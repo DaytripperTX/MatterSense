@@ -1,0 +1,71 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+*.swp
+*.bak
+
+# =========================
+# Build Artifacts
+# =========================
+build/
+out/
+bin/
+obj/
+Debug/
+Release/
+
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.a
+
+# =========================
+# Nordic / Zephyr
+# =========================
+.zephyr/
+west/
+modules/
+.twister/
+ncs/
+nrfxlib/
+
+# =========================
+# Logs & Temp
+# =========================
+*.log
+*.tmp
+*.temp
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+.venv/
+
+# =========================
+# Hardware CAD
+# =========================
+
+
+# =========================
+# Manufacturing Outputs
+# (Keep final releases only)
+# =========================
+gerbers_temp/
+cam_outputs/
+pickplace_temp/
+
+# =========================
+# Archives
+# =========================
+*.zip
+*.rar
+*.7z
