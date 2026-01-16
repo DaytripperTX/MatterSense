@@ -37,56 +37,9 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ### 3.1 High-Level Block Diagram
 
-```
-                ┌────────────────────────────────────────────┐
-                │              Mobile / Hub / App            │
-                │   (Matter controller / BLE central role)   │
-                └───────────────────────┬────────────────────┘
-                                        │ BLE (advertising + GATT)
-                                        ▼
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                                  Rev A Device                                    │
-│                                                                                  │
-│   ┌────────────────────────┐                    ┌─────────────────────────────┐  │
-│   │ Sensors / Measurements │                    │                             │  │    
-│   | - T/H Sensor           |                    │                             │  │
-│   │ - VOC / Gas            │                    │  BLE SoC / MCU              │  │
-│   | - Lux Sensor           |                    │  - BLE radio + stack        │  │
-│   │ - (Optional):          │◄── I²C / GPIO ────►│  - App logic / scheduling   │  │
-│   │  - Pressure Sensor     │       / ADC        |  - Sensor polling           |  |
-|   |  - dB / Sound          |                    |  - Power state control      |  |
-|   |  - Battery Sense       |                    │  - Secure storage / IDs     │  │
-│   └────────────────────────┘          ┌────────►│                             │  │
-│                                       |         │                             │  │
-│                                       |         └───────────┬───────────────┬─┘  │
-│                                       |                     │               |    │
-│                                       |         ┌───────────▼───────────┐   |    │
-│                                       |         │  User I/O (optional)  │   |    │
-│                                       |         │  - Status LED(s)      │   |    │
-│                                       |         │  - Button / Reset     │   |    │
-│                                       |         └───────────────────────┘   |    │
-│                                       |                                     |    │
-│   ┌─────────────────────────┐         |                                     |    │
-│   │ Coin Cell Power         │         |                                     |    │
-│   │ - Battery holder        │         |                                     |    │
-│   │ - Protection (optional) │         |                                     |    │
-│   │ - Load switch (opt)     │         |                                     |    │
-│   └───────────┬─────────────┘         |                                     |    │
-│               │                       |                                     |    │
-│   ┌───────────▼──────────────┐        │                                     |    |
-│   │ Power Mgm                │◄───────┘                                     |    |
-│   │ - Regulator              │                                              |    |
-│   │ - Fuel gauge (optional)  │                                              |    |
-│   │   (or VBAT ADC)          │                                              |    |
-│   └──────────────────────────┘                                              |    │
-│                                                                             |    │
-│              ┌───────────────────────────────────────────────────┐          |    │
-│              │ Programming / Debug (development + test)          │          |    │
-│              │ - SWD pads / minimal footprint access             │◄─────────┘    │
-│              │ - Test points (power, reset, key signals)         │               │
-│              └───────────────────────────────────────────────────┘               │
-└──────────────────────────────────────────────────────────────────────────────────┘
-```
+<img width="873" height="771" alt="matterSense-REV-A drawio" src="https://github.com/user-attachments/assets/b29ad0ee-736f-4916-a141-ba086b897e95" />
+
+
 ---
 
 ### 3.2 Functional Description
