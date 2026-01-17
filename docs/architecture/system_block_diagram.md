@@ -37,7 +37,7 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ### 3.1 High-Level Block Diagram
 
-<img width="873" height="771" alt="matterSense-REV-A drawio" src="https://github.com/user-attachments/assets/b29ad0ee-736f-4916-a141-ba086b897e95" />
+<img width="874" height="771" alt="matterSense-REV-A drawio" src="https://github.com/user-attachments/assets/0505de6e-4263-498a-820d-b15fea2991b4" />
 
 
 ---
@@ -82,66 +82,9 @@ Both revisions share a common architectural philosophy and firmware model.
 ## 4. Rev B Architecture (BLE + Wi-Fi, USB-C, LiPo, NFC)
 
 ### 4.1 High-Level Block Diagram
-```
-      ┌───────────────────────────────────────────────┐
-      |    Mobile Device / Router / Smart Home App    |
-      |  (Wi-Fi LAN, Matter over IP, BLE for pairing) |
-      └───────────────────────┬───────────────────────┘
-                              │ Wi-Fi / IP Networking
-                              ▼
-┌──────────────────────────────────────────────────────────────┐
-│                          Rev B Device                        │
-│                                                              │
-│  ┌───────────────┐     I²C / GPIO      ┌───────────────────┐ │
-│  │ Temperature / │◄───────────────────►│                   │ │
-│  │ Humidity      │                     │  BLE SoC / MCU    │ │
-│  ├───────────────┤                     │  - System ctrl    │ │
-│  │ VOC / Gas     │◄──── I²C / ADC ────►│  - BLE comms      │ │
-│  ├───────────────┤                     │  - Wi-Fi ctrl     │ │
-│  │ Battery Sense │◄──── ADC / I²C ────►│                   │ │
-│  └───────────────┘                     │                   │ │
-│                                        └─────────┬─────────┘ │
-│                                                  │           │
-│                                                  │           │
-│                               ┌───────────────┐  │           │
-│       SPI / SDIO / UART ────► │ Wi-Fi Module  │  │           │
-│                               │ - IP stack    │  │           │
-│                               └───────┬───────┘  │           │
-│                                       │          │           │
-│  ┌─────────────────────┐              │          │           │
-│  │ NFC Interface       │◄─────────────┘          │           │
-│  │ - OOB pairing       │                         │           │
-│  └───────────┬─────────┘                         │           │
-│              │                                   │           │
-│        ┌─────▼─────┐                             │           │
-│        │ NFC       │                             │           │
-│        │ Antenna   │                             │           │
-│        └───────────┘                             │           │
-│                                                  |           │
-│  ┌─────────────────────┐      ┌──────────────────────────┐   │
-│  │ USB-C Connector     │      │ LiPo Battery             │   │
-│  │ - 5V input          │      │ - Rechargeable cell      │   │
-│  └───────────┬─────────┘      └────────────┬─────────────┘   │
-│              │                             │                 │
-│       ┌──────▼───────────┐                 │                 │
-│       │ Charger / Power  │◄────────────────┘                 │
-│       │ Path Management  │                                   │
-│       │ - Charge ctrl    │                                   │
-│       │ - Power mux      │                                   │
-│       └──────┬───────────┘                                   │
-│              │                                               │
-│       ┌──────▼──────────┐                                    │
-│       │ Regulators /    │                                    │
-│       │ Load Switches   │                                    │
-│       └──────_──────────┘                                    │
-│                                                              │
-│       ┌─────────────────────────────────────────────────┐    │
-│       │ Programming / Debug / Factory Test              │    │
-│       │ - SWD pads                                      │    │
-│       │ - Bed-of-nails test access                      │    │
-│       └─────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
-```
+
+<img width="1263" height="761" alt="matterSense-REV-B drawio" src="https://github.com/user-attachments/assets/1becc3eb-e51f-4ef8-8c14-c4d7d53415f6" />
+
 ---
 
 ### 4.2 Functional Description
