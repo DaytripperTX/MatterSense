@@ -83,7 +83,8 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ### 4.1 High-Level Block Diagram
 
-<img width="1263" height="761" alt="matterSense-REV-B drawio" src="https://github.com/user-attachments/assets/1becc3eb-e51f-4ef8-8c14-c4d7d53415f6" />
+<img width="1263" height="761" alt="matterSense-REV-B drawio" src="https://github.com/user-attachments/assets/6a505ccd-1752-4ebf-985e-bf0b55661ebb" />
+
 
 ---
 
