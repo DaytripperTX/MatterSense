@@ -125,7 +125,7 @@ The MCU shall provide, at minimum:
 Both hardware revisions shall support the following sensor classes:
 
 - Temperature and Humidity
-- Volatile Organic Compounds (VOC)
+- Volatile Organic Compounds (VOC) / Equivalent CO<sub>2</sub> (eCO<sub>2</sub>)
 - Ambient Light (Lux)
 
 ### 5.2 Optional Sensors
