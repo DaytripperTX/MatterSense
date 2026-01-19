@@ -12,10 +12,10 @@ This document complements the HRS and will evolve as trade studies are completed
 ### Candidate Comparison
 
 | Candidate | Form Factor | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
-|---------|------------|---------------|----------|--------------|-----------------|--------------|
-| nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation risk | Excellent sleep<br>Low BLE TX | $$ | 1000+ (Mouser & Digi-Key) |
+| --- | --- | --- | --- | --- | --- | --- |
+| nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation risk | Excellent sleep<br>Low BLE TX | $3.59 - $5.48 | 1000+ (Mouser & Digi-Key) |
 | nRF52840 Module (TBD) | Module | • Simplified RF design<br>• Reduced compliance risk<br>• Faster bring-up | • Higher BOM cost<br>• Less layout flexibility<br>• Vendor selection pending | Slightly higher idle | $$$ | TBD |
-| Laird BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete<br>• Feature parity vs full nRF52840 must be confirmed | TBD (expected slightly higher idle) | $$$ | 1000+ (Mouser & Digi-Key) |
+| Laird BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete<br>• Feature parity vs full nRF52840 must be confirmed | TBD (expected slightly higher idle) | $11.63 - $12.08 | 1000+ (Mouser & Digi-Key) |
 
 ### Notes & Considerations
 
