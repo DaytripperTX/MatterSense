@@ -13,11 +13,11 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Form Factor | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 | --- | --- | --- | --- | --- | --- | --- |
-| nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation and schedule risk | • TX: 4.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA - 3.16 µA | $3.59 – $5.48 | 1000+ <br> (Mouser & Digi-Key) |
-| Raytac MDBT50Q-1M | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk<br>• Limited shielding | • TX: TBD<br>• RX: TBD<br>• Sleep: TBD | $6.00 – $9.00 | 0 <br> (Mouser & Digi-Key) |
-| u-blox BMD-340-A-R | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less proven in ultra-low-power designs than BL654 | • TX: 4.8 mA - 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA -  2.35 µA | $7.64 – $9.60 | 1000+ <br> (Mouser & Digi-Key) |
-| Ezurio BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete | • TX: 4.8 mA - 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA - 3.1 µA | $11.63 – $12.08 | 1000+ <br> (Mouser & Digi-Key) |
-| ESP32-WROOM-32 (Reference Only) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | • TX: 130 mA - 240 mA<br>• RX: 9 mA - 100 mA<br>• Sleep: 10 µA - 0.8 mA | $3.50 – $5.00 | 1000+ <br> (Mouser & Digi-Key) |r> (Mouser & Digi-Key) | (Mouser & Digi-Key) | Digi-Key) |
+| nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation and schedule risk | • TX: 4.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 3.16 µA | $3.59 – $5.48 | 1000+ <br>(Mouser & Digi-Key) |
+| Raytac MDBT50Q-1M | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk | • TX: TBD<br>• RX: TBD<br>• Sleep: TBD | $6.00 – $9.00 | 0 <br>(Mouser & Digi-Key) |
+| u-blox BMD-340-A-R | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less field history than BL654 | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 2.35 µA | $7.64 – $9.60 | 1000+ <br>(Mouser & Digi-Key) |
+| Ezurio BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 3.1 µA | $11.63 – $12.08 | 1000+ <br>(Mouser & Digi-Key) |
+| ESP32-WROOM-32 (Reference Only) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | • TX: 130 mA – 240 mA<br>• RX: 9 mA – 100 mA<br>• Sleep: 10 µA – 0.8 mA | $3.50 – $5.00 | 1000+ <br>(Mouser & Digi-Key) |
 
 ### Notes & Considerations
 
@@ -25,9 +25,10 @@ This document complements the HRS and will evolve as trade studies are completed
   - Comprehensive pre-certification
   - Proven RF performance in low-power designs
   - Reduced validation and regulatory risk
-- **u-blox BMD-340-A-R** is now the **primary cost-reduced alternative**:
+- **u-blox BMD-340-A-R** is the **primary cost-reduced alternative**:
   - Meaningfully cheaper than BL654
   - Strong availability and documentation
+  - Feature parity with discrete nRF52840 confirmed
 - **Raytac MDBT50Q-1M** is retained for historical context only:
   - Currently out of stock at major distributors
   - Considered high lifecycle risk for new designs
@@ -35,14 +36,14 @@ This document complements the HRS and will evolve as trade studies are completed
   - Idle power and architecture are incompatible with Rev A goals
   - Would significantly complicate low-power firmware design
 
-### Feature Parity Items to Confirm (Module Options)
+### Feature Parity (Confirmed for nRF52840-Based Modules)
 
-- NFC pin availability and antenna routing constraints
-- Flash/RAM capacity suitability for Matter + future Thread support
-- Peripheral exposure vs firmware requirements (GPIO, ADC, I²C, SPI)
+- NFC pin exposure suitable for OOB pairing
+- Flash/RAM capacity sufficient for Matter and future Thread/Zigbee support
+- Required peripheral exposure confirmed (GPIO, ADC, I²C, SPI)
 
 **Preliminary Direction:** Ezurio BL654  
-**Decision Status:** Tentatively preferred; pending feature parity confirmation and schematic validation
+**Decision Status:** Tentatively preferred; pending schematic validation
 
 ---
 
