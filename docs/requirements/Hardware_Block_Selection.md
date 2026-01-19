@@ -13,29 +13,39 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Form Factor | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 | --- | --- | --- | --- | --- | --- | --- |
-| nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation risk | Excellent sleep<br>Low BLE TX | $3.59 - $5.48 | 1000+ (Mouser & Digi-Key) |
-| nRF52840 Module (TBD) | Module | • Simplified RF design<br>• Reduced compliance risk<br>• Faster bring-up | • Higher BOM cost<br>• Less layout flexibility<br>• Vendor selection pending | Slightly higher idle | $$$ | TBD |
-| Laird BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete<br>• Feature parity vs full nRF52840 must be confirmed | TBD (expected slightly higher idle) | $11.63 - $12.08 | 1000+ (Mouser & Digi-Key) |
+| nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation and schedule risk | Excellent sleep<br>Low BLE TX | $3.59 – $5.48 | 1000+ (Mouser & Digi-Key) |
+| Raytac MDBT50Q-1M | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk<br>• Limited shielding | Slightly higher idle | $7.50 – $9.00 | 0 (Mouser & Digi-Key) |
+| u-blox BMD-340-A-R | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less proven in ultra-low-power designs than BL654 | Slightly higher idle | $7.64 – $9.60 | 1000+ (Mouser & Digi-Key) |
+| Laird BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete<br>• Feature parity vs full nRF52840 must be confirmed | TBD (expected slightly higher idle) | $11.63 – $12.08 | 1000+ (Mouser & Digi-Key) |
+| ESP32-WROOM-32 (Reference Only) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | Significantly higher idle | $3.50 – $5.00 | 1000+ (Mouser & Digi-Key) |
 
 ### Notes & Considerations
 
-- The **Laird BL654 is the current leading candidate** due to:
-  - Pre-certification reducing regulatory risk
-  - Simplified RF layout and validation
-  - Proven availability from major distributors
-- The discrete **nRF52840 remains a viable fallback** if:
-  - Cost becomes the dominant constraint
-  - RF design and certification effort is acceptable
-- Feature parity items to confirm for BL654:
-  - NFC pin availability
-  - Flash/RAM capacity suitability for Matter
-  - Peripheral availability vs firmware needs
+- **Laird BL654 is the current leading candidate** due to:
+  - Comprehensive pre-certification
+  - Proven RF performance in low-power designs
+  - Reduced validation and regulatory risk
+- **u-blox BMD-340-A-R** is now the **primary cost-reduced alternative**:
+  - Meaningfully cheaper than BL654
+  - Strong availability and documentation
+- **Raytac MDBT50Q-1M** is retained for historical context only:
+  - Currently out of stock at major distributors
+  - Considered high lifecycle risk for new designs
+- **ESP32 modules are included for comparison only**:
+  - Idle power and architecture are incompatible with Rev A goals
+  - Would significantly complicate low-power firmware design
+
+### Feature Parity Items to Confirm (Module Options)
+
+- NFC pin availability and antenna routing constraints
+- Flash/RAM capacity suitability for Matter + future Thread support
+- Peripheral exposure vs firmware requirements (GPIO, ADC, I²C, SPI)
 
 **Preliminary Direction:** Laird BL654  
-**Decision Status:** Tentatively preferred; pending feature parity and schematic validation
-
+**Decision Status:** Tentatively preferred; pending feature parity confirmation and schematic validation
 
 ---
+
 
 ## 2) Wi-Fi Strategy (Rev B)
 
