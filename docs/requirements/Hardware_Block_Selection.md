@@ -16,12 +16,12 @@ This document complements the HRS and will evolve as trade studies are completed
 | nRF52840 (Discrete) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation and schedule risk | Excellent sleep<br>Low BLE TX | $3.59 – $5.48 | 1000+ (Mouser & Digi-Key) |
 | Raytac MDBT50Q-1M | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk<br>• Limited shielding | Slightly higher idle | $7.50 – $9.00 | 0 (Mouser & Digi-Key) |
 | u-blox BMD-340-A-R | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less proven in ultra-low-power designs than BL654 | Slightly higher idle | $7.64 – $9.60 | 1000+ (Mouser & Digi-Key) |
-| Laird BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete<br>• Feature parity vs full nRF52840 must be confirmed | TBD (expected slightly higher idle) | $11.63 – $12.08 | 1000+ (Mouser & Digi-Key) |
+| Laird / Ezurio BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete<br>• Feature parity vs full nRF52840 must be confirmed | TBD (expected slightly higher idle) | $11.63 – $12.08 | 1000+ (Mouser & Digi-Key) |
 | ESP32-WROOM-32 (Reference Only) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | Significantly higher idle | $3.50 – $5.00 | 1000+ (Mouser & Digi-Key) |
 
 ### Notes & Considerations
 
-- **Laird BL654 is the current leading candidate** due to:
+- **Laird / Ezurio BL654 is the current leading candidate** due to:
   - Comprehensive pre-certification
   - Proven RF performance in low-power designs
   - Reduced validation and regulatory risk
