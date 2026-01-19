@@ -17,7 +17,7 @@ This document complements the HRS and will evolve as trade studies are completed
 | Raytac MDBT50Q-1M | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk<br>• Limited shielding | • TX: TBD<br>• RX: TBD<br>• Sleep: TBD | $6.00 – $9.00 | 0 <br> (Mouser & Digi-Key) |
 | u-blox BMD-340-A-R | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less proven in ultra-low-power designs than BL654 | • TX: 4.8 mA - 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA -  2.35 µA | $7.64 – $9.60 | 1000+ <br> (Mouser & Digi-Key) |
 | Ezurio BL654 | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete | • TX: 4.8 mA - 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA - 3.1 µA | $11.63 – $12.08 | 1000+ <br> (Mouser & Digi-Key) |
-| ESP32-WROOM-32 (Reference Only) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | • TX: TBD<br>• RX: TBD<br>• Sleep: TBD | $3.50 – $5.00 | 1000+ <br> (Mouser & Digi-Key) |
+| ESP32-WROOM-32 (Reference Only) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | • TX: 130 mA - 240 mA<br>• RX: 9 mA - 100 mA<br>• Sleep: 10 µA - 0.8 mA | $3.50 – $5.00 | 1000+ <br> (Mouser & Digi-Key) |r> (Mouser & Digi-Key) | (Mouser & Digi-Key) | Digi-Key) |
 
 ### Notes & Considerations
 
