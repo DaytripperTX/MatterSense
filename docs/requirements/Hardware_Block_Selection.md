@@ -48,22 +48,49 @@ This document complements the HRS and will evolve as trade studies are completed
 ---
 
 
-## 2) Wi-Fi Strategy (Rev B)
+## 2) Wi-Fi Companion Candidates (Rev B)
 
 ### Candidate Comparison
 
-| Candidate | Architecture | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
-|---------|--------------|----------|----------|--------------|-----------------|--------------|
-| nRF52840 + nRF70 (Discrete) | Companion IC | Native Nordic ecosystem; Matter alignment | Two-chip solution; layout complexity | High TX peaks; duty-cycled | $$–$$$ | TBD |
-| nRF70-based Certified Module | Module | Simplified RF + compliance | Higher BOM; vendor lock-in | Slightly higher idle | $$$ | TBD |
+| Candidate | Form Factor | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
+| --- | --- | --- | --- | --- | --- | --- |
+| nRF7002 (Discrete) | IC | • Native Nordic ecosystem<br>• Designed as Wi-Fi companion to nRF52<br>• Matter-aligned architecture | • Requires RF design and antenna tuning<br>• Separate FCC/IC certification effort | • TX: up to ~260 mA (5 GHz)<br>• RX: ~56–60 mA<br>• Sleep: ~15 µA<br>• Shutdown: ~1.7 µA | $2.58 | 500+ |
+| nRF7002 Module (TBD Vendor) | Module | • Simplified RF design<br>• Reduced certification risk<br>• Faster bring-up | • Higher BOM than discrete<br>• Limited vendor/module availability | • TX: up to ~260 mA (5 GHz)<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA | $$$ | TBD |
+| Combo BLE + Wi-Fi Module (Non-Nordic, Reference Only) | Module | • Single-module integration<br>• Reduced routing complexity | • Breaks Nordic-only architecture<br>• High idle power<br>• Firmware and power model divergence | • TX: 200+ mA<br>• Idle: typically mA-range | $$–$$$ | 1000+ |
 
 ### Notes & Considerations
-- Rev B assumes Wi-Fi is duty-cycled aggressively when on battery.
-- Hardware must tolerate high peak current during Wi-Fi TX.
-- Module vs discrete decision impacts layout complexity and certification effort.
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+- Rev B assumes **Wi-Fi is optional and aggressively duty-cycled**:
+  - Wi-Fi is **power-gated during battery operation**
+  - Wi-Fi is **fully enabled during USB-powered operation**
+- **nRF7002 peak TX current (~260 mA)** fundamentally drives Rev B power design:
+  - Coin-cell operation is not viable
+  - LiPo battery and robust PMIC are required
+- nRF7002 supports **Wi-Fi Power Save and Target Wake Time (TWT)**:
+  - Enables average idle currents in the **~18–30 µA range**
+  - Makes periodic Wi-Fi connectivity feasible on battery
+- A **module-based implementation is preferred** for early revisions:
+  - Reduces RF, power integrity, and regulatory risk
+  - Simplifies antenna and layout challenges at high peak currents
+- Discrete nRF7002 remains viable if:
+  - Certified modules are unavailable
+  - RF and certification effort is acceptable
+
+### Open Items (Wi-Fi Block)
+
+- Identify certified nRF7002-based modules with:
+  - Integrated or U.FL antenna options
+  - Verified Mouser/Digi-Key availability
+- Confirm SDIO vs SPI interface choice and SoC pin impact
+- Validate PMIC selection against:
+  - ~300 mA peak load
+  - Fast transient response
+- Define firmware policy for:
+  - Battery vs USB Wi-Fi behavior
+  - TWT configuration and wake cadence
+
+**Preliminary Direction:** nRF7002 (Module preferred)  
+**Decision Status:** TBD – pending module availability and PMIC selection
 
 ---
 
