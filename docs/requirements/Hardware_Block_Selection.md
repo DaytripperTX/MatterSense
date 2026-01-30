@@ -54,43 +54,39 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Form Factor | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 | --- | --- | --- | --- | --- | --- | --- |
-| nRF7002 (Discrete) | IC | • Native Nordic ecosystem<br>• Designed as Wi-Fi companion to nRF52<br>• Matter-aligned architecture | • Requires RF design and antenna tuning<br>• Separate FCC/IC certification effort | • TX: up to ~260 mA (5 GHz)<br>• RX: ~56–60 mA<br>• Sleep: ~15 µA<br>• Shutdown: ~1.7 µA | $2.58 | 500+ |
-| nRF7002 Module (TBD Vendor) | Module | • Simplified RF design<br>• Reduced certification risk<br>• Faster bring-up | • Higher BOM than discrete<br>• Limited vendor/module availability | • TX: up to ~260 mA (5 GHz)<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA | $$$ | TBD |
-| Combo BLE + Wi-Fi Module (Non-Nordic, Reference Only) | Module | • Single-module integration<br>• Reduced routing complexity | • Breaks Nordic-only architecture<br>• High idle power<br>• Firmware and power model divergence | • TX: 200+ mA<br>• Idle: typically mA-range | $$–$$$ | 1000+ |
+| nRF7002 (Discrete) | IC | • Native Nordic ecosystem<br>• Designed as Wi-Fi companion to nRF52<br>• Avoids dependence on module stock | • Requires RF design and antenna tuning<br>• Separate FCC/IC certification effort | • TX: up to ~260 mA (5 GHz)<br>• RX: ~56–60 mA<br>• Sleep: ~15 µA<br>• Shutdown: ~1.7 µA | $2.58 | 1000+ (Digi-Key) |
+| MinewSemi MS14SF1-1N02AIR | Module (PCB Antenna) | • Integrated PCB antenna<br>• Sold through Digi-Key (Marketplace)<br>• Good candidate if stock remains available | • Marketplace sourcing (not primary franchised line)<br>• Less established ecosystem vs Fanstel | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $10.00 | 1000+ (Digi-Key) |
+| Fanstel WM02F | Module (PCB Trace Antenna) | • Integrated PCB trace antenna<br>• nRF7002 module family is widely referenced<br>• Good “module-first” path for Rev B | • Stock often <1000 at distributors<br>• Lead times can apply depending on variant | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | TBD | <1000 (Digi-Key) |
+| Fanstel WM02C | Module (Chip Antenna) | • Integrated chip antenna<br>• Also carried at Mouser<br>• Smaller than WM02F class modules | • Stock often <1000 at distributors<br>• Antenna performance/layout keepouts still matter | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | TBD | <1000 (Mouser & Digi-Key) |
+| Combo BLE + Wi-Fi Module (Non-Nordic, Reference Only) | Module | • Single-module integration | • Breaks Nordic-only architecture<br>• High idle power<br>• Firmware and power model divergence | • TX: 200+ mA<br>• Idle: typically mA-range | TBD | 1000+ |
 
 ### Notes & Considerations
 
 - Rev B assumes **Wi-Fi is optional and aggressively duty-cycled**:
   - Wi-Fi is **power-gated during battery operation**
   - Wi-Fi is **fully enabled during USB-powered operation**
-- **nRF7002 peak TX current (~260 mA)** fundamentally drives Rev B power design:
-  - Coin-cell operation is not viable
-  - LiPo battery and robust PMIC are required
-- nRF7002 supports **Wi-Fi Power Save and Target Wake Time (TWT)**:
-  - Enables average idle currents in the **~18–30 µA range**
-  - Makes periodic Wi-Fi connectivity feasible on battery
-- A **module-based implementation is preferred** for early revisions:
-  - Reduces RF, power integrity, and regulatory risk
-  - Simplifies antenna and layout challenges at high peak currents
-- Discrete nRF7002 remains viable if:
-  - Certified modules are unavailable
-  - RF and certification effort is acceptable
+- **nRF7002 peak TX current (~260 mA)** drives Rev B power design and rules out coin-cell for Wi-Fi use.
+- **Module selection constraint:** candidate Wi-Fi modules must include an **integrated antenna** (PCB trace or chip antenna). Modules requiring an external antenna (pads/U.FL) are excluded from the primary shortlist.
+- Current nRF7002 module ecosystem shows **limited deep distributor stock**:
+  - This is acceptable for a small run (~500–1000 units).
+  - For a mass-produced commercial product, limited module stock would likely force either:
+    - A different Wi-Fi solution with broader module availability, or
+    - Discrete RF design with full certification testing.
 
 ### Open Items (Wi-Fi Block)
 
-- Identify certified nRF7002-based modules with:
-  - Integrated or U.FL antenna options
-  - Verified Mouser/Digi-Key availability
+- Select primary module candidate based on:
+  - Sustained distributor availability (prefer Mouser/Digi-Key)
+  - Antenna type (PCB trace vs chip antenna) and PCB keepout constraints
 - Confirm SDIO vs SPI interface choice and SoC pin impact
 - Validate PMIC selection against:
-  - ~300 mA peak load
-  - Fast transient response
+  - ~300 mA peak load and fast transient response
 - Define firmware policy for:
   - Battery vs USB Wi-Fi behavior
   - TWT configuration and wake cadence
 
-**Preliminary Direction:** nRF7002 (Module preferred)  
-**Decision Status:** TBD – pending module availability and PMIC selection
+**Preliminary Direction:** nRF7002 module with integrated antenna (TBD)  
+**Decision Status:** TBD – pending final module selection and PMIC selection
 
 ---
 
