@@ -110,11 +110,15 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Interface | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|----------|----------|----------|--------------|-----------------|--------------|
-| Sensirion SHTC3 | I²C | Proven; low power; compact | Limited sensing scope | Very low | $$ | High (Mouser) |
+| Sensirion SHTC3 | I²C | • Proven baseline choice<br>• Small DFN (2×2 mm)<br>• Good low-power modes | • Older-gen vs SHT4x family<br>• “Idle state” current notable unless put to sleep | • Measurement avg: 430 µA typ (normal), 270 µA typ (low-power)<br>• Sleep: 0.3 µA typ<br>• Avg @ 1 Hz: 4.9 µA (normal), 0.5 µA (low-power) | $2.06 – $2.70 | 1000+ (Mouser & Digi-Key) |
+| Sensirion SHT40 (SHT4x family) | I²C | • Lower cost than SHTC3 at 1pc<br>• Very low idle current<br>• Newer-gen platform | • Would change the “agreed baseline” part<br>• Different commands / timing vs SHTC3 (firmware impact) | • Idle: 80 nA<br>• Avg @ 1 Hz: 0.4 µA | $1.80 – $1.80 | 1000+ (Mouser & Digi-Key) |
+| TI HDC2010 | I²C | • Extremely low sleep current<br>• Very low average current at periodic sampling | • WLCSP package (assembly/handling complexity)<br>• Different driver ecosystem vs Sensirion | • Sleep: 50 nA<br>• Avg @ 1 Hz: 550 nA (RH+T, 11-bit) | $1.58 – $1.58 | 1000+ (Mouser & Digi-Key) |
 
 ### Notes & Considerations
-- SHTC3 is the agreed baseline T/H sensor for both revisions.
-- Well-suited for intermittent sampling and low-power operation.
+- **SHTC3 remains the agreed baseline** T/H sensor for both revisions.
+- SHTC3 must be explicitly placed into **Sleep Mode** between measurements to avoid higher “Idle state” current.
+- **SHT40** is a credible cost/power alternative if we ever decide to move off SHTC3 (firmware change required).
+- **HDC2010** looks excellent on paper for power, but the **WLCSP package** is the main integration risk.
 
 **Preliminary Direction:** SHTC3  
 **Decision Status:** Pending schematic validation
