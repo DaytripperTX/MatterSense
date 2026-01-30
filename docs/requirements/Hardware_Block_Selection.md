@@ -72,6 +72,11 @@ This document complements the HRS and will evolve as trade studies are completed
   - For mass production, limited module stock would likely force either:
     - A different Wi-Fi solution with broader module availability, or
     - Discrete RF design with full certification testing.
+  - Distributor availability may fluctuate, and restocks may occur periodically (e.g., Digi-Key may show future replenishment dates).
+    - For larger builds, procurement would likely involve coordinating directly with Fanstel to:
+      - Confirm lead times and production availability for 500–1000+ quantities
+      - Potentially reduce unit cost vs distributor single-quantity pricing
+      - Obtain clearer lifecycle visibility (PCN/EOL timing) to reduce long-term risk
 - **Optional population (DNP) strategy:**
   - The PCB shall be designed such that the Wi-Fi module can be **left unpopulated** (DNP) and the device remains fully functional in a BLE/Thread/ZigBee-only mode.
   - Firmware shall detect the absence of the Wi-Fi module (or treat it as unavailable) and operate without Wi-Fi features enabled.
