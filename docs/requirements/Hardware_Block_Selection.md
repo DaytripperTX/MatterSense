@@ -84,21 +84,25 @@ This document complements the HRS and will evolve as trade studies are completed
 
 ### Open Items (Wi-Fi Block)
 
-- Select primary module candidate based on:
-  - Near-term buyability (distributor vs vendor-direct)
-  - Antenna type (chip antenna vs PCB trace) and PCB keepout constraints
 - Confirm SDIO vs SPI interface choice and SoC pin impact
 - Validate PMIC selection against:
   - ~300 mA peak load and fast transient response
 - Define firmware policy for:
   - Battery vs USB Wi-Fi behavior
   - TWT configuration and wake cadence
-- Define hardware detection / strap approach for:
-  - Determining whether the Wi-Fi module is populated (DNP vs present)
 
+### Closed Items (Wi-Fi Block)
 
-**Preliminary Direction:** nRF7002 module with integrated antenna (TBD)  
-**Decision Status:** TBD – pending final module selection and PMIC selection
+- Integrated antenna requirement captured (modules requiring external antennas excluded from primary shortlist)
+- Wi-Fi optional population (DNP) strategy captured:
+  - System must function fully in BLE/Thread/ZigBee-only mode when Wi-Fi is unpopulated
+- Wi-Fi peak current / power-state constraints captured (~260 mA TX; sleep/shutdown and TWT targets)
+- Primary Wi-Fi module candidate selected: **Fanstel WM02C**
+  - Rationale: in-stock at major distributors; integrated chip antenna; sufficient quantity for project-scale runs
+
+**Preliminary Direction:** Fanstel WM02C (nRF7002 module with integrated chip antenna)  
+**Decision Status:** Frozen for Rev B (revisit if availability/cost changes)
+
 
 ---
 
