@@ -135,16 +135,16 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Sensor Class | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|--------------|----------|----------|--------------|-----------------|--------------|
-| ENS160 | VOC / IAQ | Purpose-built IAQ sensor | Separate pressure/temp if needed | Moderate | $$ | High (Mouser) |
-| BME688 | Multi-sensor | Combines IAQ + env sensing | More complex; heater usage | Moderate–High | $$$ | High (Mouser) |
+| [ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | VOC / IAQ | • On-sensor IAQ outputs (TVOC + eCO2 eq)<br>• Simple host integration | • Needs T/H compensation input<br>• Higher active current | • Sleep: 0.01 mA<br>• Idle: ~2–2.5 mA<br>• Active: ~29 mA avg (Std) | $5.63 – $5.63 | 1000+ ([Mouser](https://www.mouser.com/c/sensors/environmental-sensors/?series=ENS160) & [Digi-Key](https://www.digikey.com/en/products/detail/sciosense/ENS160-BGLT/16129831)) |
+| [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | Multi-sensor | • IAQ + T/H + Pressure in one<br>• Flexible profiles | • BSEC integration typical<br>• Heater power tradeoffs | • Sleep: 0.15 µA<br>• ULP IAQ: ~90 µA avg<br>• Std gas: ~3.9 mA avg | $8.65 – $8.65 | [Digi-Key](https://www.digikey.com/en/products/detail/bosch-sensortec/BME688/13681261): 10,000+<br>[Mouser](https://www.mouser.com/ProductDetail/Bosch-Sensortec/BME688?qs=IS%252B4QmGtzzqQoVDscqwx3A%3D%3D): <1000 (6,000 exp 3/3/2026) |
 
 ### Notes & Considerations
-- BME688 may reduce sensor count if pressure sensing is desired.
-- Heater-based IAQ sensors require careful power budgeting.
-- Firmware complexity differs significantly between options.
+- Both are heater-based; duty-cycling is expected.
+- ENS160 is simpler on the host; BME688 can reduce sensor count.
 
 **Preliminary Direction:** TBD  
 **Decision Status:** TBD
+
 
 ---
 
