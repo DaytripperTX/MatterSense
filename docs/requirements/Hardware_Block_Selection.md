@@ -208,18 +208,29 @@ This document complements the HRS and will evolve as trade studies are completed
 
 ### 3.5 Optional: Sound Level / dB
 
+A dedicated “dB sensor” (direct calibrated dBA output) is not commonly available as a low-cost IC. The practical implementation is a microphone (preferably digital) plus firmware to compute sound level (RMS, optional A-weighting). This block may be omitted if the power/firmware cost is not justified.
+
 #### Candidate Comparison
 
 | Candidate | Sensor Type | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|-------------|----------|----------|--------------|-----------------|--------------|
-| TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| [Infineon IM69D130V01XTSA1](https://www.infineon.com/assets/row/public/documents/24/49/infineon-im69d130-datasheet-en.pdf) | Digital MEMS mic (PDM), bottom-port | • Active part (not LTB/EOL)<br>• Strong ecosystem/stock | • Not a “dB sensor” (DSP + calibration needed)<br>• High active current for coin-cell unless duty-cycled | • Icc: ~1.3 mA typ | $1.91 – $2.02 | [Mouser](https://www.mouser.com/ProductDetail/Infineon-Technologies/IM69D130V01XTSA1?qs=W0yvOO0ixfHjr98Yrg6FIA%3D%3D): 6,800+<br>[Digi-Key](https://www.digikey.com/en/products/detail/infineon-technologies/IM69D130V01XTSA1/8030732): 5,000+ |
+| [Syntiant SPH0641LU4H-1](https://www.mouser.com/datasheet/2/218/-746191.pdf) | Digital MEMS mic (PDM), bottom-port | • Low-power capable modes<br>• Strong stock depth | • Not a “dB sensor” (DSP + calibration needed)<br>• High active current for coin-cell unless duty-cycled | • Icc: ~1.0 mA typ | $3.22 – $3.22 | [Mouser](https://www.mouser.com/ProductDetail/Syntiant/SPH0641LU4H-1-8?qs=zEmsApcVOkWTK1aVriKK3w%3D%3D): 5,700+<br>[Digi-Key](https://www.digikey.com/en/products/detail/syntiant/SPH0641LU4H-1/5332438): 18,000+ |
+| [ST MP34DT06JTR](https://www.st.com/resource/en/datasheet/mp34dt06j.pdf) | Digital MEMS mic (PDM), port varies by package | • Common PDM mic option<br>• Good stock (today) | • Distributor status indicates lifecycle risk (LTB / discontinuation flags) | • Icc: ~650 µA typ | $2.17 – $2.44 | [Mouser](https://www.mouser.com/ProductDetail/STMicroelectronics/MP34DT06JTR?qs=%252BEew9%252B0nqrDi3H2kv8Y1Xg%3D%3D): 5,800+ (EOL flagged)<br>[Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/MP34DT06JTR/9605993): 7,000+ (LTB) |
 
-### Notes & Considerations
-- Sound sensing is optional and low priority.
-- Likely requires microphone + analog front end.
+#### Notes & Considerations
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+- **Power risk (Rev A coin cell):** all listed microphones draw on the order of **~0.65–1.3 mA when enabled**, which is too high for continuous operation. If implemented on Rev A, this block must be aggressively duty-cycled (short sampling windows at low cadence) or omitted.
+- **Output expectation:** without calibration, results should be treated as **relative sound level** (quiet vs loud). Achieving meaningful absolute dBA accuracy requires calibration and enclosure/acoustic considerations.
+- **Port location / PCB orientation:**
+  - **Bottom-port** microphones couple sound through an opening beneath the package (via a PCB acoustic via/hole to the outside world). If mounted on the top side of the PCB, a bottom-port mic can still sense sound from the “top” of the product, but only if the PCB has a properly designed acoustic port path to that side (hole + keepout + gasket/mesh as needed).
+  - Without a designed acoustic port, the mic will be heavily attenuated and sensitive to internal cavity effects; it will not reliably “listen through” solid PCB/enclosure material.
+  - **Top-port** microphones simplify enclosure integration when the opening is on the same side as the component.
+
+**Preliminary Direction:** TBD (optional; omit unless a clear use-case is defined)  
+**Decision Status:** TBD – pending power budget study and enclosure/acoustic constraints
+
+
 
 ---
 
