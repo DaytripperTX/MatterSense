@@ -157,14 +157,22 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Interface | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|----------|----------|----------|--------------|-----------------|--------------|
-| TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | I²C | • Lux ALS<br>• Very low power modes<br>• Strong distributor stock | • Not multispectral | • Shutdown: 0.5 µA typ<br>• Active: ~45 µA typ | $1.09 – $1.24 | 1000+ ([Mouser](https://www.mouser.com/ProductDetail/Vishay-Semiconductors/VEML7700-TT?qs=BcfjnG7NVaXdL6DJFdWbdw%3D%3D) & [Digi-Key](https://www.digikey.com/en/products/detail/vishay-semiconductor-opto-division/VEML7700-TT/6210690)) |
+| [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | I²C | • Multispectral (VIS + NIR + clear)<br>• Enables color/spectral features | • NRND lifecycle risk<br>• Higher cost / power vs lux-only | • Active: <300 µA (spec)<br>• Sleep: <5 µA (spec) | $6.90 – $7.64 | [Mouser](https://www.mouser.com/ProductDetail/ams-OSRAM/AS7341-DLGM?qs=byeeYqUIh0OzxJ%252B6BPJ%252BEQ%3D%3D): 488<br>[Digi-Key](https://www.digikey.com/en/products/detail/ams-osram-usa-inc/AS7341-DLGM/9996230): 3,523 |
+| [ams OSRAM TCS34488M-OLGA8 (TCS3448 family)](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf) | I²C | • 14-channel spectral (VIS + NIR + clear + flicker)<br>• Intended replacement direction for AS734x-class parts | • Vendor portfolio complexity (family/ordering variants)<br>• Digi-Key flags some variants as LTB (verify lifecycle) | • Active: 210–280 µA typ<br>• Idle: 40–60 µA typ<br>• Sleep: 0.7–5 µA typ | $6.12 – $6.79 | [Mouser](https://www.mouser.com/ProductDetail/ams-OSRAM/TCS34488M-OLGA8?qs=sqEgtWRSLJ16dB5JzLAEyQ%3D%3D): 1,812<br>[Digi-Key](https://www.digikey.com/en/products/detail/ams-osram-usa-inc/TCS34488M-OLGA8-LF-T-RDP/26705585): 380 (LTB: 3/31/2027) |
 
 ### Notes & Considerations
-- Lux sensing is a frozen requirement.
-- Specific sensor selection intentionally deferred.
+- Ambient light sensing is required for both revisions. The baseline implementation shall use a simple lux ALS (VEML7700).
+- A multispectral sensor is an optional enhancement for Rev B only (AS7341 / TCS34488M), intended to enable future color/spectral features.
+- The ams OSRAM multispectral portfolio includes multiple closely related families and ordering variants; final selection shall be based on confirmed lifecycle status and distributor support.
+  - Lifecycle/availability risk remains; final selection shall be revalidated prior to any larger build.
+  - Acceptable for prototypes and small runs.
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+
+**Preliminary Direction:** VEML7700 (Rev A + Rev B baseline); multispectral optional for Rev B (TBD)  
+**Decision Status:** Pending schematic validation
+
+
 
 ---
 
