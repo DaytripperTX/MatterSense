@@ -225,6 +225,7 @@ Provision may be made for the following optional sensors:
 - Interface shall be accessible during:
   - Development
   - Manufacturing test
+- Optional (DNP) I²C breakout header footprint (SCL/SDA/GND/VDD) to support external sensor evaluation and debug during development
 
 ### 8.2 Manufacturing Test
 
