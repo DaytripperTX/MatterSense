@@ -177,7 +177,7 @@ This document complements the HRS and will evolve as trade studies are completed
 
 
 **Preliminary Direction:** VEML7700 (Rev A + Rev B baseline); multispectral optional for Rev B (TBD)  
-**Decision Status:** Pending schematic validation
+**Decision Status:** Pending schematic validation and power budget study
 
 
 
@@ -189,14 +189,20 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Interface | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|----------|----------|----------|--------------|-----------------|--------------|
-| BME688 (if selected) | I²C | Already present if chosen | Coupled to IAQ choice | See IAQ | $$$ | High (Mouser) |
-| TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) (if selected for VOC) | I²C / SPI | • Zero additional BOM<br>• Already integrated if VOC/IAQ uses BME688 | • Pressure availability depends on VOC/IAQ decision | • Pressure+Temp @ 1 Hz (forced, low power): 3.1 µA typ | $0 (incremental) | See VOC/IAQ section |
+| [BMP581](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp581-ds004.pdf) | I²C / SPI | • Low BOM impact<br>• Strong distributor stock | • Adds another IC (BOM + assembly + board area) | • Avg @ 1 Hz: ~1.3 µA typ<br>• Deep standby: ~0.5 µA typ | $2.92 – $2.98 | 11,784 ([Mouser](https://www.mouser.com/ProductDetail/Bosch-Sensortec/BMP581?qs=Li%252BoUPsLEntPL9tlFmcgXg%3D%3D))<br>21,697 ([Digi-Key](https://www.digikey.com/en/products/detail/bosch-sensortec/BMP581/16036134)) |
+| [ENS220](https://www.sciosense.com/wp-content/uploads/2025/10/ENS220-Datasheet-1.pdf) | I²C / SPI | • Low BOM impact<br>• Ultra-low average current modes | • Adds another IC (BOM + assembly + board area) | • Example: 1.7 µA @ 1 Hz (pulsed)<br>• Example: 0.1 µA @ 1/60 Hz (pulsed) | $2.57 – $2.92 | 789 ([Mouser](https://www.mouser.com/ProductDetail/ScioSense/ENS220S-BLGT-LGA10-TR-3K5?qs=17ckDYBRdelo27HqwbDxBQ%3D%3D))<br>2,791 ([Digi-Key](https://www.digikey.com/en/products/detail/sciosense/ENS220S-BLGT/21278457)) |
 
 ### Notes & Considerations
-- Pressure sensing may be implicitly satisfied depending on IAQ sensor choice.
+- If **BME688 is selected for VOC/IAQ**, pressure is considered **implicitly satisfied** at **no incremental BOM cost**.
+- If VOC/IAQ uses a non-pressure part (e.g., ENS160), the preferred low-cost pressure add-on candidates are **BMP581** and **ENS220**.
+- Any required 1.8 V domain (including for other components) is assumed to be addressed by the system power architecture and is not treated as a disqualifying factor for ENS220.
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+**Preliminary Direction:** BME688 pressure if selected for VOC/IAQ; otherwise BMP581 or ENS220  
+**Decision Status:** Pending schematic validation and power budget study
+
+
+
 
 ---
 
