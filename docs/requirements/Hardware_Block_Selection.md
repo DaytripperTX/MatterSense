@@ -138,15 +138,22 @@ This document complements the HRS and will evolve as trade studies are completed
 
 | Candidate | Sensor Class | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|--------------|----------|----------|--------------|-----------------|--------------|
-| [ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | VOC / IAQ | • On-sensor IAQ outputs (TVOC + eCO2 eq)<br>• Simple host integration | • Needs T/H compensation input<br>• Higher active current | • Sleep: 0.01 mA<br>• Idle: ~2–2.5 mA<br>• Active: ~29 mA avg (Std) | $5.63 – $5.63 | 1000+ ([Mouser](https://www.mouser.com/c/sensors/environmental-sensors/?series=ENS160) & [Digi-Key](https://www.digikey.com/en/products/detail/sciosense/ENS160-BGLT/16129831)) |
-| [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | Multi-sensor | • IAQ + T/H + Pressure in one<br>• Flexible profiles | • BSEC integration typical<br>• Heater power tradeoffs | • Sleep: 0.15 µA<br>• ULP IAQ: ~90 µA avg<br>• Std gas: ~3.9 mA avg | $8.65 – $8.65 | [Digi-Key](https://www.digikey.com/en/products/detail/bosch-sensortec/BME688/13681261): 10,000+<br>[Mouser](https://www.mouser.com/ProductDetail/Bosch-Sensortec/BME688?qs=IS%252B4QmGtzzqQoVDscqwx3A%3D%3D): <1000 (6,000 exp 3/3/2026) |
+| [ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | VOC / IAQ | • On-sensor IAQ outputs (TVOC + eCO2 eq)<br>• Simple host integration | • Warm-up/conditioning overhead after idle/power-off<br>• High risk for coin-cell use at ≥1/hr updates | • Std: ~29 mA avg (Std)<br>• Warm-up: ~3 min typical after idle/power-off | $5.63 – $5.63 | 1000+ ([Mouser](https://www.mouser.com/c/sensors/environmental-sensors/?series=ENS160) & [Digi-Key](https://www.digikey.com/en/products/detail/sciosense/ENS160-BGLT/16129831)) |
+| [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | Multi-sensor | • IAQ + T/H + Pressure in one<br>• Low average-current profiles available | • IAQ/eCO2 typically assumes BSEC integration<br>• Heater power tradeoffs | • ULP IAQ: ~0.09 mA avg<br>• LP IAQ: ~0.9 mA avg<br>• Std gas scan: ~3.9 mA avg | $8.65 – $8.65 | [Digi-Key](https://www.digikey.com/en/products/detail/bosch-sensortec/BME688/13681261): 10,000+<br>[Mouser](https://www.mouser.com/ProductDetail/Bosch-Sensortec/BME688?qs=IS%252B4QmGtzzqQoVDscqwx3A%3D%3D): <1000 (6,000 exp 3/3/2026) |
 
 ### Notes & Considerations
-- Both are heater-based; duty-cycling is expected.
-- ENS160 is simpler on the host; BME688 can reduce sensor count.
+- Both options are heater-based; duty-cycling and sampling cadence strongly influence battery life.
+- ENS160 provides processed IAQ outputs on-sensor but has warm-up/conditioning overhead after idle/power-off that can dominate energy-per-reading.
+- BME688 supports low average-current profiles; IAQ and eCO2-style outputs are typically obtained via Bosch BSEC.
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+### Decision Rationale (Current Baseline)
+- Rev A (coin cell) shall use **BME688** as the baseline VOC/IAQ sensor to support ≥1/hr updates with manageable average power.
+- ENS160 is not recommended for Rev A due to warm-up/conditioning overhead; it may remain an optional Rev B / USB-powered candidate if on-sensor processing is preferred.
+- “eCO2” is an equivalent output derived from VOC sensing/algorithms and is not a direct CO2 ppm measurement. Any future requirement for true CO2 shall use a dedicated CO2 sensor (e.g., NDIR).
+
+**Preliminary Direction:** BME688 (Rev A baseline); ENS160 optional for Rev B / USB-mode only  
+**Decision Status:** Frozen for Rev A; TBD for Rev B
+
 
 
 ---
