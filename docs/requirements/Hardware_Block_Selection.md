@@ -236,19 +236,70 @@ A dedicated “dB sensor” (direct calibrated dBA output) is not commonly avail
 
 ## 4) Power Management Strategy
 
-### Candidate Comparison
+This section defines the power architecture requirements and the PMIC/DC-DC candidate selection approach. Because Rev A and Rev B have fundamentally different power sources and load profiles, power management is tracked seperately.
 
-| Revision | Approach | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
-|--------|----------|----------|----------|--------------|-----------------|--------------|
-| Rev A | Coin cell direct supply | Minimal BOM; ultra-low power | Limited peak current | Excellent | $ | High |
-| Rev B | LiPo + USB-C PMIC | Flexible power; charging | Added complexity | Supports Wi-Fi peaks | $$ | TBD |
+---
 
-### Notes & Considerations
-- Rev A prioritizes simplicity and sleep current.
-- Rev B prioritizes robustness under Wi-Fi load and USB operation.
+### 4.1 Power Architecture Requirements (Both Revisions)
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+#### Voltage Domains (Planned)
+- **VDD_MAIN (TBD):** primary system rail for MCU + sensors
+- **Optional VDD_1V8 (TBD):** secondary rail if required by any selected sensors
+- **VDD_WIFI (Rev B only, TBD):** rail capable of supporting Wi-Fi peak current and fast load transients
+
+#### Power Gating / Switching (Planned)
+- Provide a mechanism to **disable high-current blocks** when not needed (Rev B Wi-Fi minimum requirement).
+- Sensor power gating is **TBD** and will be decided after a power budget study:
+  - Option A: keep sensors powered and rely on sensor sleep modes
+  - Option B: gate power to selected sensors (requires load switch / GPIO control)
+
+#### Measurement / Monitoring (Planned)
+- Battery voltage measurement: **TBD** (ADC divider vs fuel gauge, Rev-dependent)
+- Rev B: charging status / power-source detect signals: **required** (exact signals TBD by PMIC choice)
+
+**Decision Status:** Pending power budget study and schematic validation
+
+---
+
+### 4.2 Rev A – Coin Cell Power Path (BLE-only)
+
+#### Candidate Comparison (Rev A Regulators / Power Path Options)
+
+| Candidate | Topology | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
+|---------|----------|----------|----------|--------------|-----------------|--------------|
+| Direct coin cell → VDD_MAIN | None | • Minimal BOM<br>• Lowest quiescent current | • Voltage droop under peaks<br>• Brownout risk depends on load profile | Best for sleep; peak-limited | $ | TBD |
+| Buck/boost regulator (TBD) | DC/DC | • Stable rail across coin cell discharge<br>• Better peak handling | • Added quiescent current<br>• Added BOM + layout complexity | TBD | $$ | TBD |
+| LDO regulator (TBD) | LDO | • Simple, low noise | • Efficiency loss at higher load<br>• Still peak-limited by cell | TBD | $$ | TBD |
+
+#### Notes & Considerations (Rev A)
+- Rev A target is minimum sleep current; regulator quiescent current is a primary selection driver.
+- Final decision depends on measured peak load behavior (BLE TX bursts, sensors, any optional blocks).
+
+**Preliminary Direction (Rev A):** Direct coin cell unless power budget study shows unacceptable droop/brownout risk  
+**Decision Status (Rev A):** TBD – pending power budget study
+
+---
+
+### 4.3 Rev B – LiPo + USB-C Power Path (BLE + Wi-Fi)
+
+#### Candidate Comparison (Rev B PMIC / Charger / Power Path Options)
+
+| Candidate | Function | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
+|---------|----------|----------|----------|--------------|-----------------|--------------|
+| USB-C + LiPo charger + system power-path PMIC (TBD) | Charger + power mux | • Seamless USB/LiPo operation<br>• Supports “always-on” USB mode | • More complex<br>• Part selection critical for Wi-Fi transients | Supports Wi-Fi peaks if designed correctly | $$ | TBD |
+| Charger + separate buck regulator (TBD) | Charger + DC/DC | • Modular; easier sourcing<br>• Can optimize DC/DC for Wi-Fi load | • More components<br>• More layout effort | TBD | $$ | TBD |
+| Fuel gauge (optional, TBD) | Measurement | • Better battery reporting than ADC divider | • Added cost/IC | Low | $–$$ | TBD |
+
+#### Notes & Considerations (Rev B)
+- Rev B must support **Wi-Fi peak current (~260 mA TX)** and fast transient response without brownout.
+- Rev B must support both modes:
+  - **USB-powered:** Wi-Fi enabled, always reachable
+  - **Battery-powered:** Wi-Fi gated/duty-cycled aggressively (Wi-Fi module may be DNP)
+- PMIC selection must be compatible with the chosen battery size/chemistry and desired charge current.
+
+**Preliminary Direction (Rev B):** Power-path PMIC or charger + DC/DC (TBD)  
+**Decision Status (Rev B):** TBD – pending PMIC selection and power budget study
+
 
 ---
 
