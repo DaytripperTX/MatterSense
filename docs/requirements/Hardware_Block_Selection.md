@@ -243,21 +243,36 @@ This section defines the power architecture requirements and the PMIC/DC-DC cand
 ### 4.1 Power Architecture Requirements (Both Revisions)
 
 #### Voltage Domains (Planned)
-- **VDD_MAIN (TBD):** primary system rail for MCU + sensors
-- **Optional VDD_1V8 (TBD):** secondary rail if required by any selected sensors
-- **VDD_WIFI (Rev B only, TBD):** rail capable of supporting Wi-Fi peak current and fast load transients
+- **VDD_MAIN (3.3 V):** primary system rail for MCU + sensors
+- **VDD_1V8 (1.8 V):** secondary rail for components requiring 1.8 V operation
+- **VDD_WIFI (Rev B only, optional / TBD):** dedicated rail for Wi-Fi module if required to meet sleep/leakage or power gating requirements
+
+#### Power Path / Source Selection (Planned)
+- **Rev A:** regulated coin cell supply (regulator topology TBD)
+- **Rev B:** power-path PMIC providing:
+  - USB-powered operation when available
+  - LiPo battery charging from USB
+  - Seamless transition between USB power and battery without brownouts (USB → battery and battery → USB)
+
+#### Power Management Responsibilities (Planned)
+- Firmware shall select operating policy based on power source state:
+  - USB present: less aggressive duty cycling; Wi-Fi allowed/available
+  - Battery: aggressive duty cycling; Wi-Fi duty-cycled and/or disabled per policy
+- Power path behavior (source switchover, charge control) shall be handled by hardware (PMIC), not firmware.
 
 #### Power Gating / Switching (Planned)
-- Provide a mechanism to **disable high-current blocks** when not needed (Rev B Wi-Fi minimum requirement).
-- Sensor power gating is **TBD** and will be decided after a power budget study:
-  - Option A: keep sensors powered and rely on sensor sleep modes
-  - Option B: gate power to selected sensors (requires load switch / GPIO control)
+- Provide a mechanism to **disable the Wi-Fi block** (Rev B), pending confirmation that Wi-Fi sleep/leakage current is acceptable without gating.
+- Sensor power gating is deferred; sensors shall rely on their sleep modes for initial designs.
 
 #### Measurement / Monitoring (Planned)
-- Battery voltage measurement: **TBD** (ADC divider vs fuel gauge, Rev-dependent)
-- Rev B: charging status / power-source detect signals: **required** (exact signals TBD by PMIC choice)
+- **Rev A:** battery voltage measurement via ADC divider (implementation TBD)
+- **Rev B:** battery measurement approach TBD (ADC divider vs more complex solution)
+- **Rev B:** charging / power-source status signals are required (exact signals TBD by PMIC choice)
 
-**Decision Status:** Pending power budget study and schematic validation
+#### Rail Map
+- Rail-to-load mapping is **TBD** and will be completed during schematic capture.
+
+**Decision Status:** Pending schematic validation and power budget study
 
 ---
 
