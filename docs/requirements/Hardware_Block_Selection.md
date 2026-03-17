@@ -278,20 +278,17 @@ This section defines the power architecture requirements and the PMIC/DC-DC cand
 
 ### 4.2 Rev A – Coin Cell Power Path (BLE-only)
 
-#### Candidate Comparison (Rev A Regulators / Power Path Options)
+#### Notes & Considerations
+- Rev A is regulated; the open decision is **boost vs buck-boost** (and the final setpoint for VDD_MAIN).
+- Coin cell operating voltage is expected to span roughly **~2.7–3.3 V** under load, and may dip lower near end-of-life.
+- A **boost or buck-boost** regulator enables extended operation below the nominal VDD_MAIN setpoint (e.g., battery <3.0 V), which can improve usable battery life.
+- Final selection depends on:
+  - Final VDD_MAIN target (3.3 V vs 3.0 V)
+  - Minimum acceptable battery voltage before shutdown (TBD)
+  - Measured peak load droop and brownout margin
 
-| Candidate | Topology | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
-|---------|----------|----------|----------|--------------|-----------------|--------------|
-| Direct coin cell → VDD_MAIN | None | • Minimal BOM<br>• Lowest quiescent current | • Voltage droop under peaks<br>• Brownout risk depends on load profile | Best for sleep; peak-limited | $ | TBD |
-| Buck/boost regulator (TBD) | DC/DC | • Stable rail across coin cell discharge<br>• Better peak handling | • Added quiescent current<br>• Added BOM + layout complexity | TBD | $$ | TBD |
-| LDO regulator (TBD) | LDO | • Simple, low noise | • Efficiency loss at higher load<br>• Still peak-limited by cell | TBD | $$ | TBD |
-
-#### Notes & Considerations (Rev A)
-- Rev A target is minimum sleep current; regulator quiescent current is a primary selection driver.
-- Final decision depends on measured peak load behavior (BLE TX bursts, sensors, any optional blocks).
-
-**Preliminary Direction (Rev A):** Direct coin cell unless power budget study shows unacceptable droop/brownout risk  
-**Decision Status (Rev A):** TBD – pending power budget study
+**Preliminary Direction (Rev A):** Switching regulator; boost or buck-boost TBD pending rail map and power budget  
+**Decision Status (Rev A):** Pending rail map, power budget study, and regulator selection
 
 ---
 
