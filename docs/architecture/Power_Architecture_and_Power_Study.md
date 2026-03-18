@@ -1,0 +1,188 @@
+# MatterSense – Power Architecture and Power Study
+
+## 1. Purpose
+
+This document defines the power architecture for MatterSense Rev A and Rev B, including:
+- System power rails and their roles
+- Component-to-rail voltage mapping
+- Voltage compatibility across all selected components
+- Foundation for power consumption analysis and battery life estimation
+
+This document will also include a detailed power study (to be completed after rail mapping is finalized).
+
+---
+
+## 2. Scope
+
+- Rev A: BLE-only, coin cell powered
+- Rev B: BLE + Wi-Fi, rechargeable battery and/or USB-powered
+- Covers:
+  - Power rail definition
+  - Voltage selection
+  - Component compatibility
+  - Power budgeting framework
+
+Does NOT yet finalize:
+- Regulator IC selection
+- Battery selection
+- Exact efficiency calculations
+
+---
+
+## 3. Design Inputs and Assumptions
+
+### 3.1 Tentative Power Rails
+
+| Rail Name | Nominal Voltage | Description |
+|----------|----------------|-------------|
+| 3V3_MAIN | 3.3V | Primary system rail (MCU + most sensors) |
+| 1V8 | 1.8V | Low-voltage rail (sensor core / digital domains) |
+| 3V3_WIFI_SW | 3.3V | Load-switched rail for Wi-Fi subsystem (Rev B only) |
+
+### 3.2 Key Assumptions
+
+- BLE must remain available in low-power states (Rev A and Rev B battery mode)
+- Wi-Fi is **disabled in battery mode except when needed**
+- Wi-Fi must be fully power-gated in low-power states
+- Sensors will be duty-cycled where possible
+- Rail definitions may change after power study
+
+---
+
+## 4. Top-Level Power Architecture
+
+### 4.1 Power Sources
+
+| Source | Rev | Notes |
+|--------|-----|------|
+| Coin Cell Battery | Rev A | Primary power source |
+| LiPo Battery | Rev B | Rechargeable power source |
+| USB-C | Rev B | External power + charging |
+
+### 4.2 Power Domains
+
+| Domain | Description |
+|--------|------------|
+| Always-On Domain | BLE MCU + essential sensors |
+| Sensor Domain | Duty-cycled sensors |
+| Wi-Fi Domain | High-power, load-switched subsystem |
+
+### 4.3 Rail Interaction Notes
+
+- 3V3_MAIN is the primary logic domain
+- 1V8 is used where required by sensor cores or interfaces
+- 3V3_WIFI_SW must be independently switchable
+- Level shifting may be required between 1.8V and 3.3V domains (TBD)
+
+---
+
+## 5. Power Rail Map
+
+### 5.1 Rail Definitions
+
+| Rail | Nominal Voltage | Present In | Switched | Loads | Notes |
+|------|----------------|------------|----------|-------|------|
+| 3V3_MAIN | 3.3V | Rev A / Rev B | No | MCU, sensors, logic | Primary rail |
+| 1V8 | 1.8V | Rev A / Rev B | No (TBD) | Sensor cores, possible digital interfaces | Required by ENS160 |
+| 3V3_WIFI_SW | 3.3V | Rev B only | Yes | Wi-Fi subsystem | Power-gated for battery savings |
+
+---
+
+### 5.2 Component-to-Rail Mapping
+
+| Function | Component | Operating Voltage Range | I/O / Secondary Supply | Selected Voltage | Assigned Rail | Notes |
+|----------|----------|------------------------|------------------------|------------------|--------------|------|
+| BLE MCU / Radio | BL654 (nRF52840 module) | 1.7V – 3.6V | N/A | 3.3V | 3V3_MAIN | Simplifies system, avoids mixed-voltage MCU domain |
+| Temp / Humidity | SHTC3 | 1.62V – 3.6V | Single supply | 3.3V | 3V3_MAIN | Avoids level shifting on I2C |
+| VOC / eCO2 (Core) | ENS160 (VDD) | 1.71V – 1.98V | Separate VDDIO | 1.8V | 1V8 | Forces existence of 1.8V rail |
+| VOC / eCO2 (I/O) | ENS160 (VDDIO) | 1.71V – 3.6V | Digital interface | 3.3V | 3V3_MAIN | Allows direct I2C with MCU |
+| Wi-Fi (Rev B) | nRF7002 | 2.9V – 4.5V | May use 1.8V I/O | 3.3V | 3V3_WIFI_SW | Must be power-gated |
+| Ambient Light | TBD | TBD | TBD | TBD | TBD | Fill from hardware selection |
+| Barometric Pressure | TBD | TBD | TBD | TBD | TBD | Optional sensor |
+| Sound / dB | TBD | TBD | TBD | TBD | TBD | May impact rail design |
+
+---
+
+### 5.3 Open Questions / Decisions
+
+- Do any additional sensors require 1.8V operation?
+- Can all I2C devices remain on 3.3V without level shifting?
+- Does Wi-Fi require additional rails (beyond 3.3V + optional 1.8V I/O)?
+- Should the system move to a **3.0V main rail** instead of 3.3V?
+- Should 1V8 be switchable or always-on?
+
+---
+
+## 6. Power Study Method (To Be Completed)
+
+### 6.1 Operating Modes
+
+- Deep sleep / storage
+- BLE advertising
+- BLE connected
+- Sensor sampling event
+- Wi-Fi wake + transmit (Rev B)
+- USB-powered always-on mode (Rev B)
+
+---
+
+### 6.2 Power Budget Methodology
+
+For each component:
+- Sleep current
+- Active current
+- Peak current
+- Duty cycle
+- Average contribution
+
+System-level:
+- Total average current
+- Peak load analysis
+- Regulator efficiency impact
+
+---
+
+### 6.3 Assumptions (TBD)
+
+- Sampling interval
+- BLE connection interval
+- Wi-Fi upload frequency
+- Sensor conversion times
+- Battery usable capacity
+
+---
+
+## 7. Power Study Results (TBD)
+
+### 7.1 Rev A Current Budget
+### 7.2 Rev B Battery Mode
+### 7.3 Rev B USB Mode
+### 7.4 Peak Current Analysis
+### 7.5 Battery Life Estimates
+
+---
+
+## 8. Preliminary Observations
+
+- A 1.8V rail is required due to ENS160
+- 3.3V remains the simplest system-wide logic voltage
+- A load-switched Wi-Fi rail is critical for Rev B battery life
+- Most sensors can likely remain on 3.3V, minimizing complexity
+
+---
+
+## 9. Next Steps
+
+1. Fill in missing component voltages from hardware selection doc
+2. Validate rail compatibility across all components
+3. Confirm whether 3.3V vs 3.0V is optimal
+4. Begin detailed power study calculations
+5. Select regulator topology (buck / boost / buck-boost)
+
+---
+
+## 10. Appendix
+
+- Datasheets (to be linked)
+- Assumptions log
+- Revision notes
