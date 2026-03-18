@@ -83,7 +83,7 @@ Does NOT yet finalize:
 | Rail | Nominal Voltage | Present In | Switched | Loads | Notes |
 |------|----------------|------------|----------|-------|------|
 | 3V3_MAIN | 3.3V | Rev A / Rev B | No | MCU, sensors, logic | Primary rail |
-| 1V8 | 1.8V | Rev A / Rev B | No (TBD) | Sensor cores, possible digital interfaces | Required by ENS160 |
+| 1V8 | 1.8V | Rev A / Rev B | No (TBD) | Sensor cores, possible digital interfaces | Required by some sensors |
 | 3V3_WIFI_SW | 3.3V | Rev B only | Yes | Wi-Fi subsystem | Power-gated for battery savings |
 
 ---
@@ -91,15 +91,21 @@ Does NOT yet finalize:
 ### 5.2 Component-to-Rail Mapping
 
 | Function | Component | Operating Voltage Range | I/O / Secondary Supply | Selected Voltage | Assigned Rail | Notes |
-|----------|----------|------------------------|------------------------|------------------|--------------|------|
-| BLE MCU / Radio | BL654 (nRF52840 module) | 1.7V – 3.6V | N/A | 3.3V | 3V3_MAIN | Simplifies system, avoids mixed-voltage MCU domain |
-| Temp / Humidity | SHTC3 | 1.62V – 3.6V | Single supply | 3.3V | 3V3_MAIN | Avoids level shifting on I2C |
-| VOC / eCO2 (Core) | ENS160 (VDD) | 1.71V – 1.98V | Separate VDDIO | 1.8V | 1V8 | Forces existence of 1.8V rail |
-| VOC / eCO2 (I/O) | ENS160 (VDDIO) | 1.71V – 3.6V | Digital interface | 3.3V | 3V3_MAIN | Allows direct I2C with MCU |
-| Wi-Fi (Rev B) | nRF7002 | 2.9V – 4.5V | May use 1.8V I/O | 3.3V | 3V3_WIFI_SW | Must be power-gated |
-| Ambient Light | TBD | TBD | TBD | TBD | TBD | Fill from hardware selection |
-| Barometric Pressure | TBD | TBD | TBD | TBD | TBD | Optional sensor |
-| Sound / dB | TBD | TBD | TBD | TBD | TBD | May impact rail design |
+|----------|----------|-------------------------|------------------------|------------------|---------------|-------|
+| BLE MCU / Radio | [Ezurio BL654](https://www.ezurio.com/documentation/datasheet-bl654) | 1.7V – 3.6V (VDD), 2.5V – 5.5V (VDD_HV) | — | 3.3V | 3V3_MAIN | — |
+| BLE MCU / Radio (alternative) | [u-blox BMD-340-A-R](https://content.u-blox.com/sites/default/files/BMD-340_DataSheet_UBX-19033353.pdf) | 1.7V – 3.6V | — | 3.3V | 3V3_MAIN | Lower cost alternative |
+| Temp / Humidity | [Sensirion SHTC3](https://sensirion.com/resource/datasheet/shtc3) | 1.62V – 3.6V | — | 3.3V | 3V3_MAIN | — |
+| Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/products/catalog/SHT40) | 1.08V – 3.6V | — | 3.3V | 3V3_MAIN | Lower power alternative |
+| VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 3.3V | 3V3_MAIN | Also supports barometric sensing |
+| Ambient Light (Lux) | [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | 2.5V – 3.6V | — | 3.3V | 3V3_MAIN | — |
+| Ambient Light (alternative) | [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | ~1.7V – 2.0V | — | 1.8V | 1V8 | Requires 1.8V rail |
+| Ambient Light (alternative) | [ams OSRAM TCS3448](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf) | 1.7V – 1.98V | — | 1.8V | 1V8 | Requires 1.8V rail |
+| Barometric Pressure (optional) | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 3.3V | 3V3_MAIN | No additional sensor required |
+| Wi-Fi Companion (Rev B baseline) | [Fanstel WM02C](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | 2.9V – 4.5V | — | 3.3V | 3V3_WIFI_SW | Must be load-switched |
+| Wi-Fi Companion (alternative) | [Nordic nRF7002](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6470/NRF7002-QFAA-R.pdf) | 2.9V – 4.5V | — | 3.3V | 3V3_WIFI_SW | Must be load-switched |
+| Optional Sound / dB Front End | [Infineon IM69D130](https://www.infineon.com/dgdl/Infineon-IM69D130-DataSheet-v01_00-EN.pdf?fileId=5546d462602a9dc801607a0e46511a2e) | 1.62V – 3.6V | — | 3.3V | 3V3_MAIN | — |
+| Optional Sound / dB Front End (alternative) | [ST MP34DT06JTR](https://www.st.com/resource/en/datasheet/mp34dt06j.pdf) | 1.6V – 3.6V | — | 3.3V | 3V3_MAIN | — |
+
 
 ---
 
