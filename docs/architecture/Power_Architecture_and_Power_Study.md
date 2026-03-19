@@ -109,13 +109,16 @@ Does NOT yet finalize:
 
 ---
 
-### 5.3 Open Questions / Decisions
+### 5.3 Rail Dependency Summary
 
-- Do any additional sensors require 1.8V operation?
-- Can all I2C devices remain on 3.3V without level shifting?
-- Does Wi-Fi require additional rails (beyond 3.3V + optional 1.8V I/O)?
-- Should the system move to a **3.0V main rail** instead of 3.3V?
-- Should 1V8 be switchable or always-on?
+- No current baseline component strictly requires a 1.8V rail
+- The primary components that drive consideration of a 1.8V rail are the alternative multispectral lux sensors:
+  - [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf)
+  - [ams OSRAM TCS3448](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf)
+- The Wi-Fi subsystem requires a higher-voltage rail and cannot be operated from 1.8V
+- Because the design includes two I²C buses, it is possible to support both 1.8V and 3.3V I²C domains without level shifting, provided all devices on a given bus share the same voltage domain
+- 3.3V remains the default system assumption for now due to simplicity and broad compatibility
+- Consideration of alternate rail voltages, including 3.0V main rail operation and optional 1.8V subdomains, will be revisited during the power study
 
 ---
 
