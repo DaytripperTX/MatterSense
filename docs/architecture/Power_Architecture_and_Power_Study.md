@@ -122,42 +122,79 @@ Does NOT yet finalize:
 
 ---
 
-## 6. Power Study Method (To Be Completed)
+## 6. Power Study Method
 
 ### 6.1 Operating Modes
 
-- Deep sleep / storage
-- BLE advertising
-- BLE connected
-- Sensor sampling event
-- Wi-Fi wake + transmit (Rev B)
-- USB-powered always-on mode (Rev B)
+#### 6.1.1 Component Operating Modes
 
----
+Define the relevant modes used in the power study for each component class.
 
-### 6.2 Power Budget Methodology
+- **MCU / BLE**
+  - Sleep / System Off
+  - Idle / Standby
+  - MCU Active
+  - BLE RX
+  - BLE TX
+  - BLE Advertising
+  - BLE Connected Idle
 
-For each component:
-- Sleep current
-- Active current
-- Peak current
-- Duty cycle
-- Average contribution
+- **Wi-Fi**
+  - Off
+  - Startup / Enable
+  - Idle / Associated Idle
+  - RX
+  - TX
 
-System-level:
-- Total average current
-- Peak load analysis
-- Regulator efficiency impact
+- **Environmental Sensors**
+  - Sleep / Standby
+  - Measurement / Conversion
+  - Warm-up / Heater Stabilization (if applicable)
 
----
+- **Microphone / Sound Front End**
+  - Off / Sleep
+  - Active Sampling
 
-### 6.3 Assumptions (TBD)
+#### 6.1.2 System Operating Modes
 
-- Sampling interval
-- BLE connection interval
-- Wi-Fi upload frequency
-- Sensor conversion times
-- Battery usable capacity
+Define the higher-level system modes that combine component modes.
+
+- Ship / Storage
+- Deep Sleep
+- BLE Advertising
+- BLE Connected Idle
+- Periodic Sensor Sampling Event
+- Wi-Fi Wake + Upload (Rev B)
+- USB-Powered Always-Reachable Mode (Rev B)
+
+### 6.2 Component Electrical Characteristics
+
+This section summarizes the current and power characteristics of each component at the candidate operating voltages and relevant operating modes.
+
+### 6.3 Duty Cycle and Usage Assumptions
+
+This section defines:
+- sensor sampling interval
+- BLE advertising / connection timing
+- Wi-Fi upload interval
+- active duration per event
+- regulator efficiency assumptions
+- battery usable capacity assumptions
+
+### 6.4 System Power Budget
+
+Combine per-component electrical data with system operating modes and duty cycle assumptions to estimate:
+- average current
+- average power
+- peak current
+- battery life
+
+### 6.5 Rail Scenario Comparison
+
+Compare candidate rail architectures such as:
+- 3.3V main rail
+- 3.0V main rail
+- optional 1.8V sensor subdomain
 
 ---
 
