@@ -186,6 +186,8 @@ This table summarizes the electrical characteristics of each component at the se
 | Optional Sound / dB Front End | [Infineon IM69D130](https://www.infineon.com/dgdl/Infineon-IM69D130-DataSheet-v01_00-EN.pdf?fileId=5546d462602a9dc801607a0e46511a2e) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
 | Optional Sound / dB Front End (alternative) | [ST MP34DT06JTR](https://www.st.com/resource/en/datasheet/mp34dt06j.pdf) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
 
+Unless otherwise noted, current values represent **typical operating currents** taken from component datasheets under nominal conditions. Actual system consumption may vary depending on duty cycle, environmental conditions, and regulator efficiency.
+
 ### 6.3 Duty Cycle and Usage Assumptions
 
 This section defines:
