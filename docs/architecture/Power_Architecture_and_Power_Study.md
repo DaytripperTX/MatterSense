@@ -169,7 +169,22 @@ Define the higher-level system modes that combine component modes.
 
 ### 6.2 Component Electrical Characteristics
 
-This section summarizes the current and power characteristics of each component at the candidate operating voltages and relevant operating modes.
+This table summarizes the electrical characteristics of each component at the selected operating voltage and any alternate voltages considered during the power study.
+
+| Function | Component | Selected Voltage | Alternate Voltage(s) Considered | Sleep / Standby Current | Idle Current | Active / Measurement Current | Special Mode Current(s) | Notes |
+|---------|----------|------------------|---------------------------------|-------------------------|-------------|-------------------------------|-------------------------|------|
+| BLE MCU / Radio | [Ezurio BL654](https://www.ezurio.com/documentation/datasheet-bl654) | 3.3V | 3.0V | TBD | TBD | TBD | BLE RX: TBD; BLE TX: TBD; Advertising: TBD | |
+| Temp / Humidity | [Sensirion SHTC3](https://sensirion.com/resource/datasheet/shtc3) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
+| Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/products/catalog/SHT40) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | Lower power alternative |
+| VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | ULP Mode: TBD | Also supports barometric sensing |
+| Ambient Light (Lux) | [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | 3.3V | 3.0V | TBD | TBD | TBD | | |
+| Ambient Light (alternative) | [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | 1.8V | — | TBD | TBD | TBD | | Requires 1.8V rail |
+| Ambient Light (alternative) | [ams OSRAM TCS3448](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf) | 1.8V | — | TBD | TBD | TBD | | Requires 1.8V rail |
+| Barometric Pressure (optional) | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
+| Wi-Fi Companion | [Fanstel WM02C](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | 3.3V | — | TBD | TBD | TBD | RX: TBD; TX: TBD | Rev B only |
+| Wi-Fi Companion (alternative) | [Nordic nRF7002](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6470/NRF7002-QFAA-R.pdf) | 3.3V | — | TBD | TBD | TBD | RX: TBD; TX: TBD | |
+| Optional Sound / dB Front End | [Infineon IM69D130](https://www.infineon.com/dgdl/Infineon-IM69D130-DataSheet-v01_00-EN.pdf?fileId=5546d462602a9dc801607a0e46511a2e) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
+| Optional Sound / dB Front End (alternative) | [ST MP34DT06JTR](https://www.st.com/resource/en/datasheet/mp34dt06j.pdf) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
 
 ### 6.3 Duty Cycle and Usage Assumptions
 
