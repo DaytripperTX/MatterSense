@@ -175,7 +175,7 @@ This table summarizes the electrical characteristics of each component at the se
 |---------|----------|------------------|---------------------------------|-------------------------|-------------|-------------------------------|-------------------------|------|
 | BLE MCU / Radio | [Ezurio BL654](https://www.ezurio.com/documentation/datasheet-bl654) | 3.3V | 3.0V | 0.4 µA | 3.1 µA | — | BLE RX: 4.6 mA; BLE TX (0 dBm): 4.8 mA | |
 | Temp / Humidity | [Sensirion SHTC3](https://sensirion.com/resource/datasheet/shtc3) | 3.3V | 1.8V, 3.0V | 0.3 µA | 45 µA | 430 µA (normal measurement) | Low-power measurement: 270 µA | |
-| Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/products/catalog/SHT40) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | Lower power alternative |
+| Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/media/documents/33FD6951/6555C40E/Sensirion_Datasheet_SHT4x.pdf) | 3.3V | 1.8V, 3.0V | TBD | 80 nA | 320 µA | | Lower power alternative |
 | VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | ULP Mode: TBD | Also supports barometric sensing |
 | Ambient Light (Lux) | [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | 3.3V | 3.0V | TBD | TBD | TBD | | |
 | Ambient Light (alternative) | [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | 1.8V | — | TBD | TBD | TBD | | Requires 1.8V rail |
