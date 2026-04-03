@@ -97,6 +97,7 @@ Does NOT yet finalize:
 | Temp / Humidity | [Sensirion SHTC3](https://sensirion.com/resource/datasheet/shtc3) | 1.62V – 3.6V | — | 3.3V | 3V3_MAIN | — |
 | Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/products/catalog/SHT40) | 1.08V – 3.6V | — | 3.3V | 3V3_MAIN | Lower power alternative |
 | VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 3.3V | 3V3_MAIN | Also supports barometric sensing |
+| VOC / IAQ (alternative) | [ScioSense ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | VDD: 1.71V – 1.98V | VDDIO: 1.71V – 3.6V | 1.8V | 1V8 | Requires 1.8V core rail |
 | Ambient Light (Lux) | [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | 2.5V – 3.6V | — | 3.3V | 3V3_MAIN | — |
 | Ambient Light (alternative) | [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | ~1.7V – 2.0V | — | 1.8V | 1V8 | Requires 1.8V rail |
 | Ambient Light (alternative) | [ams OSRAM TCS3448](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf) | 1.7V – 1.98V | — | 1.8V | 1V8 | Requires 1.8V rail |
@@ -198,6 +199,10 @@ This section defines:
 - active duration per event
 - regulator efficiency assumptions
 - battery usable capacity assumptions
+
+**ENS160 Warm-Up Consideration**
+
+The ENS160 requires approximately **3 minutes of warm-up time** after entering STANDARD sensing mode before measurements are considered reliable. This significantly increases the energy cost of each sensing cycle and makes the device poorly suited to aggressive duty cycling. As a result, it is less favorable for low-power battery operation (Rev A) compared to alternatives such as the BME688.
 
 ### 6.4 System Power Budget
 
