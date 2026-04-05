@@ -96,12 +96,12 @@ Does NOT yet finalize:
 | BLE MCU / Radio (alternative) | [u-blox BMD-340-A-R](https://content.u-blox.com/sites/default/files/BMD-340_DataSheet_UBX-19033353.pdf) | 1.7V – 3.6V | — | 3.3V | 3V3_MAIN | Lower cost alternative |
 | Temp / Humidity | [Sensirion SHTC3](https://sensirion.com/resource/datasheet/shtc3) | 1.62V – 3.6V | — | 3.3V | 3V3_MAIN | — |
 | Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/products/catalog/SHT40) | 1.08V – 3.6V | — | 3.3V | 3V3_MAIN | Lower power alternative |
-| VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 3.3V | 3V3_MAIN | Also supports barometric sensing |
+| VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 1.8V | 1V8 | Also supports barometric sensing |
 | VOC / IAQ (alternative) | [ScioSense ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | VDD: 1.71V – 1.98V | VDDIO: 1.71V – 3.6V | 1.8V | 1V8 | Requires 1.8V core rail |
 | Ambient Light (Lux) | [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | 2.5V – 3.6V | — | 3.3V | 3V3_MAIN | — |
 | Ambient Light (alternative) | [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | ~1.7V – 2.0V | — | 1.8V | 1V8 | Requires 1.8V rail |
 | Ambient Light (alternative) | [ams OSRAM TCS3448](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf) | 1.7V – 1.98V | — | 1.8V | 1V8 | Requires 1.8V rail |
-| Barometric Pressure (optional) | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 3.3V | 3V3_MAIN | No additional sensor required |
+| Barometric Pressure (optional) | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | VDD: 1.71V – 3.6V | Optional VDDIO: 1.2V – 3.6V | 1.8V | 1V8 | No additional sensor required |
 | Wi-Fi Companion (Rev B baseline) | [Fanstel WM02C](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | 2.9V – 4.5V | — | 3.3V | 3V3_WIFI_SW | Must be load-switched |
 | Wi-Fi Companion (alternative) | [Nordic nRF7002](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6470/NRF7002-QFAA-R.pdf) | 2.9V – 4.5V | — | 3.3V | 3V3_WIFI_SW | Must be load-switched |
 | Optional Sound / dB Front End | [Infineon IM69D130](https://www.infineon.com/dgdl/Infineon-IM69D130-DataSheet-v01_00-EN.pdf?fileId=5546d462602a9dc801607a0e46511a2e) | 1.62V – 3.6V | — | 3.3V | 3V3_MAIN | — |
@@ -177,12 +177,12 @@ This table summarizes the electrical characteristics of each component at the se
 | BLE MCU / Radio | [Ezurio BL654](https://www.ezurio.com/documentation/datasheet-bl654) | 3.3V | 3.0V | 0.4 µA | 3.1 µA | — | BLE RX: 4.6 mA; BLE TX (0 dBm): 4.8 mA | |
 | Temp / Humidity | [Sensirion SHTC3](https://sensirion.com/resource/datasheet/shtc3) | 3.3V | 1.8V, 3.0V | 0.3 µA | 45 µA | 430 µA (normal measurement) | Low-power measurement: 270 µA | Avg. current much lower |
 | Temp / Humidity (alternative) | [Sensirion SHT40](https://sensirion.com/media/documents/33FD6951/6555C40E/Sensirion_Datasheet_SHT4x.pdf) | 3.3V | 1.8V, 3.0V | — | 80 nA | 320 µA | | Avg. current much lower; lower power alt |
-| VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 3.3V | 1.8V, 3.0V | 0.15 µA | 0.29 µA | 3.96 mA (standard gas scan) | ULP: 90 µA; LP: 0.9 mA |  Optimized for 1.8V operation |
+| VOC / IAQ | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 1.8V | 3.0V, 3.3V | 0.15 µA | 0.29 µA | 3.96 mA (standard gas scan) | ULP: 90 µA; LP: 0.9 mA |  Optimized for 1.8V operation |
 | VOC / IAQ (alternative) | [ScioSense ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | 1.8V | — | 0.01 mA  | 2–2.5 mA | 29 mA | Peak: 79 mA (<5 ms) | Requires 1.8V core rail |
 | Ambient Light (Lux) | [Vishay VEML7700](https://www.vishay.com/docs/84286/veml7700.pdf) | 3.3V | 3.0V | 0.5 µA | — | 45 µA | 2 µA (Power Saving Mode) | |
 | Ambient Light (alternative) | [ams OSRAM AS7341](https://look.ams-osram.com/m/24266a3e584de4db/original/AS7341-DS000504.pdf) | 1.8V | — | 0.7 µA | 35 µA | 210 µA | — | Requires 1.8V rail |
 | Ambient Light (alternative) | [ams OSRAM TCS3448](https://look.ams-osram.com/m/1c24b057e65ee61e/original/TCS3448-14-Channel-multi-spectral-sensor.pdf) | 1.8V | — | 0.7 µA | 40 µA | 210 µA | — | Requires 1.8V rail |
-| Barometric Pressure (optional) | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
+| Barometric Pressure | [Bosch BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | 1.8V | 3.0V, 3.3V | 0.15 µA | 0.29 µA | 3.1 µA | — | Currents specified at 1.8V |
 | Wi-Fi Companion | [Fanstel WM02C](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | 3.3V | — | TBD | TBD | TBD | RX: TBD; TX: TBD | Rev B only |
 | Wi-Fi Companion (alternative) | [Nordic nRF7002](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6470/NRF7002-QFAA-R.pdf) | 3.3V | — | TBD | TBD | TBD | RX: TBD; TX: TBD | |
 | Optional Sound / dB Front End | [Infineon IM69D130](https://www.infineon.com/dgdl/Infineon-IM69D130-DataSheet-v01_00-EN.pdf?fileId=5546d462602a9dc801607a0e46511a2e) | 3.3V | 1.8V, 3.0V | TBD | — | TBD | | |
