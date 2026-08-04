@@ -151,8 +151,8 @@ This document complements the HRS and will evolve as trade studies are completed
 - ENS160 is not recommended for Rev A due to warm-up/conditioning overhead; it may remain an optional Rev B / USB-powered candidate if on-sensor processing is preferred.
 - “eCO2” is an equivalent output derived from VOC sensing/algorithms and is not a direct CO2 ppm measurement. Any future requirement for true CO2 shall use a dedicated CO2 sensor (e.g., NDIR).
 
-**Preliminary Direction:** BME688 (Rev A baseline); ENS160 optional for Rev B / USB-mode only  
-**Decision Status:** Frozen for Rev A; TBD for Rev B
+**Preliminary Direction:** BME688 (Rev A + Rev B baseline); ENS160 optional for a future Rev B / USB-only variant
+**Decision Status:** Frozen for both baseline revisions
 
 
 
@@ -176,8 +176,8 @@ This document complements the HRS and will evolve as trade studies are completed
   - Acceptable for prototypes and small runs.
 
 
-**Preliminary Direction:** VEML7700 (Rev A + Rev B baseline); multispectral optional for Rev B (TBD)  
-**Decision Status:** Pending schematic validation and power budget study
+**Preliminary Direction:** VEML7700 (Rev A + Rev B baseline); multispectral optional for a future Rev B variant
+**Decision Status:** Frozen for both baseline revisions
 
 
 
@@ -198,8 +198,8 @@ This document complements the HRS and will evolve as trade studies are completed
 - If VOC/IAQ uses a non-pressure part (e.g., ENS160), the preferred low-cost pressure add-on candidates are **BMP581** and **ENS220**.
 - Any required 1.8 V domain (including for other components) is assumed to be addressed by the system power architecture and is not treated as a disqualifying factor for ENS220.
 
-**Preliminary Direction:** BME688 pressure if selected for VOC/IAQ; otherwise BMP581 or ENS220  
-**Decision Status:** Pending schematic validation and power budget study
+**Preliminary Direction:** Use pressure data from the baseline BME688; no separate pressure sensor
+**Decision Status:** Frozen for both baseline revisions
 
 
 
@@ -227,8 +227,8 @@ A dedicated “dB sensor” (direct calibrated dBA output) is not commonly avail
   - Without a designed acoustic port, the mic will be heavily attenuated and sensitive to internal cavity effects; it will not reliably “listen through” solid PCB/enclosure material.
   - **Top-port** microphones simplify enclosure integration when the opening is on the same side as the component.
 
-**Preliminary Direction:** TBD (optional; omit unless a clear use-case is defined)  
-**Decision Status:** TBD – pending power budget study and enclosure/acoustic constraints
+**Preliminary Direction:** Omit from Rev A and Rev B baseline; reconsider only for a future externally powered variant with defined acoustic requirements
+**Decision Status:** Frozen as not fitted in the baseline designs
 
 
 
@@ -236,81 +236,55 @@ A dedicated “dB sensor” (direct calibrated dBA output) is not commonly avail
 
 ## 4) Power Management Strategy
 
-This section defines the power architecture requirements and the PMIC/DC-DC candidate selection approach. Because Rev A and Rev B have fundamentally different power sources and load profiles, power management is tracked seperately.
+This section records the power architecture selected by the completed [Power Architecture and Power Study](../architecture/Power_Architecture_and_Power_Study.md). Because Rev A and Rev B have fundamentally different power sources and load profiles, power management is tracked separately.
 
 ---
 
-### 4.1 Power Architecture Requirements (Both Revisions)
+### 4.1 Selected Voltage Domains and Controls
 
-#### Voltage Domains (Planned)
-- **VDD_MAIN (3.3 V):** primary system rail for MCU + sensors
-- **VDD_1V8 (1.8 V):** secondary rail for components requiring 1.8 V operation
-- **VDD_WIFI (Rev B only, optional / TBD):** dedicated rail for Wi-Fi module if required to meet sleep/leakage or power gating requirements
+- **Rev A – 3V0_MAIN:** 3.0 V from a TPS63900 buck-boost; supplies the BL654, SHTC3, BME688, VEML7700, and logic.
+- **Rev B – 3V3_MAIN:** 3.3 V from a TPS63802 buck-boost; supplies the BL654, baseline sensors, and logic.
+- **Rev B – 3V3_WIFI_SW:** load-switched 3.3 V branch controlled by the BL654 through a TPS22919.
+- **VDD_1V8_DNP:** no baseline 1.8 V rail. Rev B may reserve a DNP TPS7A0218 option for a future 1.8 V sensor.
 
-#### Power Path / Source Selection (Planned)
-- **Rev A:** regulated coin cell supply (regulator topology TBD)
-- **Rev B:** power-path PMIC providing:
-  - USB-powered operation when available
-  - LiPo battery charging from USB
-  - Seamless transition between USB power and battery without brownouts (USB → battery and battery → USB)
+Baseline sensors remain powered and use their specified sleep modes. Only the Wi-Fi module is hard power-gated. Both revisions use a normally-off ADC divider for coarse battery measurement. Rev B also routes BQ24074 PGOOD and CHG status to the MCU.
 
-#### Power Management Responsibilities (Planned)
-- Firmware shall select operating policy based on power source state:
-  - USB present: less aggressive duty cycling; Wi-Fi allowed/available
-  - Battery: aggressive duty cycling; Wi-Fi duty-cycled and/or disabled per policy
-- Power path behavior (source switchover, charge control) shall be handled by hardware (PMIC), not firmware.
-
-#### Power Gating / Switching (Planned)
-- Provide a mechanism to **disable the Wi-Fi block** (Rev B), pending confirmation that Wi-Fi sleep/leakage current is acceptable without gating.
-- Sensor power gating is deferred; sensors shall rely on their sleep modes for initial designs.
-
-#### Measurement / Monitoring (Planned)
-- **Rev A:** battery voltage measurement via ADC divider (implementation TBD)
-- **Rev B:** battery measurement approach TBD (ADC divider vs more complex solution)
-- **Rev B:** charging / power-source status signals are required (exact signals TBD by PMIC choice)
-
-#### Rail Map
-- Rail-to-load mapping is **TBD** and will be completed during schematic capture.
-
-**Decision Status:** Pending schematic validation and power budget study
+**Decision Status:** Frozen for schematic baseline; prototype validation required
 
 ---
 
 ### 4.2 Rev A – Coin Cell Power Path (BLE-only)
 
-#### Notes & Considerations
-- Rev A is regulated; the open decision is **boost vs buck-boost** (and the final setpoint for VDD_MAIN).
-- Coin cell operating voltage is expected to span roughly **~2.7–3.3 V** under load, and may dip lower near end-of-life.
-- A **boost or buck-boost** regulator enables extended operation below the nominal VDD_MAIN setpoint (e.g., battery <3.0 V), which can improve usable battery life.
-- Final selection depends on:
-  - Final VDD_MAIN target (3.3 V vs 3.0 V)
-  - Minimum acceptable battery voltage before shutdown (TBD)
-  - Measured peak load droop and brownout margin
+#### Selected Implementation
 
-**Preliminary Direction (Rev A):** Switching regulator; boost or buck-boost TBD pending rail map and power budget  
-**Decision Status (Rev A):** Pending rail map, power budget study, and regulator selection
+- One CR2477-class 3 V, 1000 mAh Li-MnO₂ coin cell
+- TI TPS63900 buck-boost set to 3.0 V
+- Initial programmable input-current limit: 50 mA
+- External 32.768 kHz crystal for the BL654
+- 100–220 µF low-leakage bulk-capacitor footprint in addition to converter and local decoupling
+
+The conservative modeled battery life is approximately seven months with the BME688 running BSEC ULP. The supply must survive an approximately 37 mA worst-case overlap, although firmware shall avoid overlapping BME688 heater turn-on and high-power BLE TX.
+
+**Preliminary Direction (Rev A):** TPS63900 at 3.0 V from one CR2477
+**Decision Status (Rev A):** Frozen for schematic baseline; cell-pulse and end-of-life validation required
 
 ---
 
 ### 4.3 Rev B – LiPo + USB-C Power Path (BLE + Wi-Fi)
 
-#### Candidate Comparison (Rev B PMIC / Charger / Power Path Options)
+#### Selected Implementation
 
-| Candidate | Function | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
-|---------|----------|----------|----------|--------------|-----------------|--------------|
-| USB-C + LiPo charger + system power-path PMIC (TBD) | Charger + power mux | • Seamless USB/LiPo operation<br>• Supports “always-on” USB mode | • More complex<br>• Part selection critical for Wi-Fi transients | Supports Wi-Fi peaks if designed correctly | $$ | TBD |
-| Charger + separate buck regulator (TBD) | Charger + DC/DC | • Modular; easier sourcing<br>• Can optimize DC/DC for Wi-Fi load | • More components<br>• More layout effort | TBD | $$ | TBD |
-| Fuel gauge (optional, TBD) | Measurement | • Better battery reporting than ADC divider | • Added cost/IC | Low | $–$$ | TBD |
+| Component | Function | Selection basis |
+|---|---|---|
+| TI BQ24074 | 1S LiPo charger and dynamic power path | USB/battery switchover, battery supplement, batteryless startup, PGOOD/CHG status |
+| TI TPS63802 | 3.3 V, 2 A buck-boost | Covers the LiPo discharge range and approximately 300 mA worst-case system peak with margin |
+| TI TPS22919 | Wi-Fi load switch | 1.5 A capability, 2 nA typical off-state current, controlled turn-on, output discharge |
+| TI TPS7A0218 (DNP) | Optional 1.8 V sensor rail | 25 nA typical IQ and 200 mA capability; not populated for baseline |
 
-#### Notes & Considerations (Rev B)
-- Rev B must support **Wi-Fi peak current (~260 mA TX)** and fast transient response without brownout.
-- Rev B must support both modes:
-  - **USB-powered:** Wi-Fi enabled, always reachable
-  - **Battery-powered:** Wi-Fi gated/duty-cycled aggressively (Wi-Fi module may be DNP)
-- PMIC selection must be compatible with the chosen battery size/chemistry and desired charge current.
+The BQ24074 input-current limit is initially 500 mA and charge current is approximately 400–500 mA for a protected 2000 mAh LiPo. The 3.3 V rail is designed for at least 500 mA continuous, 1 A transient capability, and less than 200 mV droop at the Wi-Fi module.
 
-**Preliminary Direction (Rev B):** Power-path PMIC or charger + DC/DC (TBD)  
-**Decision Status (Rev B):** TBD – pending PMIC selection and power budget study
+**Preliminary Direction (Rev B):** BQ24074 + TPS63802 + TPS22919
+**Decision Status (Rev B):** Frozen for schematic baseline; thermal and transient validation required
 
 
 ---
@@ -321,15 +295,16 @@ This section defines the power architecture requirements and the PMIC/DC-DC cand
 
 | Revision | Chemistry | Capacity | Key Pros | Key Cons | Availability |
 |--------|----------|----------|----------|----------|--------------|
-| Rev A | Coin cell | TBD | Simple; replaceable | Limited current | High |
-| Rev B | LiPo | ~2000 mAh | Long runtime; rechargeable | Requires charging circuit | High |
+| Rev A | CR2477 Li-MnO₂ coin cell | 1000 mAh nominal; 700 mAh conservative usable | Simple; replaceable; modeled seven-month baseline | Pulse capability and holder/contact resistance require validation | High |
+| Rev B | Protected 1S LiPo with NTC preferred | 2000 mAh nominal; 1600 mAh conservative usable | Rechargeable; supports Wi-Fi peaks | Pack/connector selection depends on enclosure | High |
 
 ### Notes & Considerations
-- Rev B battery size appears feasible within enclosure constraints.
-- Final capacity selection tied to Wi-Fi duty cycle assumptions.
+- Rev A life is dominated by the BME688 ULP profile.
+- Rev B modeled life is approximately 15 months with Wi-Fi gated, 10 months at one modeled upload per four hours, and five months at one upload per hour.
+- Final holder, LiPo pack, connector, and mechanical retention remain BOM/enclosure selections.
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+**Preliminary Direction:** CR2477 for Rev A; protected 2000 mAh 1S LiPo for Rev B
+**Decision Status:** Frozen electrically; exact mechanical parts pending
 
 ---
 
@@ -372,8 +347,16 @@ This section defines the power architecture requirements and the PMIC/DC-DC cand
 
 ## 8) Summary & Next Steps
 
-- This document will be updated as each block is reviewed and frozen.
-- Once a block decision is finalized:
-  - Preliminary Direction will be locked
-  - Decision Status updated
-  - HRS and schematic assumptions updated accordingly
+- Power-study-dependent baseline selections are now frozen:
+  - Ezurio BL654
+  - Fanstel WM02C for Rev B Wi-Fi
+  - SHTC3, BME688, and VEML7700
+  - BME688 pressure output; no separate barometric sensor
+  - no baseline microphone/sound block
+  - TPS63900 + CR2477 for Rev A
+  - BQ24074 + TPS63802 + TPS22919 + 2000 mAh LiPo for Rev B
+- Next:
+  - begin schematic capture and select exact passives, magnetics, batteries/holders, connectors, and protection parts;
+  - complete antenna and programming/test selections;
+  - verify the modeled power figures on prototype hardware;
+  - revisit optional Rev B multispectral or 1.8 V sensor population only if the product scope requires it.
