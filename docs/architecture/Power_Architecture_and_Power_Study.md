@@ -1,6 +1,6 @@
 # MatterSense – Power Architecture and Power Study
 
-**Status:** Architecture decisions complete; schematic implementation and prototype validation remain
+**Status:** Baseline architecture selected; BME688 supply-voltage comparison, schematic implementation, and prototype validation remain
 **Last updated:** 2026-08-04
 
 ---
@@ -30,10 +30,11 @@ The results are planning estimates, not guaranteed battery-life specifications. 
 | USB/LiPo power path | Not applicable | [TI BQ24074](https://www.ti.com/lit/ds/symlink/bq24074.pdf), 500 mA input limit and approximately 400–500 mA charge current | Frozen for schematic baseline |
 | Wi-Fi rail | Not applicable | 3.3 V switched branch from 3V3_MAIN | Frozen |
 | Wi-Fi switch | Not applicable | [TI TPS22919](https://www.ti.com/lit/gpn/TPS22919), controlled by BL654 | Frozen |
-| 1.8 V rail | Omitted | Omitted from baseline; DNP [TPS7A0218](https://www.ti.com/lit/ds/symlink/tps7a02.pdf) option only if a 1.8 V sensor is fitted | Frozen |
+| BME688 1.8 V evaluation | Prototype shall support mutually exclusive BME688 VDD supply from 3V0_MAIN or a DNP [TPS62840](https://www.ti.com/lit/ds/symlink/tps62840.pdf) 1.8 V buck; VDDIO remains on 3V0_MAIN | Same provision from 3V3_MAIN or the DNP 1.8 V buck; VDDIO remains on 3V3_MAIN | Production population pending measured comparison |
 | Sensor gating | No separate load switch; use device sleep modes | Baseline sensors remain powered and use sleep modes | Frozen |
 | Battery measurement | MCU ADC through a normally-off switched divider | MCU ADC through a normally-off switched divider; charger PGOOD and CHG also routed to MCU | Frozen |
 | Fuel gauge | Not fitted | Not fitted; reserve test/DNP provision only if later accuracy requirements justify it | Frozen |
+| Power profiling access | Whole-board input plus MCU/BLE and individual sensor branches shall have removable 0 Ω links and paired test access | Same, plus separate Wi-Fi and USB/battery-path access | Required for prototype schematic/layout |
 | Low-frequency clock | External 32.768 kHz crystal on BL654 | External 32.768 kHz crystal on BL654 | Frozen |
 | Optional sound block | Not fitted | Not fitted in baseline; future externally powered option only | Frozen for baseline |
 
@@ -74,9 +75,18 @@ The LiPo voltage crosses above and below 3.3 V during discharge, so a buck-only 
 
 A separate Wi-Fi converter is not required. A TPS22919 load switch isolates the Wi-Fi module when off, limits inrush through controlled turn-on, and introduces only about 23 mV typical drop at 260 mA from its 90 mΩ typical on-resistance.
 
-### 3.3 No Baseline 1.8 V Rail
+### 3.3 BME688 1.8 V Decision Reopened for Measurement
 
-No selected baseline component requires 1.8 V. Running the BME688 from a dedicated 1.8 V rail does not justify the additional converter, capacitors, routing, enable logic, and possible level-domain complexity. Rev B may include a DNP 1.8 V LDO footprint for an optional ENS160 or multispectral sensor. The baseline I²C buses remain at the primary rail voltage and need no level shifter.
+No selected baseline component requires 1.8 V, but that is not sufficient reason to close the question for the dominant load. Bosch states that BME688 power efficiency, performance, and heat dissipation scale with supply voltage and that the device is optimized for 1.8 V. More importantly, the published 90 µA BSEC ULP average, 12 mA heater current, and related gas-mode values are characterized at VDD ≤ 1.8 V. Equivalent gas-mode current is not specified at 3.0 V or 3.3 V.
+
+The prototype shall therefore support an A/B comparison without requiring a PCB respin:
+
+- BME688 VDD shall be selectable through mutually exclusive population options from the main rail or a dedicated 1.8 V buck.
+- BME688 VDDIO and the I²C pull-ups shall remain on the main logic rail, so no level shifter is required.
+- The 1.8 V evaluation path shall use a DNP TPS62840-class buck rather than an LDO. The TPS62840 has 60 nA typical operating quiescent current, an input range of 1.8 V to 6.5 V, and sufficient peak-current capability for the BME688 heater.
+- The source selector shall be fail-safe: the main rail and 1.8 V output must never be shorted together by an allowed population state.
+
+The default first-build population may power BME688 VDD directly from the main rail while the 1.8 V converter is DNP, but the production choice is not frozen until identical BSEC ULP profiles are measured at both voltages. The comparison shall use battery-input charge per complete cycle and long-term average current, not BME688 rail current alone, so converter losses are included.
 
 ### 3.4 Sensors Remain Powered
 
@@ -95,11 +105,11 @@ The firmware must explicitly return the SHTC3 to sleep and the VEML7700 to shutd
 
 ### 4.1 Rev A
 
-CR2477 → TPS63900 3.0 V buck-boost → BL654, SHTC3, BME688, and VEML7700. A separate normally-off divider connects raw battery voltage to the BL654 ADC only while a measurement is taken.
+CR2477 → TPS63900 3.0 V buck-boost → BL654, SHTC3, and VEML7700. BME688 VDD is supplied through a mutually exclusive selector from either 3V0_MAIN or a DNP TPS62840 1.8 V evaluation rail; BME688 VDDIO remains on 3V0_MAIN. A separate normally-off divider connects raw battery voltage to the BL654 ADC only while a measurement is taken.
 
 ### 4.2 Rev B
 
-USB-C 5 V and the 1S LiPo connect to the BQ24074 power-path charger. Its OUT node feeds the TPS63802 3.3 V buck-boost. The BL654 and baseline sensors use 3V3_MAIN; a TPS22919 creates 3V3_WIFI_SW for the WM02C. A DNP TPS7A0218 may create 1.8 V for future optional sensors.
+USB-C 5 V and the 1S LiPo connect to the BQ24074 power-path charger. Its OUT node feeds the TPS63802 3.3 V buck-boost. The BL654, SHTC3, and VEML7700 use 3V3_MAIN; a TPS22919 creates 3V3_WIFI_SW for the WM02C. BME688 VDD is selectable from 3V3_MAIN or a DNP TPS62840 1.8 V evaluation rail, while BME688 VDDIO remains on 3V3_MAIN.
 
 With USB present, the power path powers the system and charges the battery. Without USB, the battery supplies OUT through the internal battery FET. The battery can supplement the input during a load transient, and the system can start from USB with a missing or deeply discharged battery.
 
@@ -111,10 +121,10 @@ With USB present, the power path powers the system and charges the battery. With
 |---|---|---:|---:|---|
 | MCU / BLE | Ezurio BL654 | 3V0_MAIN | 3V3_MAIN | System ON idle; System OFF only for storage |
 | Temperature / humidity | Sensirion SHTC3 | 3V0_MAIN | 3V3_MAIN | Explicit sleep command |
-| VOC / IAQ / pressure | Bosch BME688 | 3V0_MAIN | 3V3_MAIN | BSEC ULP / sensor sleep between heater events |
+| VOC / IAQ / pressure | Bosch BME688 | 3V0_MAIN or VDD_1V8_EVAL | 3V3_MAIN or VDD_1V8_EVAL | BSEC ULP / sensor sleep between heater events |
 | Ambient light | Vishay VEML7700 | 3V0_MAIN | 3V3_MAIN | Software shutdown between readings |
 | Wi-Fi | Fanstel WM02C | — | 3V3_WIFI_SW | Hard off through TPS22919 |
-| Optional 1.8 V sensor | ENS160 or multispectral sensor | Not supported in baseline | VDD_1V8_DNP | LDO disabled when option absent/off |
+| Optional 1.8 V sensor | ENS160 or multispectral sensor | Not fitted; evaluation rail is reserved for BME688 testing | Future variant may reuse VDD_1V8_EVAL after load review | Converter disabled when option absent/off |
 | Battery sensing | Resistor divider + ADC filter | Raw coin cell, switched | Raw LiPo, switched | Divider normally disconnected |
 | Status LED | BOM/layout selection | 3V0_MAIN | 3V3_MAIN | Off except short user-visible events |
 
@@ -132,12 +142,13 @@ With USB present, the power path powers the system and charges the battery. With
 | SHTC3 | Sleep | 0.3 µA typical | [SHTC3 datasheet](https://sensirion.com/resource/datasheet/shtc3) |
 | SHTC3 | Normal measurement | 430 µA for 10.8 ms typical | Used to derive 0.38 µA at one sample per minute |
 | BME688 | Sleep | 0.15 µA typical | [BME688 datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) |
-| BME688 | BSEC ULP | 90 µA average | 300 s IAQ update interval |
-| BME688 | Heater operating | 12 mA typical, 13 mA max | At the datasheet heater condition |
+| BME688 | BSEC ULP | 90 µA average | 300 s IAQ update interval; specified at VDD ≤ 1.8 V |
+| BME688 | Heater operating | 12 mA typical, 13 mA max | Heater target 320 °C; specified at VDD ≤ 1.8 V and 25 °C |
 | BME688 | Heater turn-on peak | 17 mA typical, 18 mA max | First milliseconds of hotplate turn-on |
 | VEML7700 | Shutdown | 0.5 µA typical | [VEML7700 datasheet](https://www.vishay.com/docs/84286/veml7700.pdf) |
 | VEML7700 | Active, PSM disabled | 45 µA for 100 ms | Used to derive 0.57 µA at one sample per minute |
 | TPS63900 | Operating quiescent current | 0.075 µA typical | Included in Rev A |
+| TPS62840 | Operating quiescent current | 0.060 µA typical | DNP BME688 1.8 V evaluation path; excluded from baseline estimates |
 | TPS63802 | Operating quiescent current | 11 µA typical | Included in Rev B |
 | BQ24074 | Battery sleep current, USB absent | 4.3 µA typical, 6.5 µA max at stated condition | Conservative 6.5 µA used |
 | TPS22919 | Off-state current | 2 nA typical | Wi-Fi module isolated |
@@ -146,7 +157,7 @@ With USB present, the power path powers the system and charges the battery. With
 | WM02C / nRF7002 | Connected power save | approximately 4 mA planning value | Used only for USB-mode range |
 | CR2477 | Nominal rating | 3 V, 1000 mAh, 0.2 mA standard continuous drain | [Panasonic CR2477](https://energy.panasonic.com/na/business/products/lithium/coin-cr-standard/models/CR2477) |
 
-The BME688 ULP current is intentionally used without claiming that it scales linearly with supply voltage. It is the dominant uncertainty and must be measured with the actual BSEC configuration.
+The baseline budgets retain the 90 µA BME688 ULP value as a planning proxy, not as a characterized 3.0 V or 3.3 V value. Bosch specifies that average at VDD ≤ 1.8 V and states that the device is optimized for 1.8 V. The actual main-rail current and the end-to-end benefit of the 1.8 V buck are therefore dominant uncertainties that must be measured with the actual BSEC configuration.
 
 ---
 
@@ -223,7 +234,7 @@ One average month is treated as 730 hours. Battery self-discharge and calendar a
 | MCU and I²C service allowance | 2.00 µA |
 | SHTC3 at one reading per minute | 0.38 µA |
 | VEML7700 at one reading per minute | 0.57 µA |
-| BME688 BSEC ULP | 90.00 µA |
+| BME688 BSEC ULP planning proxy (specified at VDD ≤ 1.8 V) | 90.00 µA |
 | TPS63900 quiescent current | 0.08 µA |
 | Battery divider, pull resistors, and PCB leakage allowance | 1.00 µA |
 | **Typical modeled subtotal** | **106.63 µA** |
@@ -239,9 +250,15 @@ At 90% conversion efficiency, the conservative result is approximately **136 µA
 | Conservative design case | 700 mAh | 15% contingency | 5140 h / **7.0 months** |
 | IAQ sensor omitted/disabled | 700 mAh | Same assumptions without BME688 ULP | approximately **45 months**, normally shelf-life limited first |
 
+### 9.3 BME688 1.8 V Sensitivity
+
+The present seven-month design case assumes 90 µA on 3V0_MAIN even though that value is specified only at VDD ≤ 1.8 V. As an illustrative sensitivity case, if the BME688 consumes 90 µA at 1.8 V, both buck stages average 90% efficiency, and the TPS62840 adds 60 nA quiescent current, the modeled Rev A battery-equivalent current falls from approximately 136 µA to approximately 98 µA. Estimated life rises from about 7.0 months to about 9.8 months.
+
+This is a hypothesis, not a prediction. Actual 3.0 V BME688 current, heater behavior, converter efficiency across the pulsed load, and BSEC performance must be measured. The production rail shall be chosen from measured battery-input energy and IAQ behavior.
+
 The Rev A multi-month target is met with the BME688 ULP profile. The BME688 consumes about 73% of the conservative rail budget and is the primary battery-life lever.
 
-### 9.3 Rev A Mode Budget
+### 9.4 Rev A Mode Budget
 
 | System mode | Expected current | Notes |
 |---|---:|---|
@@ -251,7 +268,7 @@ The Rev A multi-month target is met with the BME688 ULP profile. The BME688 cons
 | SHTC3/lux sampling | Approximately 4–6 mA while MCU is active | Short duration |
 | BME688 heater event | 12 mA typical; 18 mA max turn-on peak, plus MCU | Long enough that the battery, not only a capacitor, must support it |
 
-### 9.4 Rev A Peak-Current Decision
+### 9.5 Rev A Peak-Current Decision
 
 The worst unscheduled overlap is approximately:
 
@@ -269,6 +286,8 @@ Rev A schematic requirements:
 - provide an additional 100–220 µF low-leakage bulk-capacitor footprint near the main rail;
 - place local 0.1 µF and device-recommended bulk capacitors at each IC;
 - expose battery voltage and 3V0_MAIN test points;
+- include mutually exclusive 3V0_MAIN and 1.8 V population paths to BME688 VDD, with VDDIO fixed to 3V0_MAIN;
+- include the series current-measurement links and event-marker test points defined in Section 13;
 - verify cold, aged-cell, and end-of-life pulse behavior on hardware.
 
 A bulk capacitor can cover fast radio/load-step response, but it cannot supply the complete BME688 heater interval. Coin-cell chemistry and holder/contact resistance must be validated with the actual heater profile.
@@ -387,22 +406,76 @@ The approximately 0.5 µA saving is small relative to the BME688, but the LFXO a
 
 ---
 
-## 13. Power Verification Plan
+## 13. Power Verification and Measurement Access Plan
 
-The following measurements are required before battery-life numbers are treated as verified.
+The PCB shall be intentionally partitioned so current can be measured at the complete-device input and at the major load branches with a Nordic Power Profiler Kit II (PPK2), source-measure unit, Joulescope, or equivalent instrument. These provisions are part of the prototype design, not an afterthought added with cut traces.
 
-### 13.1 Rev A
+### 13.1 Required PCB Measurement Architecture
+
+#### Series current-measurement links
+
+- Put a normally populated 0 Ω resistor or closed solder link in the high-side DC feed to each measurement domain.
+- Place two accessible pads and a DNP two-pin header footprint across each link. Removing the 0 Ω element shall allow an ammeter to be inserted in series without cutting a trace.
+- Keep ground continuous. Do not place the measurement disconnect in the ground return.
+- Do not place a measurement link in a converter switching node or inside a high-di/dt loop.
+- Normal production population may omit the headers and retain the 0 Ω links, so no permanent sense-resistor loss is required.
+- Document allowed power-injection states. External power shall never be applied to a downstream rail while its upstream source is connected unless the schematic explicitly supports that condition.
+
+Minimum measurement domains:
+
+| Link / access point | Rev A | Rev B | Purpose |
+|---|---:|---:|---|
+| BAT_IN | Required | Required | Complete battery-powered device, including regulators |
+| USB_IN | — | Required | Complete USB-powered device and charger behavior |
+| MAIN_RAIL | Required | Required | Post-converter system load and converter-efficiency comparison |
+| MCU_BLE | Required | Required | BL654, external LFXO, and associated local support load |
+| BME688_VDD | Required | Required | ULP/heater cycle and 3.0/3.3 V versus 1.8 V comparison |
+| SHTC3_VDD | Required | Required | Temperature/humidity event and sleep current |
+| VEML7700_VDD | Required | Required | Lux conversion and shutdown current |
+| WIFI_SW | — | Required | Wi-Fi inrush, association, TX, and hard-off leakage |
+
+If board area becomes constrained, BAT_IN, MAIN_RAIL, MCU_BLE, BME688_VDD, and Rev B WIFI_SW are the highest-priority individual links. SHTC3 and VEML7700 may share a secondary sensor-branch link only if each can still be isolated by a removable population option.
+
+#### Rail and signal breakout
+
+Provide labeled probe pads and DNP development-header access for:
+
+- raw battery input and ground;
+- 3V0_MAIN or 3V3_MAIN and ground;
+- VDD_1V8_EVAL and ground;
+- 3V3_WIFI_SW and ground on Rev B;
+- power-control signals, including the 1.8 V converter enable and Wi-Fi switch enable;
+- battery-divider enable and ADC node;
+- BQ24074 PGOOD and CHG on Rev B;
+- at least two spare/profile GPIOs from the BL654.
+
+Power pads shall be large enough for grabber leads or spring probes and shall remain accessible with the normal prototype enclosure open. Repeated ground pads shall be placed near the measurement groups to minimize long flying returns.
+
+#### Time-correlated event markers
+
+Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity, BLE radio windows, sensor conversions, and Rev B Wi-Fi events. Route at least two such GPIOs to test points or a DNP logic header. PPK2 digital inputs or an oscilloscope can then correlate code state with the current trace. These pins are development aids and may be reassigned or DNP in a production-cost optimization.
+
+#### BME688 A/B population
+
+- Fit mutually exclusive source options for BME688 VDD: direct main rail or VDD_1V8_EVAL.
+- Keep BME688 VDDIO and I²C pull-ups on the main logic rail in both cases.
+- Put the BME688_VDD current-measurement link downstream of the source selection so the same access measures either population.
+- Provide a separate VDD_1V8_EVAL output test point to measure converter input/output behavior.
+- Verify by schematic rule and assembly note that no valid population can short the two supplies together.
+
+### 13.2 Rev A Measurements
 
 1. Measure electronics-only storage current at 25 °C; pass target ≤3 µA.
 2. Measure System ON idle with RTC, full firmware image, and all sensors sleeping; pass target ≤7 µA.
 3. Measure charge per three-channel BLE advertising event at the selected interval and TX power.
 4. Measure SHTC3 and VEML7700 event charge at their final cadence.
-5. Measure one complete BME688 ULP cycle and long-term average with the selected BSEC version/configuration.
-6. Capture 3V0_MAIN and raw-cell droop during BME688 heater start and BLE TX.
-7. Repeat peak tests with a fresh cell, a partially discharged cell, and an aged/high-resistance cell at low indoor temperature.
-8. Run a long-duration coulomb-counting test and compare against the model.
+5. Measure one complete BME688 ULP cycle and long-term average with identical BSEC version, configuration, cadence, and environmental exposure at 3.0 V VDD and 1.8 V VDD.
+6. For each BME688 supply option, record BME688 branch charge, complete-device battery-input charge, heater peak, main-rail droop, IAQ accuracy status, and stabilization behavior.
+7. Capture 3V0_MAIN and raw-cell droop during BME688 heater start and BLE TX.
+8. Repeat peak tests with a fresh cell, a partially discharged cell, and an aged/high-resistance cell at low indoor temperature.
+9. Run a long-duration coulomb-counting test and compare against the model.
 
-### 13.2 Rev B
+### 13.3 Rev B Measurements
 
 1. Verify battery-only, USB-only with no battery, USB with battery, and source-transition behavior.
 2. Verify charger thermal behavior at 400–500 mA charge current.
@@ -410,12 +483,15 @@ The following measurements are required before battery-life numbers are treated 
 4. Measure complete Wi-Fi event energy from rail enable through association, upload, acknowledgement, and rail discharge.
 5. Test weak-signal and retry cases at 2.4 GHz and 5 GHz.
 6. Capture 3V3_WIFI_SW minimum voltage during 260 mA-class TX bursts.
-7. Verify that an unpopulated Wi-Fi module does not affect BLE/sensor operation.
-8. Confirm battery-life policy using measured event energy and update the cadence table.
+7. Repeat the BME688 3.3 V versus 1.8 V comparison used for Rev A and update the no-Wi-Fi baseline budget from the measured result.
+8. Verify that an unpopulated Wi-Fi module does not affect BLE/sensor operation.
+9. Confirm battery-life policy using measured event energy and update the cadence table.
 
-### 13.3 Instruments and Capture
+### 13.4 Instruments and Capture
 
-Use a source-measure unit, Nordic Power Profiler Kit, Joulescope, or equivalent instrument capable of resolving both sub-microamp sleep current and hundreds-of-milliamp RF transients. A single handheld DMM average is not sufficient.
+The Nordic PPK2 is well matched to this prototype because it supports both source and ampere-meter modes, measures low sleep currents and active peaks across a wide dynamic range, and provides digital inputs for code-synchronized traces. Use source mode at BAT_IN when characterizing the electronics independently of cell variability. Use ampere-meter mode with the actual cell or power path when characterizing battery droop, regulator efficiency, and realistic system behavior.
+
+A single handheld DMM average is not sufficient. Retain raw traces and exported data with firmware commit, board revision, population option, supply voltage, temperature, RF conditions, and BSEC configuration recorded for each run.
 
 ---
 
@@ -430,8 +506,10 @@ The power study is complete enough to begin schematic capture with the following
 - [x] Rev B BQ24074 power-path charger selected.
 - [x] Rev B TPS63802 main converter selected.
 - [x] Rev B TPS22919 Wi-Fi load switch selected.
-- [x] Baseline 1.8 V rail removed.
+- [x] No mandatory production 1.8 V domain; DNP BME688 1.8 V evaluation path required on prototypes.
 - [x] Baseline sensor power gating removed.
+- [ ] Add fail-safe BME688 main-rail/1.8 V source selection with VDDIO fixed to the main rail.
+- [ ] Add whole-device and per-load current-measurement links, rail breakouts, and profile-event GPIO test points.
 - [x] Battery ADC and charger-status requirements defined.
 - [x] Peak-current and bulk-capacitance targets defined.
 - [x] Battery-mode firmware cadences defined for estimation.
@@ -449,7 +527,7 @@ The power study is complete enough to begin schematic capture with the following
 3. **A regulated 3.0 V Rev A rail is the best system trade.** The low-Iq TPS63900 removes rail variability and preserves usable cell range with little overhead.
 4. **Rev B requires a true buck-boost and a hard Wi-Fi gate.** TPS63802 plus TPS22919 meets the current and leakage targets.
 5. **Rev B battery life is a firmware-policy result.** The model ranges from approximately 15 months with Wi-Fi off to 1.8 months with 15-minute uploads. Hourly or slower battery-mode uploads satisfy the multi-month goal.
-6. **No baseline 1.8 V rail or sensor load switches are justified.** They remain optional/DNP only for future Rev B sensor variants.
+6. **Sensor load switches remain unjustified, but the BME688 1.8 V question is open for measurement.** Prototype boards shall support both main-rail and efficient 1.8 V operation; production population will follow measured battery-input energy.
 7. **The optional sound block is omitted from both baseline revisions.** A continuously active digital microphone would materially increase battery load and still requires acoustic/mechanical definition.
 8. **Component selection can proceed to schematic capture.** Remaining risks are validation items—coin-cell pulse behavior, actual BME688 ULP energy, Wi-Fi event charge, and rail transient response—not unresolved topology decisions.
 
@@ -463,10 +541,11 @@ The power study is complete enough to begin schematic capture with the following
 - [Vishay VEML7700 datasheet](https://www.vishay.com/docs/84286/veml7700.pdf)
 - [Fanstel WM02C product specifications](https://fanstel.squarespace.com/s/WM02C-Product-Specifications-3py2.pdf)
 - [TI TPS63900 datasheet](https://www.ti.com/lit/ds/symlink/tps63900.pdf)
+- [TI TPS62840 datasheet](https://www.ti.com/lit/ds/symlink/tps62840.pdf)
 - [TI TPS63802 datasheet](https://www.ti.com/lit/ds/symlink/tps63802.pdf)
 - [TI BQ24074 datasheet](https://www.ti.com/lit/ds/symlink/bq24074.pdf)
 - [TI TPS22919 datasheet](https://www.ti.com/lit/gpn/TPS22919)
-- [TI TPS7A02 datasheet](https://www.ti.com/lit/ds/symlink/tps7a02.pdf)
+- [Nordic Power Profiler Kit II](https://www.nordicsemi.com/Products/Development-hardware/Power-Profiler-Kit-2)
 - [Panasonic CR2477 product data](https://energy.panasonic.com/na/business/products/lithium/coin-cr-standard/models/CR2477)
 
 ---
@@ -475,4 +554,5 @@ The power study is complete enough to begin schematic capture with the following
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | Reopened BME688 supply-voltage selection for measured 3.0/3.3 V versus 1.8 V comparison; added prototype current-measurement links, rail/signal breakouts, and event-marker requirements. |
 | 2026-08-04 | Completed rail selection, topology and component decisions, duty-cycle assumptions, current budgets, battery-life estimates, peak analysis, schematic requirements, and validation plan. |
