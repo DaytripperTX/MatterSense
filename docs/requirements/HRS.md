@@ -59,7 +59,8 @@ This HRS does **not** define:
 ### 2.3 MCU Power Management Responsibilities
 
 - The MCU shall be capable of:
-  - Enabling and disabling major power consumers (sensors, Wi-Fi, indicators)
+  - Enabling and disabling major power consumers that require hardware control, including Wi-Fi, indicators, and optional evaluation rails
+  - Placing baseline sensors into their specified sleep or shutdown modes
   - Entering deep sleep or system-off modes
   - Waking via timer, GPIO, or radio events
 
@@ -78,6 +79,7 @@ This HRS does **not** define:
 ### 3.1 System Voltage
 
 - Primary logic voltage domain expected to be approximately 3 V class
+- Prototype hardware shall permit BME688 VDD operation from either the primary rail or an efficient 1.8 V evaluation rail while keeping BME688 VDDIO on the primary logic rail
 - Voltage regulation must support:
   - Low quiescent current
   - Stable operation across battery discharge range
@@ -145,9 +147,9 @@ Provision may be made for the following optional sensors:
 ### 5.4 Sampling Assumptions
 
 - Sensors are sampled intermittently, not continuously
-- Firmware assumes:
-  - Sensors may be power-gated
-  - Sensors provide stable readings shortly after power-up
+- Baseline sensors remain powered and use their specified sleep or shutdown modes between events; routine power-gating is not assumed
+- Firmware shall preserve BME688/BSEC history and stabilization behavior across normal low-power operation
+- Prototype firmware and hardware shall support identical BME688 ULP profiles at main-rail VDD and 1.8 V VDD for energy comparison
 
 ---
 
@@ -234,9 +236,29 @@ Provision may be made for the following optional sensors:
   - Power
   - Ground
   - Programming interface
-  - Key GPIO signals
+  - Key GPIO and power-control/status signals
+- Development headers may be DNP in production assemblies
 
-### 8.3 Factory Programming Assumptions
+### 8.3 Power-Profiling Access
+
+- Prototype PCBs shall permit current measurement of the complete battery-powered device, including its regulator losses
+- Rev B shall additionally permit measurement at USB input and the switched Wi-Fi rail
+- Major load branches shall be individually measurable at minimum for:
+  - MCU / BLE module
+  - BME688 VDD
+  - SHTC3 VDD
+  - VEML7700 VDD
+  - Wi-Fi module on Rev B
+- Each measurement domain shall use a normally populated 0 Ω high-side link or equivalent removable connection with paired test pads and a DNP two-pin header footprint
+- Removing a link shall allow a Power Profiler Kit II, source-measure unit, Joulescope, or equivalent instrument to be inserted in series without cutting PCB traces
+- Ground shall remain continuous during high-side current measurement
+- Raw battery/input, regulated main rail, 1.8 V evaluation rail, Rev B Wi-Fi rail, and nearby ground shall be exposed at labeled test points or DNP development headers
+- At least two MCU GPIOs shall be exposed as profile-event markers for time-correlating sensor, heater, BLE, and Wi-Fi activity with current traces
+- The BME688 current-measurement link shall be downstream of its main-rail/1.8 V source selector so either supply option can be measured through the same access point
+- Schematic and assembly notes shall prevent simultaneous population or external injection states that short or back-power power domains
+- Production builds may omit development headers and use direct 0 Ω links after validation is complete
+
+### 8.4 Factory Programming Assumptions
 
 - Devices will be programmed prior to final enclosure assembly
 - Hardware shall support reliable and repeatable mass-programming workflows
