@@ -79,7 +79,9 @@ This HRS does **not** define:
 ### 3.1 System Voltage
 
 - Primary logic voltage domain expected to be approximately 3 V class
-- Prototype hardware shall permit BME688 VDD operation from either the primary rail or an efficient 1.8 V evaluation rail while keeping BME688 VDDIO on the primary logic rail
+- Pre-v1.0 evaluation hardware shall populate an efficient 1.8 V rail and permit solderless BME688 VDD selection between it and the primary rail through one break-before-make micro switch with an SPDT source-selection function; BME688 VDDIO shall remain on the primary logic rail
+- The BME688 supply selector shall be changed only while the board is unpowered and shall not have any allowed state that connects the two source rails together
+- After measured validation closes the BME688 rail decision, v1.0 and later hardware may hardwire the selected rail and omit the selector and unused evaluation circuitry
 - Voltage regulation must support:
   - Low quiescent current
   - Stable operation across battery discharge range
@@ -237,11 +239,13 @@ Provision may be made for the following optional sensors:
   - Ground
   - Programming interface
   - Key GPIO and power-control/status signals
-- Development headers may be DNP in production assemblies
+- Development-only headers may be omitted from v1.0 and later production assemblies after their associated validation requirements are complete
 
 ### 8.3 Power-Profiling Access
 
-- Prototype PCBs shall permit current measurement of the complete battery-powered device, including its regulator losses
+- Rev A and Rev B identify feature architectures; v0.x and v1.x identify PCB maturity
+- Board versions below v1.0 shall provide the full removable power-measurement header set
+- Pre-v1.0 PCBs shall permit current measurement of the complete battery-powered device, including regulator losses
 - Rev B shall additionally permit measurement at USB input and the switched Wi-Fi rail
 - Major load branches shall be individually measurable at minimum for:
   - MCU / BLE module
@@ -249,14 +253,21 @@ Provision may be made for the following optional sensors:
   - SHTC3 VDD
   - VEML7700 VDD
   - Wi-Fi module on Rev B
-- Each measurement domain shall use a normally populated 0 Ω high-side link or equivalent removable connection with paired test pads and a DNP two-pin header footprint
-- Removing a link shall allow a Power Profiler Kit II, source-measure unit, Joulescope, or equivalent instrument to be inserted in series without cutting PCB traces
+- Each pre-v1.0 current-measurement domain shall use a two-pin high-side header labeled SOURCE and LOAD with a removable jumper shunt fitted for normal operation
+- Removing the shunt shall open only that domain and allow a Power Profiler Kit II, source-measure unit, Joulescope, or equivalent instrument to be inserted in series without soldering or cutting PCB traces
 - Ground shall remain continuous during high-side current measurement
-- Raw battery/input, regulated main rail, 1.8 V evaluation rail, Rev B Wi-Fi rail, and nearby ground shall be exposed at labeled test points or DNP development headers
+- Each current domain shall have a separate two-pin VDD_DUT/GND voltage header near the DUT; VDD_DUT shall connect on the load side of the current header
+- A combined VDD_INPUT/VDD_OUTPUT/GND three-pin header shall not be used
+- Current and voltage headers shall be distinguishable by keying, pitch, shrouding, or unmistakable silkscreen so the current shunt cannot be installed across VDD and ground
+- Current headers, shunts, and traces shall be rated for the applicable peak current and acceptable contact voltage drop
+- The BME688 current header shall be downstream of its break-before-make main-rail/1.8 V selector so either supply option uses the same measurement access
+- The BME688 voltage header shall sense BME688 VDD and local ground downstream of the current header
 - At least two MCU GPIOs shall be exposed as profile-event markers for time-correlating sensor, heater, BLE, and Wi-Fi activity with current traces
-- The BME688 current-measurement link shall be downstream of its main-rail/1.8 V source selector so either supply option can be measured through the same access point
-- Schematic and assembly notes shall prevent simultaneous population or external injection states that short or back-power power domains
-- Production builds may omit development headers and use direct 0 Ω links after validation is complete
+- Schematic, silkscreen, and assembly notes shall identify header functions and prevent invalid external-injection or selector states that short or back-power power domains
+- After validation, v1.0 and later hardware may replace removable development headers with compact labeled test points
+- v1.0 and later test points shall retain at minimum battery/input voltage, main rail, BME688 VDD, ground, SWD, key power-control/status signals, and profile-event GPIOs; Rev B shall also retain USB input and the switched Wi-Fi rail
+- Compact production test points preserve voltage and signal debugging but do not inherently preserve per-branch series-current insertion; any domain that still requires production current profiling shall retain a removable link or fixture-accessible disconnect
+- Hardware shall not advance to v1.0 until the pre-v1.0 measurements needed to close the power architecture have been completed
 
 ### 8.4 Factory Programming Assumptions
 
