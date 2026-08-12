@@ -34,7 +34,7 @@ The results are planning estimates, not guaranteed battery-life specifications. 
 | Sensor gating | No separate load switch; use device sleep modes | Baseline sensors remain powered and use sleep modes | Frozen |
 | Battery measurement | MCU ADC through a normally-off switched divider | MCU ADC through a normally-off switched divider; charger PGOOD and CHG also routed to MCU | Frozen |
 | Fuel gauge | Not fitted | Not fitted; reserve test/DNP provision only if later accuracy requirements justify it | Frozen |
-| Power profiling access | Board versions below v1.0 shall use shunted two-pin series-current headers plus separate local VDD/GND voltage headers | Same, plus separate Wi-Fi and USB/battery-path access; v1.0 and later retain compact test points after validation | Required for schematic/layout |
+| Power profiling access | Board versions below v1.0 shall use shunted two-pin 2.54 mm male series-current headers plus separate two-pin 2.54 mm female VDD/GND voltage headers | Same, plus separate Wi-Fi and USB/battery-path access; v1.0 and later retain compact test points after validation | Required for schematic/layout |
 | Low-frequency clock | External 32.768 kHz crystal on BL654 | External 32.768 kHz crystal on BL654 | Frozen |
 | Optional sound block | Not fitted | Not fitted in baseline; future externally powered option only | Frozen for baseline |
 
@@ -417,8 +417,8 @@ Board maturity and feature architecture use separate identifiers: Rev A and Rev 
 
 #### Pre-v1.0 series-current headers
 
-- Put a two-pin header in series with the high-side DC feed to each required measurement domain. Label the pins SOURCE and LOAD.
-- Fit a removable jumper shunt for normal operation. Removing the shunt shall open only that domain and allow an ammeter to be connected between SOURCE and LOAD without soldering or cutting a trace.
+- Put a two-pin, 2.54 mm-pitch male pin header in series with the high-side DC feed to each required measurement domain. Label the pins SOURCE and LOAD.
+- Fit a standard 2.54 mm removable jumper shunt for normal operation. Removing the shunt shall open only that domain and allow an ammeter to be connected between SOURCE and LOAD with female-ended 2.54 mm DuPont leads, without soldering or cutting a trace.
 - Use a compact, low-profile header and shunt whose voltage, current, contact-resistance, and cycle-life ratings cover the domain. The Rev B battery/main/Wi-Fi paths shall be rated for their approximately 300 mA-class peaks.
 - Place the disconnect upstream of the DUT local decoupling so series measurement captures the charge drawn by the DUT and its bypass network.
 - Keep ground continuous. Do not place the measurement disconnect in the ground return, converter switching node, or a high-di/dt commutation loop.
@@ -426,10 +426,11 @@ Board maturity and feature architecture use separate identifiers: Rev A and Rev 
 
 #### Separate voltage headers
 
-- Place a separate two-pin voltage-measurement header near each current-measurement domain, with pins VDD_DUT and GND. VDD_DUT shall be sensed on the load side of the current header so jumper, connector, and test-lead voltage drops are visible.
-- Do not use a combined three-pin VDD_INPUT/VDD_OUTPUT/GND header. Separating the functions prevents a current jumper from being placed between a supply pin and ground.
-- The voltage header shall not use the removable current jumper. Prefer different keying, pitch, shrouding, or unmistakable silkscreen between current and voltage headers so the current shunt cannot be accidentally installed across VDD_DUT and GND.
-- Place the ground pin physically close to the DUT return and keep the measurement loop short.
+- Place a separate two-pin, 2.54 mm-pitch female socket header near each current-measurement domain, with contacts VDD_DUT and GND. VDD_DUT shall be sensed on the load side of the current header so jumper, connector, and test-lead voltage drops are visible.
+- Connect voltage instruments with male-ended 2.54 mm DuPont leads. Do not populate male pins at a voltage-measurement position.
+- Do not use a combined three-pin VDD_INPUT/VDD_OUTPUT/GND header. Separating the functions prevents a current jumper from being placed between a supply contact and ground.
+- Male current headers and female voltage headers are mandatory physical differentiation. A standard jumper shunt can fit only the male current header and therefore cannot short VDD_DUT to GND at the voltage header. Silkscreen shall reinforce, not replace, this mechanical safeguard.
+- Place the ground contact physically close to the DUT return and keep the measurement loop short.
 - Label every header with the domain and function on both the schematic and silkscreen.
 
 #### v1.0-and-later production access
@@ -578,6 +579,6 @@ The power study is complete enough to begin schematic capture with the following
 
 | Date | Change |
 |---|---|
-| 2026-08-12 | Replaced prototype 0 Ω/DNP-header measurement links with normally shunted two-pin series-current headers plus separate local VDD/GND voltage headers; specified v0.x header and v1.0+ test-point policy; changed BME688 evaluation to a populated break-before-make SPDT micro selector. |
+| 2026-08-12 | Replaced prototype 0 Ω/DNP-header measurement links with normally shunted two-pin 2.54 mm male series-current headers plus separate two-pin 2.54 mm female local VDD/GND voltage headers; specified v0.x header and v1.0+ test-point policy; changed BME688 evaluation to a populated break-before-make SPDT micro selector. |
 | 2026-08-04 | Reopened BME688 supply-voltage selection for measured 3.0/3.3 V versus 1.8 V comparison; added prototype current-measurement links, rail/signal breakouts, and event-marker requirements. |
 | 2026-08-04 | Completed rail selection, topology and component decisions, duty-cycle assumptions, current budgets, battery-life estimates, peak analysis, schematic requirements, and validation plan. |
