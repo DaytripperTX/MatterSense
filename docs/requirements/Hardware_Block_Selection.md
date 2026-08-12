@@ -151,7 +151,7 @@ This document complements the HRS and will evolve as trade studies are completed
 - Rev A (coin cell) shall use **BME688** as the baseline VOC/IAQ sensor to support ≥1/hr updates with manageable average power.
 - ENS160 is not recommended for Rev A due to warm-up/conditioning overhead; it may remain an optional Rev B / USB-powered candidate if on-sensor processing is preferred.
 - “eCO2” is an equivalent output derived from VOC sensing/algorithms and is not a direct CO2 ppm measurement. Any future requirement for true CO2 shall use a dedicated CO2 sensor (e.g., NDIR).
-- Both prototype revisions shall provide mutually exclusive BME688 VDD population from the main rail or a DNP TPS62840 1.8 V buck. VDDIO remains on the main rail. Production population will be selected after battery-input energy is measured with identical BSEC ULP profiles.
+- Pre-v1.0 evaluation boards shall populate the TPS62840 1.8 V buck and one break-before-make micro DIP/slide selector with an SPDT source-selection function so BME688 VDD can be switched between the main rail and 1.8 V without soldering. VDDIO remains on the main rail. The switch shall be changed only while unpowered. Production population will be selected after battery-input energy is measured with identical BSEC ULP profiles.
 
 **Preliminary Direction:** BME688 (Rev A + Rev B baseline); ENS160 optional for a future Rev B / USB-only variant
 **Decision Status:** Sensor selection frozen; BME688 supply population pending prototype A/B measurement
@@ -247,11 +247,11 @@ This section records the power architecture selected by the completed [Power Arc
 - **Rev A – 3V0_MAIN:** 3.0 V from a TPS63900 buck-boost; supplies the BL654, SHTC3, BME688, VEML7700, and logic.
 - **Rev B – 3V3_MAIN:** 3.3 V from a TPS63802 buck-boost; supplies the BL654, baseline sensors, and logic.
 - **Rev B – 3V3_WIFI_SW:** load-switched 3.3 V branch controlled by the BL654 through a TPS22919.
-- **VDD_1V8_EVAL:** DNP TPS62840 1.8 V evaluation rail on prototype revisions. It is selectable for BME688 VDD; BME688 VDDIO remains on the main logic rail.
+- **VDD_1V8_EVAL:** Populated TPS62840 1.8 V evaluation rail on pre-v1.0 boards. A break-before-make SPDT micro selector switches BME688 VDD between it and the main rail; BME688 VDDIO remains on the main logic rail.
 
 Baseline sensors remain powered and use their specified sleep modes. Only the Wi-Fi module is hard power-gated. Both revisions use a normally-off ADC divider for coarse battery measurement. Rev B also routes BQ24074 PGOOD and CHG status to the MCU.
 
-Prototype schematics shall include removable high-side 0 Ω links and paired test access at the battery/input, post-converter main rail, MCU/BLE branch, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B Wi-Fi rail. Firmware profile GPIOs shall be exposed so a PPK2 or oscilloscope can correlate heater, sensor, BLE, and Wi-Fi activity with current traces.
+Pre-v1.0 schematics shall include normally shunted two-pin high-side current headers and separate local VDD/GND voltage headers at the battery/input, post-converter main rail, MCU/BLE branch, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B Wi-Fi rail. Firmware profile GPIOs shall be exposed so a PPK2 or oscilloscope can correlate heater, sensor, BLE, and Wi-Fi activity with current traces. At v1.0 and later, the development headers may be replaced by the compact production test-point set after validation closes.
 
 **Decision Status:** Baseline topology frozen; BME688 rail population and measured power model pending prototype validation
 
@@ -266,8 +266,8 @@ Prototype schematics shall include removable high-side 0 Ω links and paired tes
 - Initial programmable input-current limit: 50 mA
 - External 32.768 kHz crystal for the BL654
 - 100–220 µF low-leakage bulk-capacitor footprint in addition to converter and local decoupling
-- Mutually exclusive BME688 VDD population from 3V0_MAIN or a DNP TPS62840 1.8 V buck
-- Series current-measurement links at the complete-device input and major load branches
+- Populated TPS62840 1.8 V evaluation rail and a break-before-make SPDT micro selector for BME688 VDD on pre-v1.0 hardware
+- Normally shunted current headers plus separate local voltage headers at the complete-device input and major load branches on pre-v1.0 hardware
 
 The conservative modeled battery life is approximately seven months with the BME688 running BSEC ULP. The supply must survive an approximately 37 mA worst-case overlap, although firmware shall avoid overlapping BME688 heater turn-on and high-power BLE TX.
 
@@ -285,7 +285,7 @@ The conservative modeled battery life is approximately seven months with the BME
 | TI BQ24074 | 1S LiPo charger and dynamic power path | USB/battery switchover, battery supplement, batteryless startup, PGOOD/CHG status |
 | TI TPS63802 | 3.3 V, 2 A buck-boost | Covers the LiPo discharge range and approximately 300 mA worst-case system peak with margin |
 | TI TPS22919 | Wi-Fi load switch | 1.5 A capability, 2 nA typical off-state current, controlled turn-on, output discharge |
-| TI TPS62840 (DNP) | BME688 1.8 V evaluation rail | 60 nA typical IQ, 1.8 V to 6.5 V input, 750 mA output capability, and efficient light-load operation |
+| TI TPS62840 | BME688 1.8 V evaluation rail | Populated on pre-v1.0 evaluation boards; 60 nA typical IQ, 1.8 V to 6.5 V input, 750 mA output capability, and efficient light-load operation |
 
 The BQ24074 input-current limit is initially 500 mA and charge current is approximately 400–500 mA for a protected 2000 mAh LiPo. The 3.3 V rail is designed for at least 500 mA continuous, 1 A transient capability, and less than 200 mV droop at the Wi-Fi module.
 
@@ -341,30 +341,38 @@ The BQ24074 input-current limit is initially 500 mA and charge current is approx
 | SWD interface | Development / debug | Required; standard | Requires access points | Low | Mandatory |
 | Bed-of-nails | Manufacturing | Scalable; fast | Fixture cost | Medium | Required |
 | Tag-Connect / proprietary | Development only | Compact | Expensive cables | High | Avoid if possible |
-| Removable 0 Ω current links + paired test access | Prototype power profiling | Measures whole device and individual branches without cutting traces | Adds small routing/footprint area | Low | Normally populated; DNP headers |
+| Shunted two-pin current headers | Pre-v1.0 power profiling | Jumper installed for normal use; removal opens the high-side feed for solderless series-current measurement | Adds connector area and contact resistance | Low | Compact header/shunt rated for the domain |
+| Separate two-pin VDD/GND headers | Pre-v1.0 voltage probing | Provides a short local return and measures the DUT side of the current header | Must be distinguished from current-jumper headers | Low | No jumper fitted |
+| Compact test points | v1.0+ production debug | Preserves voltage, signal, event, and manufacturing access with less area | Does not inherently preserve per-branch series-current insertion | Low | Retained after validation |
 | Profile-event GPIO test points | Time correlation | Aligns heater, BLE, sensor, and Wi-Fi states with current traces | Consumes temporary GPIO/test area | Low | At least two markers |
 
 ### Power-Measurement Partitioning
 
-The prototype shall support a Nordic PPK2, source-measure unit, Joulescope, or equivalent instrument in source or ampere-meter mode.
+Rev A and Rev B describe feature architectures; v0.x and v1.x describe PCB maturity. Board versions below v1.0 shall retain the full measurement-header set. Once the required validation is complete, v1.0 and later boards may use the compact production test-point set.
+
+The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulescope, or equivalent instrument in source or ampere-meter mode.
 
 - Required complete-device access: battery input on both revisions and USB input on Rev B.
 - Required post-converter access: 3V0_MAIN on Rev A and 3V3_MAIN on Rev B.
 - Required individual branches: MCU/BLE, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B 3V3_WIFI_SW.
-- Place each disconnect in the high-side DC feed. Ground remains continuous.
-- Use a normally fitted 0 Ω resistor or closed solder link with accessible pads and a DNP two-pin header footprint. Removing the link shall permit series-current measurement without trace cutting.
-- Break out raw battery, main rail, VDD_1V8_EVAL, Rev B Wi-Fi rail, nearby grounds, power-control/status signals, and at least two profile GPIOs.
-- Put the BME688 current link downstream of the main-rail/1.8 V selector so the same fixture measures either supply population.
-- Production builds may omit development headers and retain direct 0 Ω links.
+- Put a two-pin header in each high-side DC feed, labeled SOURCE and LOAD, with a removable jumper shunt fitted for normal operation. Removing the shunt shall permit series-current measurement without soldering or cutting traces.
+- Put a separate two-pin VDD_DUT/GND voltage header near each domain. Sense VDD_DUT downstream of the current header, and keep its ground close to the DUT.
+- Do not combine VDD_INPUT, VDD_OUTPUT, and GND on one three-pin header. The current and voltage headers shall use different keying, pitch, shrouding, or unmistakable silkscreen so the current shunt cannot be placed across VDD and ground.
+- Select compact headers and shunts whose current rating and contact resistance cover the domain, including Rev B's approximately 300 mA-class peaks.
+- Put the BME688 current header downstream of its SPDT main-rail/1.8 V selector so the same instrument connection measures either supply.
+- Implement the BME selector as one break-before-make micro switch with an SPDT source-selection function, not two independently operated SPST DIP poles. Change it only with the board unpowered.
+- If practical, a DPDT version may use the second pole to control TPS62840 enable, disabling the evaluation buck in the main-rail position. Otherwise account for its approximately 60 nA quiescent current during comparison.
+- At v1.0 and later, retain compact test points for battery/input, main rail, BME688 VDD, ground, SWD, power-control/status signals, and profile GPIOs; Rev B also retains USB input and 3V3_WIFI_SW.
+- Per-branch series-current insertion is not implied after a shunted header is removed. Any branch that still requires production current profiling shall retain an explicit removable link or fixture-accessible disconnect.
 
 ### Notes & Considerations
 
 - Explicit goal to avoid expensive proprietary programming solutions.
-- Test-point-based access is preferred for development and production.
-- Power access points must remain reachable on an unenclosed prototype and be compatible with spring probes or grabber leads.
+- Header-based access is preferred on pre-v1.0 development boards; compact test-point access is preferred at v1.0 and later.
+- Power access points must remain reachable on an unenclosed prototype and be compatible with the intended shunts, PPK2 leads, spring probes, or grabber leads.
 - Schematic notes shall identify allowed external-injection states so rails cannot be back-powered or shorted together.
 
-**Preliminary Direction:** SWD + bed-of-nails programming, removable high-side power-measurement links, and profile-event GPIO access
+**Preliminary Direction:** SWD + bed-of-nails programming; pre-v1.0 shunted high-side current headers with separate voltage headers; v1.0+ compact test points; profile-event GPIO access
 **Decision Status:** Frozen at the architecture level; exact connector and test-pad geometry to be completed during schematic/layout
 
 ---
@@ -379,8 +387,8 @@ The prototype shall support a Nordic PPK2, source-measure unit, Joulescope, or e
   - no baseline microphone/sound block
   - TPS63900 + CR2477 for Rev A
   - BQ24074 + TPS63802 + TPS22919 + 2000 mAh LiPo for Rev B
-- The BME688 component is frozen, but its production VDD source remains an explicit prototype measurement decision between the main rail and an efficient 1.8 V buck.
-- Prototype schematic/layout shall include whole-device and per-load current-measurement access plus profile-event GPIOs.
+- The BME688 component is frozen, but its production VDD source remains an explicit pre-v1.0 measurement decision between the main rail and an efficient 1.8 V buck, selected by a populated break-before-make SPDT micro switch.
+- Pre-v1.0 schematic/layout shall include shunted whole-device and per-load current headers, separate voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
 - Next:
   - begin schematic capture and select exact passives, magnetics, batteries/holders, connectors, and protection parts;
   - complete antenna and programming/test selections;
