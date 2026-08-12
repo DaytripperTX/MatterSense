@@ -251,7 +251,7 @@ This section records the power architecture selected by the completed [Power Arc
 
 Baseline sensors remain powered and use their specified sleep modes. Only the Wi-Fi module is hard power-gated. Both revisions use a normally-off ADC divider for coarse battery measurement. Rev B also routes BQ24074 PGOOD and CHG status to the MCU.
 
-Pre-v1.0 schematics shall include normally shunted two-pin high-side current headers and separate local VDD/GND voltage headers at the battery/input, post-converter main rail, MCU/BLE branch, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B Wi-Fi rail. Firmware profile GPIOs shall be exposed so a PPK2 or oscilloscope can correlate heater, sensor, BLE, and Wi-Fi activity with current traces. At v1.0 and later, the development headers may be replaced by the compact production test-point set after validation closes.
+Pre-v1.0 schematics shall include normally shunted two-pin 2.54 mm male high-side current headers and separate two-pin 2.54 mm female local VDD/GND voltage headers at the battery/input, post-converter main rail, MCU/BLE branch, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B Wi-Fi rail. Firmware profile GPIOs shall be exposed so a PPK2 or oscilloscope can correlate heater, sensor, BLE, and Wi-Fi activity with current traces. At v1.0 and later, the development headers may be replaced by the compact production test-point set after validation closes.
 
 **Decision Status:** Baseline topology frozen; BME688 rail population and measured power model pending prototype validation
 
@@ -267,7 +267,7 @@ Pre-v1.0 schematics shall include normally shunted two-pin high-side current hea
 - External 32.768 kHz crystal for the BL654
 - 100–220 µF low-leakage bulk-capacitor footprint in addition to converter and local decoupling
 - Populated TPS62840 1.8 V evaluation rail and a break-before-make SPDT micro selector for BME688 VDD on pre-v1.0 hardware
-- Normally shunted current headers plus separate local voltage headers at the complete-device input and major load branches on pre-v1.0 hardware
+- Normally shunted two-pin 2.54 mm male current headers plus separate two-pin 2.54 mm female local voltage headers at the complete-device input and major load branches on pre-v1.0 hardware
 
 The conservative modeled battery life is approximately seven months with the BME688 running BSEC ULP. The supply must survive an approximately 37 mA worst-case overlap, although firmware shall avoid overlapping BME688 heater turn-on and high-power BLE TX.
 
@@ -341,8 +341,8 @@ The BQ24074 input-current limit is initially 500 mA and charge current is approx
 | SWD interface | Development / debug | Required; standard | Requires access points | Low | Mandatory |
 | Bed-of-nails | Manufacturing | Scalable; fast | Fixture cost | Medium | Required |
 | Tag-Connect / proprietary | Development only | Compact | Expensive cables | High | Avoid if possible |
-| Shunted two-pin current headers | Pre-v1.0 power profiling | Jumper installed for normal use; removal opens the high-side feed for solderless series-current measurement | Adds connector area and contact resistance | Low | Compact header/shunt rated for the domain |
-| Separate two-pin VDD/GND headers | Pre-v1.0 voltage probing | Provides a short local return and measures the DUT side of the current header | Must be distinguished from current-jumper headers | Low | No jumper fitted |
+| Shunted two-pin 2.54 mm male current headers | Pre-v1.0 power profiling | Standard jumper installed for normal use; removal opens the high-side feed for series measurement with female DuPont leads | Adds connector area and contact resistance | Low | Header/shunt rated for the domain |
+| Separate two-pin 2.54 mm female VDD/GND headers | Pre-v1.0 voltage probing | Accepts male DuPont leads, provides a short local return, and measures the DUT side of the current header | Socket contacts are less convenient for direct probe hooks | Low | No male pins, so a jumper shunt cannot be installed |
 | Compact test points | v1.0+ production debug | Preserves voltage, signal, event, and manufacturing access with less area | Does not inherently preserve per-branch series-current insertion | Low | Retained after validation |
 | Profile-event GPIO test points | Time correlation | Aligns heater, BLE, sensor, and Wi-Fi states with current traces | Consumes temporary GPIO/test area | Low | At least two markers |
 
@@ -355,9 +355,9 @@ The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulesco
 - Required complete-device access: battery input on both revisions and USB input on Rev B.
 - Required post-converter access: 3V0_MAIN on Rev A and 3V3_MAIN on Rev B.
 - Required individual branches: MCU/BLE, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B 3V3_WIFI_SW.
-- Put a two-pin header in each high-side DC feed, labeled SOURCE and LOAD, with a removable jumper shunt fitted for normal operation. Removing the shunt shall permit series-current measurement without soldering or cutting traces.
-- Put a separate two-pin VDD_DUT/GND voltage header near each domain. Sense VDD_DUT downstream of the current header, and keep its ground close to the DUT.
-- Do not combine VDD_INPUT, VDD_OUTPUT, and GND on one three-pin header. The current and voltage headers shall use different keying, pitch, shrouding, or unmistakable silkscreen so the current shunt cannot be placed across VDD and ground.
+- Put a two-pin 2.54 mm male pin header in each high-side DC feed, labeled SOURCE and LOAD, with a standard removable jumper shunt fitted for normal operation. Removing the shunt shall permit series-current measurement with female-ended 2.54 mm DuPont leads, without soldering or cutting traces.
+- Put a separate two-pin 2.54 mm female socket header for VDD_DUT/GND near each domain. Sense VDD_DUT downstream of the current header, keep its ground close to the DUT, and connect voltage instruments with male-ended 2.54 mm DuPont leads.
+- Do not combine VDD_INPUT, VDD_OUTPUT, and GND on one three-pin header. Do not populate male pins at voltage-measurement positions. Male current headers and female voltage headers are mandatory physical differentiation so the current shunt cannot be placed across VDD and ground; silkscreen shall reinforce this distinction.
 - Select compact headers and shunts whose current rating and contact resistance cover the domain, including Rev B's approximately 300 mA-class peaks.
 - Put the BME688 current header downstream of its SPDT main-rail/1.8 V selector so the same instrument connection measures either supply.
 - Implement the BME selector as one break-before-make micro switch with an SPDT source-selection function, not two independently operated SPST DIP poles. Change it only with the board unpowered.
@@ -388,7 +388,7 @@ The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulesco
   - TPS63900 + CR2477 for Rev A
   - BQ24074 + TPS63802 + TPS22919 + 2000 mAh LiPo for Rev B
 - The BME688 component is frozen, but its production VDD source remains an explicit pre-v1.0 measurement decision between the main rail and an efficient 1.8 V buck, selected by a populated break-before-make SPDT micro switch.
-- Pre-v1.0 schematic/layout shall include shunted whole-device and per-load current headers, separate voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
+- Pre-v1.0 schematic/layout shall include shunted two-pin 2.54 mm male whole-device and per-load current headers, separate two-pin 2.54 mm female voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
 - Next:
   - begin schematic capture and select exact passives, magnetics, batteries/holders, connectors, and protection parts;
   - complete antenna and programming/test selections;
