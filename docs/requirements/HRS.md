@@ -253,12 +253,13 @@ Provision may be made for the following optional sensors:
   - SHTC3 VDD
   - VEML7700 VDD
   - Wi-Fi module on Rev B
-- Each pre-v1.0 current-measurement domain shall use a two-pin high-side header labeled SOURCE and LOAD with a removable jumper shunt fitted for normal operation
-- Removing the shunt shall open only that domain and allow a Power Profiler Kit II, source-measure unit, Joulescope, or equivalent instrument to be inserted in series without soldering or cutting PCB traces
+- Each pre-v1.0 current-measurement domain shall use a two-pin 2.54 mm-pitch male high-side pin header labeled SOURCE and LOAD with a standard removable jumper shunt fitted for normal operation
+- Removing the shunt shall open only that domain and allow a Power Profiler Kit II, source-measure unit, Joulescope, or equivalent instrument to be inserted in series with female-ended 2.54 mm DuPont leads, without soldering or cutting PCB traces
 - Ground shall remain continuous during high-side current measurement
-- Each current domain shall have a separate two-pin VDD_DUT/GND voltage header near the DUT; VDD_DUT shall connect on the load side of the current header
+- Each current domain shall have a separate two-pin 2.54 mm-pitch female socket header for VDD_DUT/GND near the DUT; VDD_DUT shall connect on the load side of the current header, and voltage instruments shall connect with male-ended 2.54 mm DuPont leads
 - A combined VDD_INPUT/VDD_OUTPUT/GND three-pin header shall not be used
-- Current and voltage headers shall be distinguishable by keying, pitch, shrouding, or unmistakable silkscreen so the current shunt cannot be installed across VDD and ground
+- Male pins shall not be populated at voltage-measurement positions
+- Male current headers and female voltage headers shall provide mandatory physical differentiation so a current jumper shunt cannot be installed across VDD and ground; silkscreen shall reinforce this distinction
 - Current headers, shunts, and traces shall be rated for the applicable peak current and acceptable contact voltage drop
 - The BME688 current header shall be downstream of its break-before-make main-rail/1.8 V selector so either supply option uses the same measurement access
 - The BME688 voltage header shall sense BME688 VDD and local ground downstream of the current header
