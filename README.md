@@ -22,7 +22,8 @@ hardware and firmware development practices, with a strong focus on:
 - Clear documentation and requirements traceability
 
 The system is architected to evolve across multiple hardware revisions, beginning
-with a BLE-based sensor node and expanding toward hub-less Wi-Fi operation.
+with a Matter-over-Thread sensor node commissioned over Bluetooth Low Energy and
+expanding toward direct Wi-Fi IP transport without requiring a Thread Border Router.
 
 ---
 
@@ -39,20 +40,22 @@ with a BLE-based sensor node and expanding toward hub-less Wi-Fi operation.
 ## Key Features
 
 ### Revision A (Current Focus)
-- Nordic nRF52840-based BLE SoC
-- Temperature & humidity sensing
-- BLE commissioning
-- Matter protocol support
+- Ezurio BL654 module based on the Nordic nRF52840
+- Matter-over-Thread operation with BLE commissioning
+- Temperature/humidity, VOC/IAQ/eCO₂, barometric pressure, and lux sensing
 - Ultra-low-power operation
-- Battery-powered design
+- Regulated CR2477 coin-cell power
+- 64-Mbit external QSPI NOR flash for secure OTA staging and sensor-data buffering
 - SWD-based development and debugging
 
 ### Planned Revision B
-- Wi-Fi connectivity (nRF70 series)
+- Matter-over-Wi-Fi target using a Fanstel WM02C/nRF7002 companion
+- nRF5340-class host/module selection required before Rev B schematic capture; the Rev A BL654/nRF52840 is not a currently supported Nordic Matter-over-Wi-Fi host
+- Matter-over-Thread remains a separate Rev B build/population option when Wi-Fi is omitted
 - NFC-assisted commissioning
-- Hub-less operation
-- Expanded sensor suite (e.g. VOC / air quality)
-- Further power optimization
+- USB-C plus protected 2000 mAh LiPo power
+- Operation without a Thread Border Router; a Matter controller/fabric is still required
+- The same baseline environmental sensor suite as Rev A, with room for future variants
 
 ---
 
@@ -61,22 +64,8 @@ with a BLE-based sensor node and expanding toward hub-less Wi-Fi operation.
 ```text
 MatterSense/
 ├── docs/
-│   ├── PRD.md              # Product Requirements Document
-│   ├── SRS.md              # Software Requirements Specification
-│   └── architecture/       # Block diagrams, system overviews
-│
-├── firmware/
-│   ├── rev_a/              # Firmware for Revision A hardware
-│   └── common/             # Shared code and utilities
-│
-├── hardware/
-│   ├── rev_a/
-│   │   ├── schematics/
-│   │   ├── pcb/
-│   │   └── fabrication/
-│   └── rev_b/              # Future hardware revision
-│
-├── tools/                  # Scripts, utilities, test tools
+│   ├── requirements/       # PRD, SRS, HRS, RTM, and block selections
+│   └── architecture/       # System and power architecture
 ├── LICENSE
 └── README.md
 ```
@@ -89,20 +78,24 @@ commercial hardware programs.
 ## Development Status
 
 - ✔ System architecture defined
-- ✔ Component selection (Rev A) completed
-- ✔ PRD & SRS in progress
-- ⏳ Firmware bring-up
-- ⏳ Hardware schematic & PCB layout
+- ✔ Baseline component and power-architecture selection completed
+- ✔ Product, system, hardware, and traceability requirements aligned
+- ⏳ Rev A schematic capture
+- ⏳ Rev B Matter-over-Wi-Fi host/module selection
+- ⏳ Firmware and hardware bring-up
 
 ---
 
 ## Hardware Platform
 
-- **Primary SoC:** Nordic nRF52840
-- **Sensors:** Digital temperature & humidity sensor (Rev A)
-- **Power:** Battery-powered (final chemistry TBD)
+- **Rev A SoC module:** Ezurio BL654, orderable part 451-00001
+- **Rev B host:** nRF5340-class MCU/module to be selected for the Matter-over-Wi-Fi requirement
+- **Sensors:** SHTC3, BME688, and VEML7700 in both baseline revisions
+- **External memory:** Macronix MX25R6435FZNIL0, 64-Mbit QSPI NOR
+- **Power:** Regulated CR2477 in Rev A; USB-C/protected 1S LiPo in Rev B
 - **Debug:** SWD
-- **Commissioning:** BLE (Rev A), NFC planned (Rev B)
+- **Connectivity:** Matter-over-Thread with BLE commissioning in Rev A; Wi-Fi added in Rev B
+- **Commissioning:** BLE in both revisions, with NFC assistance planned for Rev B
 
 ---
 
@@ -110,7 +103,7 @@ commercial hardware programs.
 
 - Embedded firmware targeting low-power operation
 - Matter protocol stack integration
-- OTA update support planned
+- Signed OTA updates staged in external flash, with rollback/recovery behavior
 - Structured for long-term maintainability
 
 ---

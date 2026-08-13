@@ -9,11 +9,12 @@ This document defines the **high-level system architecture** for the Environment
 
 The architecture is designed to:
 - Support **low-power battery operation**
-- Scale from **BLE-only (Rev A)** to **BLE + Wi-Fi + USB-powered (Rev B)**
-- Enable future compatibility with **Matter and common smart-home ecosystems**
+- Scale from **Matter-over-Thread with BLE commissioning (Rev A)** to **Thread + Wi-Fi + USB-powered (Rev B)**
+- Support **Matter and common smart-home ecosystems**
 - Be suitable for **volume manufacturing and test**
 
-No specific component part numbers are defined in this document.
+Exact orderable components are maintained in the hardware block-selection record;
+this document defines their architectural relationships.
 
 ---
 
@@ -24,7 +25,8 @@ The device is a compact, battery-powered environmental sensor node that periodic
 Two hardware revisions are planned:
 
 - **Rev A**  
-  Ultra-low-power BLE device optimized for coin-cell operation.
+  Ultra-low-power Matter-over-Thread device, commissioned over BLE and optimized
+  for coin-cell operation.
 
 - **Rev B**  
   Feature-expanded device with Wi-Fi connectivity, USB-C power, rechargeable battery support, and NFC-based onboarding.
@@ -33,49 +35,66 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ---
 
-## 3. Rev A Architecture (BLE, Coin Cell)
+## 3. Rev A Architecture (Matter-over-Thread, BLE Commissioning, Coin Cell)
 
 ### 3.1 High-Level Block Diagram
 
-<img width="874" height="771" alt="matterSense-REV-A drawio" src="https://github.com/user-attachments/assets/0505de6e-4263-498a-820d-b15fea2991b4" />
+```mermaid
+flowchart TD
+    BAT["CR2477"] --> PWR["3.0 V power"]
+    PWR --> MCU["Multiprotocol MCU"]
+    PWR --> SNS["Environmental sensors"]
+    PWR --> FLASH["64-Mbit QSPI NOR"]
+    MCU <--> SNS
+    MCU <--> FLASH
+    MCU <--> THREAD["Thread network"]
+    BLE["BLE commissioner"] <--> MCU
+```
 
 
 ---
 
 ### 3.2 Functional Description
 
-**BLE SoC / MCU**
+**Multiprotocol SoC / MCU**
 - Central controller for all system functions
 - Handles sensor polling, data aggregation, and power-state transitions
-- Manages BLE advertising, connections, and secure communication
+- Manages BLE commissioning and Matter-over-Thread communication
 - Enters deep sleep between scheduled events
 
 **Sensors**
 - Temperature / Humidity sensor via I²C  
-- VOC or gas sensor via I²C or ADC  
-- Battery voltage monitoring via ADC or internal measurement
+- VOC/IAQ, pressure, and ambient-light sensors via I²C
+- Battery voltage monitoring through a normally-off ADC divider
+
+**External Memory**
+- Dedicated QSPI NOR flash for secure OTA image staging
+- Wear-aware circular storage for selected sensor history
+- Powered continuously from the main rail and placed in deep power down between accesses
 
 **Power System**
 - Coin-cell powered
 - Minimal always-on circuitry
-- Sensors and peripherals powered only when required
+- Baseline sensors remain powered and use their device sleep/shutdown modes
+- External flash uses deep power down; no separate flash or sensor load switches
 - No charging circuitry
 
 **Wireless Operation**
-- BLE advertising at configurable intervals
-- GATT-based data access
-- Designed to support Matter over BLE commissioning where applicable
+- BLE is used for Matter commissioning and optional development/service access
+- Thread is the normal Matter operational transport
+- A Thread Border Router and Matter controller/fabric are required
 
 ---
 
 ### 3.3 Power Strategy
 
-- Device remains in deep sleep >99% of the time
+- Device uses a Matter Intermittently Connected Device or Thread Sleepy End Device profile
 - Wake events:
   - Scheduled sensor sampling
-  - BLE connection requests
+  - Thread polling/reporting and commissioning activity
   - User input (button)
-- All nonessential peripherals are fully powered down between events
+- Baseline sensors enter software-controlled sleep/shutdown modes between events
+- Flash logging is buffered, and program/erase activity is scheduled away from BME688 heater and high-power radio events where practical
 
 ---
 
@@ -83,21 +102,36 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ### 4.1 High-Level Block Diagram
 
-<img width="1263" height="761" alt="matterSense-REV-B drawio" src="https://github.com/user-attachments/assets/6a505ccd-1752-4ebf-985e-bf0b55661ebb" />
+```mermaid
+flowchart TD
+    USB["USB-C"] --> PM["Charger and power path"]
+    BAT["Protected 1S LiPo"] <--> PM
+    PM --> MCU["Multiprotocol MCU"]
+    PM --> SNS["Environmental sensors"]
+    PM --> FLASH["64-Mbit QSPI NOR"]
+    MCU <--> SNS
+    MCU <--> FLASH
+    MCU <--> WIFI["Wi-Fi companion over SPI"]
+    PM --> WIFI
+    WIFI <--> LAN["Wi-Fi LAN"]
+    MCU <--> NFC["NFC and antenna"]
+```
 
 
 ---
 
 ### 4.2 Functional Description
 
-**BLE SoC / MCU**
+**Multiprotocol SoC / MCU**
 - Remains the system master controller
 - Manages sensor polling, power domains, and state transitions
-- Handles BLE pairing, commissioning, and fallback communication
+- Handles BLE commissioning and the selected Thread or Wi-Fi Matter configuration
 - Controls Wi-Fi module power and activity
+- Uses its dedicated QSPI controller for external NOR flash
 
 **Wi-Fi Subsystem**
 - Provides IP connectivity for Matter over Wi-Fi
+- Uses a standard SPI host connection so the MCU QSPI controller remains available for flash
 - Enabled continuously when USB-powered
 - Duty-cycled aggressively when battery-powered
 
@@ -105,6 +139,10 @@ Both revisions share a common architectural philosophy and firmware model.
 - Enables tap-to-pair and out-of-band credential exchange
 - Used primarily during commissioning
 - Passive when not actively scanned
+
+**External Memory**
+- Uses the same 64-Mbit QSPI NOR baseline as Rev A
+- Stages signed OTA images and buffers selected sensor history
 
 **Power System**
 - USB-C input for continuous operation
@@ -122,16 +160,16 @@ Both revisions share a common architectural philosophy and firmware model.
   - No aggressive duty cycling required
 
 - **Battery-Powered Mode**
-  - BLE remains low-power always-on interface
-  - Wi-Fi enabled only for scheduled sync or explicit requests
-  - Sensors and radios powered via load switches
+  - Matter-over-Thread build keeps Wi-Fi unpopulated or hard-off
+  - Matter-over-Wi-Fi build remains associated using a supported power-save mode
+  - Wi-Fi is the only hard-gateable load; baseline sensors and flash use their own low-power modes
 
 ---
 
 ## 5. Programming, Debug, and Manufacturing Support
 
 Both revisions include:
-- SWD programming interface via pads (no permanent connector)
+- SWD programming access through fixture-compatible pads
 - Test points for:
   - Power rails
   - Reset
@@ -141,6 +179,10 @@ Both revisions include:
   - Basic RF verification
   - Sensor sanity checks
   - Automated bed-of-nails testing
+
+Pre-v1.0 boards additionally use gender-keyed 2.54 mm current and voltage headers
+for full power profiling. v1.0 and later boards replace completed development
+interfaces with compact production test points as defined by the HRS.
 
 ---
 

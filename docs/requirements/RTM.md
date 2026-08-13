@@ -34,32 +34,34 @@ The RTM maps:
 | PRD-1 | Temperature & humidity monitoring | FR-1, FR-2 | Sensor HW + Firmware | Functional test |
 | PRD-2 | eCO₂ / VOC monitoring | FR-3 | Sensor HW + Firmware | Functional test |
 | PRD-3 | Ambient light (lux) monitoring | FR-4 | Sensor HW + Firmware | Functional test |
-| PRD-4 | Optional barometric pressure monitoring | FR-5 | Optional Sensor HW + Firmware | Functional test |
+| PRD-4 | Barometric pressure capability | FR-5 | Baseline BME688 + Firmware | Functional test |
 | PRD-5 | Optional ambient sound level (dB) monitoring | FR-6 | Optional Sensor HW + Firmware | Functional test |
 | PRD-6 | Configurable sensor sampling | FR-7 | Firmware | Configuration test |
 | PRD-7 | Matter-compatible data reporting | FR-8, FR-9 | Firmware + Protocol Stack | Interoperability test |
 | PRD-8 | Conditional exposure of optional sensors | FR-10 | Firmware | Feature detection test |
 | PRD-9 | BLE-based commissioning | FR-11, FR-12 | Wireless FW | Commissioning test |
-| PRD-10 | Wi-Fi connectivity (Rev B) | FR-13 | Wireless HW + FW | Connectivity test |
+| PRD-10 | Matter-over-Wi-Fi connectivity (Rev B) | FR-13 | Wireless HW + FW | Connectivity and interoperability test |
 | PRD-11 | Battery-powered operation | FR-19, FR-20 | Power HW + FW | Power profiling |
 | PRD-12 | Multi-month battery life | NFR-1, NFR-2 | Power HW + FW | Long-duration profiling |
 | PRD-13 | USB-powered operation (Rev B) | FR-14, FR-17 | Power HW + FW | Power-mode test |
 | PRD-14 | Power-mode–aware radio behavior | FR-15, FR-16, FR-18 | Firmware | Mode transition test |
 | PRD-15 | Low-power sleep-centric design | FR-19 | Firmware | Current measurement |
 | PRD-16 | Robust recovery from power events | FR-21 | Firmware | Fault injection test |
-| PRD-17 | Secure firmware updates | FR-22, FR-23 | Firmware + Bootloader | OTA update test |
+| PRD-17 | Secure firmware updates | FR-22, FR-23, FR-27, FR-28, FR-29, NFR-10 | External Flash + Firmware + Bootloader | Signed OTA, interruption, and recovery test |
 | PRD-18 | Secure wireless communication | NFR-6 | Wireless FW | Security validation |
 | PRD-19 | Modular, revision-aware firmware | NFR-8, NFR-9 | Firmware architecture | Code review |
 | PRD-20 | Privacy-preserving sound sensing | FR-6, PRD Notes | Firmware + Product Design | Design review |
+| PRD-21 | Matter-over-Thread operation (Rev A baseline; Rev B build option) | FR-24 | Wireless HW + Thread/Matter Stack | Commissioning and interoperability test |
+| PRD-22 | Local buffering of selected sensor history | FR-25, FR-26, NFR-10, NFR-11 | External Flash + Firmware | Capacity, wear, integrity, wraparound, and interruption test |
 
 ---
 
 ## 4. Notes on Optional Features
 
-Optional sensors (barometric pressure and sound level) are treated as conditional
-features. Their associated system requirements are only applicable when the
-corresponding hardware is populated. Firmware shall detect and expose these
-capabilities dynamically.
+Barometric pressure is available from the baseline BME688, although product exposure
+may remain optional. Sound-level sensing is not fitted in either baseline revision and
+is conditional on a future externally powered hardware variant. Firmware shall expose
+only the capabilities enabled for the assembled product configuration.
 
 ---
 
@@ -86,4 +88,3 @@ This RTM is intended to be used during:
 
 This RTM does not replace detailed test plans or manufacturing validation
 documentation. It provides traceability and coverage, not execution detail.
-

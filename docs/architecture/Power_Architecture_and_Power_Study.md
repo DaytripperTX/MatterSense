@@ -1,13 +1,8 @@
 # MatterSense – Power Architecture and Power Study
 
-**Status:** Baseline architecture selected; BME688 supply-voltage comparison, schematic implementation, and prototype validation remain
-**Last updated:** 2026-08-12
-
----
-
 ## 1. Purpose
 
-This document defines and closes the pre-schematic power architecture for MatterSense Rev A and Rev B. It:
+This document closes the Rev A pre-schematic power architecture and the Rev B power-path architecture. The Rev B MCU load remains provisional until an nRF5340-class Matter-over-Wi-Fi host/module is selected. It:
 
 - maps every baseline load to a power rail;
 - defines representative operating profiles;
@@ -29,16 +24,17 @@ The results are planning estimates, not guaranteed battery-life specifications. 
 | Main converter | [TI TPS63900](https://www.ti.com/lit/ds/symlink/tps63900.pdf) buck-boost | [TI TPS63802](https://www.ti.com/lit/ds/symlink/tps63802.pdf) 2 A buck-boost | Frozen |
 | USB/LiPo power path | Not applicable | [TI BQ24074](https://www.ti.com/lit/ds/symlink/bq24074.pdf), 500 mA input limit and approximately 400–500 mA charge current | Frozen for schematic baseline |
 | Wi-Fi rail | Not applicable | 3.3 V switched branch from 3V3_MAIN | Frozen |
-| Wi-Fi switch | Not applicable | [TI TPS22919](https://www.ti.com/lit/gpn/TPS22919), controlled by BL654 | Frozen |
+| Wi-Fi switch | Not applicable | [TI TPS22919](https://www.ti.com/lit/gpn/TPS22919), controlled by the selected Rev B host | Frozen electrically; control pin pending host selection |
 | BME688 1.8 V evaluation | Pre-v1.0 prototypes shall populate a [TPS62840](https://www.ti.com/lit/ds/symlink/tps62840.pdf) 1.8 V buck and a break-before-make SPDT micro selector between 3V0_MAIN and 1.8 V; VDDIO remains on 3V0_MAIN | Same provision between 3V3_MAIN and 1.8 V; VDDIO remains on 3V3_MAIN | Production rail and removal of evaluation hardware pending measured comparison |
 | Sensor gating | No separate load switch; use device sleep modes | Baseline sensors remain powered and use sleep modes | Frozen |
 | Battery measurement | MCU ADC through a normally-off switched divider | MCU ADC through a normally-off switched divider; charger PGOOD and CHG also routed to MCU | Frozen |
 | Fuel gauge | Not fitted | Not fitted; reserve test/DNP provision only if later accuracy requirements justify it | Frozen |
 | Power profiling access | Board versions below v1.0 shall use shunted two-pin 2.54 mm male series-current headers plus separate two-pin 2.54 mm female VDD/GND voltage headers | Same, plus separate Wi-Fi and USB/battery-path access; v1.0 and later retain compact test points after validation | Required for schematic/layout |
-| Low-frequency clock | External 32.768 kHz crystal on BL654 | External 32.768 kHz crystal on BL654 | Frozen |
+| Low-frequency clock | External 32.768 kHz crystal on BL654 | Host/module-specific LFXO implementation | Rev A frozen; Rev B pending host selection |
+| External nonvolatile memory | [Macronix MX25R6435FZNIL0](https://www.digikey.com/en/products/detail/macronix/MX25R6435FZNIL0/6558605), 64-Mbit QSPI NOR on 3V0_MAIN | Same part on 3V3_MAIN; QSPI dedicated to flash and WM02C connected through standard SPI | Frozen for OTA staging and sensor-history storage |
 | Optional sound block | Not fitted | Not fitted in baseline; future externally powered option only | Frozen for baseline |
 
-The current Rev B hardware-selection document identifies the Fanstel WM02C as the frozen Wi-Fi module. The power architecture is based on the nRF7002 electrical envelope and therefore also remains valid if another nRF7002 module, such as the MinewSemi MS14SF1-1N02AIR, is substituted after a sourcing review.
+The current Rev B hardware-selection document identifies the Fanstel WM02C as the frozen Wi-Fi module. The Wi-Fi rail and peak design are based on the nRF7002 electrical envelope and remain valid through the host re-selection. The Rev B baseline-current and battery-life figures remain provisional because the original BL654/nRF52840 host is not a currently supported Nordic Matter-over-Wi-Fi target.
 
 ---
 
@@ -89,7 +85,25 @@ The prototype shall therefore support an A/B comparison without requiring a PCB 
 
 Both supply paths shall be functional on pre-v1.0 evaluation builds. The production choice is not frozen until identical BSEC ULP profiles are measured at both voltages. The comparison shall use battery-input charge per complete cycle and long-term average current, not BME688 rail current alone, so converter losses are included. Once the choice is validated, v1.0 and later hardware may hardwire the selected rail and omit the selector and unused evaluation circuitry.
 
-### 3.4 Sensors Remain Powered
+### 3.4 External Flash Without a Load Switch
+
+Both revisions populate a 64-Mbit Macronix MX25R6435FZNIL0 on a dedicated host QSPI
+controller. The part accepts either primary rail, defaults to its ultra-low-power
+mode, and can enter deep power down between logging or update operations. Its residual
+sleep current is lower than the leakage and area penalty of a separate load switch, so
+the flash remains connected to the unswitched main rail.
+
+Reserve at least 2 MiB for a signed MCUboot/Matter OTA secondary slot until the final
+image and partition layout are measured. Approximately 5.75 MiB can remain for a
+wear-aware circular sensor log after allowing 0.25 MiB for settings, crash records,
+and storage metadata. Firmware shall buffer small records, avoid erasing a sector for
+every sample, and recover from interrupted writes. The active firmware remains in
+internal MCU flash.
+
+Rev B uses a separate standard SPI peripheral for the WM02C, preventing the Wi-Fi
+companion from competing with the OTA/data flash for the selected host's QSPI controller.
+
+### 3.5 Sensors Remain Powered
 
 The baseline sensors already have low-current sleep modes. Keeping them powered:
 
@@ -106,11 +120,11 @@ The firmware must explicitly return the SHTC3 to sleep and the VEML7700 to shutd
 
 ### 4.1 Rev A
 
-CR2477 → TPS63900 3.0 V buck-boost → BL654, SHTC3, and VEML7700. On pre-v1.0 evaluation hardware, BME688 VDD is supplied through a populated break-before-make SPDT selector from either 3V0_MAIN or a populated TPS62840 1.8 V evaluation rail; BME688 VDDIO remains on 3V0_MAIN. A separate normally-off divider connects raw battery voltage to the BL654 ADC only while a measurement is taken.
+CR2477 → TPS63900 3.0 V buck-boost → BL654, MX25R6435F QSPI flash, SHTC3, and VEML7700. On pre-v1.0 evaluation hardware, BME688 VDD is supplied through a populated break-before-make SPDT selector from either 3V0_MAIN or a populated TPS62840 1.8 V evaluation rail; BME688 VDDIO remains on 3V0_MAIN. A separate normally-off divider connects raw battery voltage to the BL654 ADC only while a measurement is taken.
 
 ### 4.2 Rev B
 
-USB-C 5 V and the 1S LiPo connect to the BQ24074 power-path charger. Its OUT node feeds the TPS63802 3.3 V buck-boost. The BL654, SHTC3, and VEML7700 use 3V3_MAIN; a TPS22919 creates 3V3_WIFI_SW for the WM02C. On pre-v1.0 evaluation hardware, BME688 VDD is selectable through a populated break-before-make SPDT switch from 3V3_MAIN or a populated TPS62840 1.8 V evaluation rail, while BME688 VDDIO remains on 3V3_MAIN.
+USB-C 5 V and the 1S LiPo connect to the BQ24074 power-path charger. Its OUT node feeds the TPS63802 3.3 V buck-boost. The selected nRF5340-class host, MX25R6435F QSPI flash, SHTC3, and VEML7700 use 3V3_MAIN; a TPS22919 creates 3V3_WIFI_SW for the WM02C. On pre-v1.0 evaluation hardware, BME688 VDD is selectable through a populated break-before-make SPDT switch from 3V3_MAIN or a populated TPS62840 1.8 V evaluation rail, while BME688 VDDIO remains on 3V3_MAIN.
 
 With USB present, the power path powers the system and charges the battery. Without USB, the battery supplies OUT through the internal battery FET. The battery can supplement the input during a load transient, and the system can start from USB with a missing or deeply discharged battery.
 
@@ -120,7 +134,8 @@ With USB present, the power path powers the system and charges the battery. With
 
 | Function | Baseline component | Rev A rail | Rev B rail | Low-power state |
 |---|---|---:|---:|---|
-| MCU / BLE | Ezurio BL654 | 3V0_MAIN | 3V3_MAIN | System ON idle; System OFF only for storage |
+| MCU / Thread / BLE | Ezurio BL654 (Rev A); nRF5340-class host pending (Rev B) | 3V0_MAIN | 3V3_MAIN | Matter ICD/Thread SED idle; exact Rev B state current pending host selection |
+| OTA / data flash | Macronix MX25R6435FZNIL0 | 3V0_MAIN | 3V3_MAIN | Deep power down between buffered writes/updates |
 | Temperature / humidity | Sensirion SHTC3 | 3V0_MAIN | 3V3_MAIN | Explicit sleep command |
 | VOC / IAQ / pressure | Bosch BME688 | 3V0_MAIN or VDD_1V8_EVAL | 3V3_MAIN or VDD_1V8_EVAL | BSEC ULP / sensor sleep between heater events |
 | Ambient light | Vishay VEML7700 | 3V0_MAIN | 3V3_MAIN | Software shutdown between readings |
@@ -140,6 +155,9 @@ With USB present, the power path powers the system and charges the battery. With
 | BL654 | BLE RX | 4.6 mA peak | Datasheet, DC/DC on |
 | BL654 | BLE TX at 0 dBm | 4.8 mA peak | Datasheet, DC/DC on |
 | BL654 | BLE TX at +8 dBm | 14.1 mA peak | Datasheet maximum-radio case |
+| MX25R6435F | Deep power down | ≤0.2 µA planning value | Conservative value; verify the selected L0 device on board |
+| MX25R6435F | Buffered one-minute logging allowance | 1.0 µA average planning value | Includes wake, page program, periodic sector erase, and margin; OTA energy is event-based |
+| MX25R6435F | Active read/program/erase | <4 mA typical family target | [Macronix MX25R ultra-low-power family](https://www.macronix.com/en-us/products/NOR-Flash/Pages/Ultra-Low-Power-Flash.aspx); include up to 4 mA in peak scheduling |
 | SHTC3 | Sleep | 0.3 µA typical | [SHTC3 datasheet](https://sensirion.com/resource/datasheet/shtc3) |
 | SHTC3 | Normal measurement | 430 µA for 10.8 ms typical | Used to derive 0.38 µA at one sample per minute |
 | BME688 | Sleep | 0.15 µA typical | [BME688 datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) |
@@ -171,15 +189,21 @@ The baseline budgets retain the 90 µA BME688 ULP value as a planning proxy, not
 | SHTC3 cadence | One normal-mode T/RH reading per 60 s |
 | VEML7700 cadence | One 100 ms lux conversion per 60 s; shutdown otherwise |
 | BME688 cadence | BSEC ULP, IAQ update every 300 s |
-| BLE advertising interval | 2 s |
-| BLE advertising contribution | 10 µA average planning allowance |
+| Matter operational transport | Matter-over-Thread using a low-power ICD/SED configuration; BLE used for commissioning |
+| Thread/BLE radio contribution | 10 µA average planning allowance pending measurement with the selected Matter ICD parameters |
 | MCU/sensor-service overhead | 2 µA average planning allowance |
+| External-flash history cadence | One buffered 32–48 byte record per minute; 1 µA average planning allowance |
 | LED use | Excluded from normal operation; brief commissioning/status indications only |
 | ADC divider | Normally off; sampled on boot, periodically, and around low-battery events |
 | Miscellaneous leakage | 1 µA Rev A; 2 µA Rev B |
 | Design contingency | 15% added to the modeled baseline |
 
-The 10 µA BLE allowance is an engineering assumption for a 2 s, three-channel advertising configuration at 0 dBm. It must be replaced with Power Profiler measurements after the Zephyr Bluetooth configuration is frozen.
+The 10 µA wireless allowance is an engineering placeholder, not a claim that
+Matter operates over BLE. Rev A uses Thread after BLE commissioning. Nordic's
+nRF52840 Matter measurements show that ICD current depends strongly on slow/fast
+poll intervals, idle-mode duration, subscriptions, and network quality. Replace the
+allowance with complete-device Power Profiler measurements using the final Matter
+ICD configuration and commercial ecosystem.
 
 ### 7.2 Battery Capacity and Efficiency
 
@@ -231,29 +255,30 @@ One average month is treated as 730 hours. Battery self-discharge and calendar a
 | Contributor | Average current at 3.0 V rail |
 |---|---:|
 | BL654 System ON idle with external LFXO | 2.60 µA |
-| BLE advertising allowance | 10.00 µA |
+| Matter-over-Thread / BLE commissioning allowance | 10.00 µA |
 | MCU and I²C service allowance | 2.00 µA |
+| MX25R6435F buffered history logging | 1.00 µA |
 | SHTC3 at one reading per minute | 0.38 µA |
 | VEML7700 at one reading per minute | 0.57 µA |
 | BME688 BSEC ULP planning proxy (specified at VDD ≤ 1.8 V) | 90.00 µA |
 | TPS63900 quiescent current | 0.08 µA |
 | Battery divider, pull resistors, and PCB leakage allowance | 1.00 µA |
-| **Typical modeled subtotal** | **106.63 µA** |
-| **With 15% contingency** | **122.62 µA** |
+| **Typical modeled subtotal** | **107.63 µA** |
+| **With 15% contingency** | **123.77 µA** |
 
-At 90% conversion efficiency, the conservative result is approximately **136 µA battery-equivalent average current**.
+At 90% conversion efficiency, the conservative result is approximately **138 µA battery-equivalent average current**.
 
 ### 9.2 Battery-Life Estimate
 
 | Case | Capacity basis | Load basis | Estimated life |
 |---|---:|---:|---:|
-| Nominal / optimistic | 1000 mAh | Typical subtotal | 8440 h / **11.6 months** |
-| Conservative design case | 700 mAh | 15% contingency | 5140 h / **7.0 months** |
-| IAQ sensor omitted/disabled | 700 mAh | Same assumptions without BME688 ULP | approximately **45 months**, normally shelf-life limited first |
+| Nominal / optimistic | 1000 mAh | Typical subtotal | 8360 h / **11.5 months** |
+| Conservative design case | 700 mAh | 15% contingency | 5090 h / **7.0 months** |
+| IAQ sensor omitted/disabled | 700 mAh | Same assumptions without BME688 ULP | approximately **43 months**, normally shelf-life limited first |
 
 ### 9.3 BME688 1.8 V Sensitivity
 
-The present seven-month design case assumes 90 µA on 3V0_MAIN even though that value is specified only at VDD ≤ 1.8 V. As an illustrative sensitivity case, if the BME688 consumes 90 µA at 1.8 V, both buck stages average 90% efficiency, and the TPS62840 adds 60 nA quiescent current, the modeled Rev A battery-equivalent current falls from approximately 136 µA to approximately 98 µA. Estimated life rises from about 7.0 months to about 9.8 months.
+The present seven-month design case assumes 90 µA on 3V0_MAIN even though that value is specified only at VDD ≤ 1.8 V. As an illustrative sensitivity case, if the BME688 consumes 90 µA at 1.8 V, both buck stages average 90% efficiency, and the TPS62840 adds 60 nA quiescent current, the modeled Rev A battery-equivalent current falls from approximately 138 µA to approximately 99 µA. Estimated life rises from about 7.0 months to about 9.7 months.
 
 This is a hypothesis, not a prediction. Actual 3.0 V BME688 current, heater behavior, converter efficiency across the pulsed load, and BSEC performance must be measured. The production rail shall be chosen from measured battery-input energy and IAQ behavior.
 
@@ -265,7 +290,8 @@ The Rev A multi-month target is met with the BME688 ULP profile. The BME688 cons
 |---|---:|---|
 | Storage, electronics connected | Target ≤3 µA | BL654 System OFF plus sleeping sensors and converter; verify on board |
 | Between scheduled events | Approximately 4–6 µA | BL654 System ON idle plus sleeping sensors |
-| BLE advertising | Approximately 5–15 mA instantaneous | Average covered by advertising allowance |
+| Thread/BLE radio event | Approximately 5–15 mA instantaneous | Average covered by provisional wireless allowance |
+| External-flash page program/erase | Up to approximately 4 mA planning peak | Buffer writes and avoid overlap with heater/high-power radio where practical |
 | SHTC3/lux sampling | Approximately 4–6 mA while MCU is active | Short duration |
 | BME688 heater event | 12 mA typical; 18 mA max turn-on peak, plus MCU | Long enough that the battery, not only a capacitor, must support it |
 
@@ -275,10 +301,11 @@ The worst unscheduled overlap is approximately:
 
 - BME688 heater peak: 18 mA;
 - BL654 +8 dBm TX: 14.1 mA;
+- external-flash program/erase: up to approximately 4 mA;
 - MCU and other active loads: approximately 5 mA;
-- total: approximately 37 mA.
+- total: approximately 41 mA.
 
-Firmware shall avoid scheduling a BLE high-power radio event during BME688 heater turn-on. The normal target peak is therefore less than approximately 25 mA. The power path shall nevertheless survive the 37 mA overlap without reset.
+Firmware shall avoid scheduling a high-power radio event or routine flash erase/program during BME688 heater turn-on. The normal target peak is therefore less than approximately 25–29 mA. OTA reception necessarily overlaps radio and flash activity but shall suspend normal BME688 heater scheduling. The power path shall nevertheless survive the approximately 41 mA unscheduled overlap without reset.
 
 Rev A schematic requirements:
 
@@ -286,6 +313,7 @@ Rev A schematic requirements:
 - fit at least 22 µF effective ceramic output capacitance per converter guidance;
 - provide an additional 100–220 µF low-leakage bulk-capacitor footprint near the main rail;
 - place local 0.1 µF and device-recommended bulk capacitors at each IC;
+- place the external-flash decoupling at the WSON supply pins and keep QSPI routing short;
 - expose battery voltage and 3V0_MAIN test access;
 - on pre-v1.0 hardware, populate the 1.8 V evaluation rail and a break-before-make SPDT selector between 3V0_MAIN and 1.8 V for BME688 VDD, with VDDIO fixed to 3V0_MAIN;
 - include the shunted current headers, separate voltage headers, and event-marker test points defined in Section 13;
@@ -297,29 +325,41 @@ A bulk capacitor can cover fast radio/load-step response, but it cannot supply t
 
 ## 10. Rev B Results
 
-### 10.1 Battery-Mode Baseline Without Wi-Fi Events
+The following figures preserve the original BL654-based planning model so the
+converter, battery, and Wi-Fi cadence can be evaluated. They are not a frozen Rev B
+battery-life prediction. Recalculate the MCU/radio contribution, idle states, peak
+current, LFXO load, and firmware cadence after selecting the required nRF5340-class
+Matter-over-Wi-Fi host/module.
+
+### 10.1 Battery-Mode Thread Build or Wi-Fi-Unavailable Baseline
 
 | Contributor | Battery-equivalent average current |
 |---|---:|
-| BL654, BLE, MCU service, and baseline sensors through TPS63802 | approximately 107 µA |
+| Provisional BL654-reference host, Thread/BLE, MCU service, baseline sensors, miscellaneous leakage, and buffered flash logging through TPS63802 | approximately 107.5 µA |
 | TPS63802 quiescent current | 11.0 µA |
 | BQ24074 battery sleep current | 6.5 µA |
-| Miscellaneous allowance included above | 2.0 µA |
-| **Subtotal before contingency** | **approximately 124 µA** |
-| **With 15% contingency** | **approximately 143 µA** |
+| **Subtotal before contingency** | **approximately 125 µA** |
+| **With 15% contingency** | **approximately 144 µA** |
 
-With 1600 mAh usable capacity, the Wi-Fi-gated baseline is approximately **11,200 hours or 15.4 months**.
+With 1600 mAh usable capacity, this provisional Thread-build or intentionally
+Wi-Fi-unavailable reference is approximately **11,100 hours or 15.2 months** before
+the Rev B host correction. It is not a Matter-over-Wi-Fi battery-life estimate.
 
-### 10.2 Wi-Fi Cadence Sensitivity
+### 10.2 Scheduled Wi-Fi Energy Sensitivity
 
 | Battery-mode policy | Wi-Fi average contribution | Total estimated battery current | Estimated life |
 |---|---:|---:|---:|
-| Wi-Fi never scheduled; BLE only | 0 µA | 143 µA | **15.4 months** |
-| One 10 s upload every 4 h | 69 µA | 212 µA | **10.4 months** |
-| One 10 s upload every 1 h | 275 µA | 418 µA | **5.2 months** |
-| One 10 s upload every 15 min | 1101 µA | 1244 µA | **1.8 months** |
+| Thread build or Wi-Fi intentionally unavailable | 0 µA | 144 µA | **15.2 months** |
+| One 10 s upload every 4 h | 69 µA | 213 µA | **10.3 months** |
+| One 10 s upload every 1 h | 275 µA | 419 µA | **5.2 months** |
+| One 10 s upload every 15 min | 1101 µA | 1245 µA | **1.8 months** |
 
-The default Rev B battery policy shall therefore keep Wi-Fi hard-off and schedule no more than one upload per hour. A four-hour default provides substantially better margin until measured event energy is available. User-requested or retry traffic may temporarily exceed the nominal cadence.
+This table is useful for a Thread build that occasionally uses a non-Matter Wi-Fi data
+path, or as an engineering event-energy sensitivity. It is not a valid normal policy
+for a Matter-over-Wi-Fi device: that configuration must remain associated using a
+supported Wi-Fi power-save mode and meet its selected Matter reachability behavior.
+Measure that associated idle/poll traffic on the chosen host and replace this table
+with a separate Matter-over-Wi-Fi battery model.
 
 ### 10.3 USB-Powered Mode
 
@@ -342,10 +382,11 @@ The BQ24074 dynamic power path reduces charge current as system demand rises and
 | Simultaneous load | Peak planning value |
 |---|---:|
 | nRF7002 5 GHz TX | 260 mA |
-| BL654 +8 dBm TX | 14.1 mA |
+| Provisional host radio/MCU allowance | At least 14.1 mA; replace after host selection |
 | BME688 heater turn-on | 18 mA |
+| External-flash program/erase | Up to approximately 4 mA |
 | MCU, sensors, and margin | 10–20 mA |
-| **Worst planning total** | **approximately 302–312 mA** |
+| **Worst planning total** | **approximately 306–316 mA** |
 
 The 3V3_MAIN converter and power path shall be designed for at least:
 
@@ -364,6 +405,7 @@ Rev B schematic/layout requirements:
 - connect TPS22919 QOD so the Wi-Fi rail discharges when disabled;
 - ensure the MCU control pin defaults low during reset;
 - design for 260 mA even if firmware initially limits Wi-Fi to 2.4 GHz.
+- connect WM02C through standard SPI and reserve the selected host's QSPI controller for external flash.
 
 Firmware should avoid overlapping Wi-Fi startup/TX with the BME688 heater where practical, but correctness shall not depend on event serialization.
 
@@ -373,7 +415,7 @@ Firmware should avoid overlapping Wi-Fi startup/TX with the BME688 heater where 
 
 ### 11.1 ADC Divider
 
-Both revisions shall use a normally-off, high-side-switched resistor divider into a BL654 SAADC input. The divider shall:
+Both revisions shall use a normally-off, high-side-switched resistor divider into an MCU ADC input. Rev A uses the BL654 SAADC; Rev B shall use the selected host's ADC. The divider shall:
 
 - tolerate 3.3 V maximum coin-cell voltage in Rev A and 4.2 V LiPo voltage in Rev B;
 - limit ADC pin voltage below its configured full-scale and below MCU supply rails;
@@ -447,13 +489,14 @@ Minimum pre-v1.0 measurement domains:
 | BAT_IN | Required | Required | Complete battery-powered device, including regulators |
 | USB_IN | — | Required | Complete USB-powered device and charger behavior |
 | MAIN_RAIL | Required | Required | Post-converter system load and converter-efficiency comparison |
-| MCU_BLE | Required | Required | BL654, external LFXO, and associated local support load |
+| MCU_RADIO | Required | Required | Rev A BL654 or selected Rev B host, LFXO implementation, and associated local support load |
+| EXT_FLASH | Required | Required | Deep-power-down leakage, buffered logging energy, erase/program peaks, and OTA staging |
 | BME688_VDD | Required | Required | ULP/heater cycle and 3.0/3.3 V versus 1.8 V comparison |
 | SHTC3_VDD | Required | Required | Temperature/humidity event and sleep current |
 | VEML7700_VDD | Required | Required | Lux conversion and shutdown current |
 | WIFI_SW | — | Required | Wi-Fi inrush, association, TX, and hard-off leakage |
 
-If board area becomes constrained, BAT_IN, MAIN_RAIL, MCU_BLE, BME688_VDD, and Rev B WIFI_SW are the highest-priority individual domains. SHTC3 and VEML7700 may share a secondary sensor-branch header only if each can still be isolated by a removable population option.
+If board area becomes constrained, BAT_IN, MAIN_RAIL, MCU_RADIO, BME688_VDD, EXT_FLASH, and Rev B WIFI_SW are the highest-priority individual domains. SHTC3 and VEML7700 may share a secondary sensor-branch header only if each can still be isolated by a removable population option.
 
 #### Rail and signal breakout
 
@@ -461,6 +504,7 @@ On pre-v1.0 hardware, provide the dedicated voltage headers described above for:
 
 - raw battery input and ground;
 - 3V0_MAIN or 3V3_MAIN and ground;
+- external-flash VDD and ground;
 - VDD_1V8_EVAL and ground;
 - 3V3_WIFI_SW and ground on Rev B.
 
@@ -469,13 +513,13 @@ Also provide labeled test-point access for:
 - power-control signals, including the 1.8 V converter enable and Wi-Fi switch enable;
 - battery-divider enable and ADC node;
 - BQ24074 PGOOD and CHG on Rev B;
-- at least two spare/profile GPIOs from the BL654.
+- at least two spare/profile GPIOs from the selected MCU/host.
 
 Headers and pads shall remain accessible with the normal prototype enclosure open. Test points retained on v1.0 and later hardware shall be compatible with spring probes or grabber leads where board area permits.
 
 #### Time-correlated event markers
 
-Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity, BLE radio windows, sensor conversions, and Rev B Wi-Fi events. Route at least two such GPIOs to test points or a small logic header on pre-v1.0 hardware. PPK2 digital inputs or an oscilloscope can then correlate code state with the current trace. Retain compact profile-event test points on v1.0 and later hardware where practical.
+Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity, Thread/BLE radio windows, flash program/erase operations, sensor conversions, and Rev B Wi-Fi events. Route at least two such GPIOs to test points or a small logic header on pre-v1.0 hardware. PPK2 digital inputs or an oscilloscope can then correlate code state with the current trace. Retain compact profile-event test points on v1.0 and later hardware where practical.
 
 #### BME688 A/B selection
 
@@ -491,13 +535,15 @@ Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity
 
 1. Measure electronics-only storage current at 25 °C; pass target ≤3 µA.
 2. Measure System ON idle with RTC, full firmware image, and all sensors sleeping; pass target ≤7 µA.
-3. Measure charge per three-channel BLE advertising event at the selected interval and TX power.
+3. Measure commissioning advertising plus steady-state Matter-over-Thread ICD/SED current using the final poll, subscription, report, and ecosystem configuration.
 4. Measure SHTC3 and VEML7700 event charge at their final cadence.
 5. Measure one complete BME688 ULP cycle and long-term average with identical BSEC version, configuration, cadence, and environmental exposure at 3.0 V VDD and 1.8 V VDD.
 6. For each BME688 supply option, record BME688 branch charge, complete-device battery-input charge, heater peak, main-rail droop, IAQ accuracy status, and stabilization behavior.
 7. Capture 3V0_MAIN and raw-cell droop during BME688 heater start and BLE TX.
 8. Repeat peak tests with a fresh cell, a partially discharged cell, and an aged/high-resistance cell at low indoor temperature.
-9. Run a long-duration coulomb-counting test and compare against the model.
+9. Measure MX25R6435F deep-power-down leakage, buffered page-program/sector-erase energy, and a complete OTA download/staging event.
+10. Interrupt flash writes and OTA staging at multiple points and verify active-image and sensor-log recovery.
+11. Run a long-duration coulomb-counting test and compare against the model.
 
 ### 13.3 Rev B Measurements
 
@@ -509,7 +555,8 @@ Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity
 6. Capture 3V3_WIFI_SW minimum voltage during 260 mA-class TX bursts.
 7. Repeat the BME688 3.3 V versus 1.8 V comparison used for Rev A and update the no-Wi-Fi baseline budget from the measured result.
 8. Verify that an unpopulated Wi-Fi module does not affect BLE/sensor operation.
-9. Confirm battery-life policy using measured event energy and update the cadence table.
+9. Repeat external-flash logging, OTA energy, and interruption/recovery measurements on 3V3_MAIN.
+10. Confirm battery-life policy using measured event energy and update the cadence table.
 
 ### 13.4 Instruments and Capture
 
@@ -521,7 +568,9 @@ A single handheld DMM average is not sufficient. Retain raw traces and exported 
 
 ## 14. Schematic Handoff Checklist
 
-The power study is complete enough to begin schematic capture with the following constraints:
+The power study is complete enough to begin Rev A schematic capture and to retain the
+Rev B power-path design. Rev B MCU/radio schematic capture remains blocked on the
+nRF5340-class host/module selection.
 
 - [x] Rev A primary rail fixed at 3.0 V.
 - [x] Rev A TPS63900 buck-boost selected.
@@ -530,6 +579,9 @@ The power study is complete enough to begin schematic capture with the following
 - [x] Rev B BQ24074 power-path charger selected.
 - [x] Rev B TPS63802 main converter selected.
 - [x] Rev B TPS22919 Wi-Fi load switch selected.
+- [ ] Select the Rev B nRF5340-class Matter-over-Wi-Fi host/module and recalculate its baseline and peak contribution.
+- [x] MX25R6435FZNIL0 64-Mbit external QSPI NOR selected for both revisions.
+- [x] QSPI reserved for external flash; WM02C host interface fixed as standard SPI.
 - [x] No mandatory production 1.8 V domain; populated BME688 1.8 V evaluation path required on pre-v1.0 prototypes.
 - [x] Baseline sensor power gating removed.
 - [ ] Add a break-before-make SPDT BME688 main-rail/1.8 V selector with VDDIO fixed to the main rail.
@@ -540,6 +592,7 @@ The power study is complete enough to begin schematic capture with the following
 - [x] Battery-mode firmware cadences defined for estimation.
 - [ ] Select exact inductors/capacitors and verify effective capacitance at bias.
 - [ ] Select exact CR2477 holder and protected 2000 mAh LiPo pack.
+- [ ] Freeze external-flash devicetree/MCUboot/settings/history partitions after measuring the signed production image.
 - [ ] Complete converter loop/layout review against vendor reference designs.
 - [ ] Replace modeled values with prototype measurements.
 
@@ -551,10 +604,12 @@ The power study is complete enough to begin schematic capture with the following
 2. **The BME688 dominates Rev A energy.** BLE optimization is useful, but changing IAQ cadence or disabling IAQ has a much larger effect.
 3. **A regulated 3.0 V Rev A rail is the best system trade.** The low-Iq TPS63900 removes rail variability and preserves usable cell range with little overhead.
 4. **Rev B requires a true buck-boost and a hard Wi-Fi gate.** TPS63802 plus TPS22919 meets the current and leakage targets.
-5. **Rev B battery life is a firmware-policy result.** The model ranges from approximately 15 months with Wi-Fi off to 1.8 months with 15-minute uploads. Hourly or slower battery-mode uploads satisfy the multi-month goal.
+5. **The present Rev B battery table does not establish Matter-over-Wi-Fi life.** It ranges from approximately 15.2 months for the Thread/Wi-Fi-unavailable reference to 1.8 months for 15-minute scheduled Wi-Fi events. A compliant associated Matter-over-Wi-Fi build requires a new model after host selection.
 6. **Sensor load switches remain unjustified, but the BME688 1.8 V question is open for measurement.** Pre-v1.0 boards shall provide solderless selection between main-rail and efficient 1.8 V operation; v1.0 production hardware will follow measured battery-input energy.
 7. **The optional sound block is omitted from both baseline revisions.** A continuously active digital microphone would materially increase battery load and still requires acoustic/mechanical definition.
-8. **Component selection can proceed to schematic capture.** Remaining risks are validation items—coin-cell pulse behavior, actual BME688 ULP energy, Wi-Fi event charge, and rail transient response—not unresolved topology decisions.
+8. **The 64-Mbit external flash is a low-cost, useful margin choice.** It supports a conservative OTA secondary slot plus months of compact one-minute sensor history, while adding approximately $2.89 at prototype quantity and a provisional 1 µA average logging allowance.
+9. **Rev A can proceed to schematic capture.** Its remaining risks are validation items: coin-cell pulse behavior, actual BME688 ULP energy, Matter ICD behavior, flash logging/OTA energy, and rail transient response.
+10. **Rev B cannot yet freeze its MCU/radio schematic.** Its power path, Wi-Fi module, sensors, and flash can be retained, but an nRF5340-class Matter-over-Wi-Fi host/module must be selected and the provisional current model updated.
 
 ---
 
@@ -565,6 +620,11 @@ The power study is complete enough to begin schematic capture with the following
 - [Bosch BME688 datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf)
 - [Vishay VEML7700 datasheet](https://www.vishay.com/docs/84286/veml7700.pdf)
 - [Fanstel WM02C product specifications](https://fanstel.squarespace.com/s/WM02C-Product-Specifications-3py2.pdf)
+- [Macronix MX25R ultra-low-power serial NOR family](https://www.macronix.com/en-us/products/NOR-Flash/Pages/Ultra-Low-Power-Flash.aspx)
+- [Nordic Matter OTA documentation](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/matter/overview/dfu.html)
+- [Nordic Matter-over-Thread power study](https://docs.nordicsemi.com/r/bundle/nwp_049)
+- [Nordic Matter sample platform support](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/light_switch/README.html)
+- [Nordic nRF52840 Wi-Fi station memory requirements](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/wifi/station_mode/mem_requirements_sta.html)
 - [TI TPS63900 datasheet](https://www.ti.com/lit/ds/symlink/tps63900.pdf)
 - [TI TPS62840 datasheet](https://www.ti.com/lit/ds/symlink/tps62840.pdf)
 - [TI TPS63802 datasheet](https://www.ti.com/lit/ds/symlink/tps63802.pdf)
@@ -572,13 +632,3 @@ The power study is complete enough to begin schematic capture with the following
 - [TI TPS22919 datasheet](https://www.ti.com/lit/gpn/TPS22919)
 - [Nordic Power Profiler Kit II](https://www.nordicsemi.com/Products/Development-hardware/Power-Profiler-Kit-2)
 - [Panasonic CR2477 product data](https://energy.panasonic.com/na/business/products/lithium/coin-cr-standard/models/CR2477)
-
----
-
-## 17. Revision Notes
-
-| Date | Change |
-|---|---|
-| 2026-08-12 | Replaced prototype 0 Ω/DNP-header measurement links with normally shunted two-pin 2.54 mm male series-current headers plus separate two-pin 2.54 mm female local VDD/GND voltage headers; specified v0.x header and v1.0+ test-point policy; changed BME688 evaluation to a populated break-before-make SPDT micro selector. |
-| 2026-08-04 | Reopened BME688 supply-voltage selection for measured 3.0/3.3 V versus 1.8 V comparison; added prototype current-measurement links, rail/signal breakouts, and event-marker requirements. |
-| 2026-08-04 | Completed rail selection, topology and component decisions, duty-cycle assumptions, current budgets, battery-life estimates, peak analysis, schematic requirements, and validation plan. |

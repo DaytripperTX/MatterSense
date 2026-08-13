@@ -1,28 +1,33 @@
 # MatterSense — Hardware Block Selection / Trade Study
 
-**Purpose:**  
-This document captures major hardware block options for MatterSense Rev A and Rev B prior to schematic and PCB design. It evaluates candidate technologies and ICs at a block level and records preliminary direction and decision status.
+**Purpose:**
+This document captures major hardware block options for MatterSense Rev A and Rev B prior to schematic and PCB design. It evaluates candidate technologies and ICs at a block level and records the selected direction and remaining decision status.
 
-This document complements the HRS and will evolve as trade studies are completed and decisions are frozen.
+This document complements the HRS and will evolve as the remaining schematic and validation selections are completed.
+
+Distributor pricing and inventory in candidate tables are point-in-time trade-study
+inputs, not design requirements. The selected baseline table near the end of this
+document identifies the authoritative orderable variants; stock shall be rechecked
+before every prototype or production buy.
 
 ---
 
-## 1) MCU / SoC Candidates (Rev A + Rev B)
+## 1) MCU / SoC Candidates
 
 ### Candidate Comparison
 
 | Candidate | Form Factor | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 | --- | --- | --- | --- | --- | --- | --- |
 | [nRF52840 (Discrete)](https://docs-be.nordicsemi.com/bundle/ps_nrf52840/attach/nRF52840_PS_v1.11.pdf?_LANG=enus) | SoC | • Lowest BOM cost<br>• Full control over RF/layout<br>• Maximum flexibility | • Requires RF design effort<br>• FCC/IC certification burden<br>• Higher validation and schedule risk | • TX: 4.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 3.16 µA | $3.59 – $5.48 | 1000+ <br>([Mouser](https://www.mouser.com/c/semiconductors/wireless-rf-integrated-circuits/rf-system-on-a-chip-soc/?m=Nordic%20Semiconductor&series=nRF52840) & [Digi-Key](https://www.digikey.com/en/products/detail/nordic-semiconductor-asa/NRF52840-QIAA-R7/11200025)) |
-| [Raytac MDBT50Q-1M](https://www.mouser.com/datasheet/2/744/_5bnRF52840_5d_MDBT50Q_1MV2__26_MDBT50Q_P1MV2_Ver_-2525658.pdf?srsltid=AfmBOorB5Z35m8gI5794esgzA8Nj53-aUOLUO8bO6VV-565TyayQimsI) | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk | • TX: TBD<br>• RX: TBD<br>• Sleep: TBD | $6.00 – $9.00 | 0 <br>([Mouser](https://www.mouser.com/c/?q=MDBT50Q) & [Digi-Key](https://www.digikey.com/en/products/detail/raytac/MDBT50Q-1MV2/13677591)) |
+| [Raytac MDBT50Q-1M](https://www.mouser.com/datasheet/2/744/_5bnRF52840_5d_MDBT50Q_1MV2__26_MDBT50Q_P1MV2_Ver_-2525658.pdf?srsltid=AfmBOorB5Z35m8gI5794esgzA8Nj53-aUOLUO8bO6VV-565TyayQimsI) | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk | Not evaluated because the candidate was rejected on availability | $6.00 – $9.00 | 0 <br>([Mouser](https://www.mouser.com/c/?q=MDBT50Q) & [Digi-Key](https://www.digikey.com/en/products/detail/raytac/MDBT50Q-1MV2/13677591)) |
 | [u-blox BMD-340-A-R](https://content.u-blox.com/sites/default/files/BMD-340_DataSheet_UBX-19033353.pdf) | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less field history than BL654 | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 2.35 µA | $7.64 – $9.60 | 1000+ <br>([Mouser](https://www.mouser.com/ProductDetail/u-blox/BMD-340-A-R?qs=wd5RIQLrsJgGcI5R13BUYg%3D%3D&srsltid=AfmBOorkcgR2_ZodEhfTeudAxMhkFS4pwKuMG93ztHSLkbOvfiFKmboP) & [Digi-Key](https://www.digikey.com/en/products/detail/u-blox/BMD-340-A-R/8638939)) |
-| [Ezurio BL654](https://www.ezurio.com/documentation/datasheet-bl654) | Module | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 3.1 µA | $11.63 – $12.08 | 1000+ <br>([Mouser](https://www.mouser.com/ProductDetail/Ezurio/451-00001?qs=MLItCLRbWszU6GB3nrHvkA%3D%3D&srsltid=AfmBOorA1ltk7Dfq18QRUn1tKwWPF2PeBid5a2opnczd6jA04DZWorvP) & [Digi-Key](https://www.digikey.com/en/products/detail/ezurio/451-00001/9172334)) |
+| [Ezurio BL654 451-00001](https://www.ezurio.com/documentation/datasheet-bl654) | Module with integrated trace antenna | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 3.1 µA | $11.63 – $12.08 | Active and stocked by [Mouser](https://www.mouser.com/ProductDetail/Ezurio/451-00001?qs=MLItCLRbWszU6GB3nrHvkA%3D%3D&srsltid=AfmBOorA1ltk7Dfq18QRUn1tKwWPF2PeBid5a2opnczd6jA04DZWorvP) and [Digi-Key](https://www.digikey.com/en/products/detail/ezurio/451-00001/9172334) |
 | [ESP32-WROOM-32 (Reference Only)](https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | • TX: 130 mA – 240 mA<br>• RX: 9 mA – 100 mA<br>• Sleep: 10 µA – 0.8 mA | $3.50 – $5.00 | 1000+ <br>([Mouser](https://www.mouser.com/ProductDetail/Espressif-Systems/ESP32-WROOM-32E-N4?qs=Li%252BoUPsLEnsPzTWsi%252BRMgQ%3D%3D&srsltid=AfmBOooi9ADzgFX94NQYgr2DWTCfaqRWz4_b8t2TaKm5tqPpJovUdi3F) & [Digi-Key](https://www.digikey.com/en/products/detail/espressif-systems/ESP32-WROOM-32-N4/8544298)) |
 
 
 ### Notes & Considerations
 
-- **Ezurio BL654 is the current leading candidate** due to:
+- **Ezurio BL654 451-00001 is the selected Rev A baseline** due to:
   - Comprehensive pre-certification
   - Proven RF performance in low-power designs
   - Reduced validation and regulatory risk
@@ -40,11 +45,30 @@ This document complements the HRS and will evolve as trade studies are completed
 ### Feature Parity (Confirmed for nRF52840-Based Modules)
 
 - NFC pin exposure suitable for OOB pairing
-- Flash/RAM capacity sufficient for Matter and future Thread/Zigbee support
-- Required peripheral exposure confirmed (GPIO, ADC, I²C, SPI)
+- Internal flash/RAM sufficient for the active Matter image and runtime; external QSPI NOR is required for robust OTA staging and data storage
+- Required peripheral exposure confirmed (GPIO, ADC, I²C, SPI, QSPI, IEEE 802.15.4, and NFC)
 
-**Preliminary Direction:** Ezurio BL654  
-**Decision Status:** Tentatively preferred; pending schematic validation
+**Selected Baseline (Rev A):** Ezurio BL654 451-00001
+**Decision Status:** Frozen for Rev A; not accepted as the Rev B Matter-over-Wi-Fi host
+
+### Rev B Matter-over-Wi-Fi Host Gap
+
+The original assumption that Rev B could retain BL654/nRF52840 as the host for an
+nRF7002 companion is not supported by Nordic's current Matter platform matrix.
+[Nordic's Matter sample documentation](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/light_switch/README.html)
+lists nRF52840 for Matter-over-Thread, but lists Matter-over-Wi-Fi on nRF5340-class
+targets with nRF7002. Nordic's standalone nRF52840 Wi-Fi station reference also uses
+approximately [565 KB ROM and 179 KB RAM](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/wifi/station_mode/mem_requirements_sta.html)
+before adding the Matter application and product features, leaving inadequate
+evidence to freeze a 1 MB/256 KB nRF52840 host for the combined design.
+
+Rev B therefore requires a focused nRF5340 MCU/module trade study. Prefer a
+pre-certified integrated-antenna module exposing QSPI for the MX25R6435F, a separate
+SPIM interface for WM02C, NFC, ADC, SWD, the required GPIOs, and enough memory for
+the signed Matter-over-Wi-Fi image. The alternative is a formal product-scope change
+that keeps Matter over Thread and uses Wi-Fi only for a non-Matter data path.
+
+**Decision Status (Rev B host):** Architecture blocker; exact MCU/module must be selected before Rev B schematic capture
 
 ---
 
@@ -58,14 +82,15 @@ This document complements the HRS and will evolve as trade studies are completed
 | [nRF7002 (Discrete)](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6470/NRF7002-QFAA-R.pdf) | IC | • Native Nordic ecosystem<br>• Designed as Wi-Fi companion to nRF52<br>• Avoids dependence on module stock | • Requires RF design and antenna tuning<br>• Separate FCC/IC certification effort | • TX: up to ~260 mA (5 GHz)<br>• RX: ~56–60 mA<br>• Sleep: ~15 µA<br>• Shutdown: ~1.7 µA | $2.58 | 1000+ ([Digi-Key](https://www.digikey.com/en/products/detail/nordic-semiconductor-asa/NRF7002-QFAA-R/17738488)) |
 | [MinewSemi MS14SF1-1N02AIR](https://en.minewsemi.com/file/MS14SF1-nRF7002_Datasheet_K_EN.pdf) | Module (PCB Antenna) | • Integrated PCB antenna<br>• Sold through Digi-Key (Marketplace)<br>• Good candidate if stock remains available | • Marketplace sourcing (not primary franchised line)<br>• Less established ecosystem vs Fanstel | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $10.00 | 1000+ ([Digi-Key](https://www.digikey.com/en/products/detail/minewsemi/MS14SF1-1N02AIR/26409766)) |
 | [Fanstel WM02F](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | Module (PCB Trace Antenna) | • Integrated PCB trace antenna<br>• Attractive cost when sourced direct<br>• Module-first path for Rev B | • Not stocked at Mouser/Digi-Key (10+ week LT; MOQ 1000)<br>• Reliance on vendor-direct inventory | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $4.20 – $5.03 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-hlhel)) | ~600 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-hlhel))<br>0 ([Mouser](https://www.mouser.com/ProductDetail/Fanstel/WM02F?qs=ST9lo4GX8V39vk8QtDIbrQ%3D%3D) & [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WM02F/22107923)) |
-| [Fanstel WM02C](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | Module (Chip Antenna) | • Integrated chip antenna<br>• Stocked at major distributors<br>• Good near-term buyable option | • Stock typically <1000 (risk for scaling)<br>• Antenna performance/layout keepouts still matter | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $9.09 – $9.65 | 454 ([Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WM02C/22107887))<br>320 ([Mouser](https://www.mouser.com/ProductDetail/Fanstel/WM02C?qs=ST9lo4GX8V2bfCVo1J5PEw%3D%3D)) |
-| [Fanstel WT02E40E (Combo)](https://www.mouser.com/datasheet/2/915/WT02E40E_2bProduct_2bSpecifications-3576516.pdf) | Module (Integrated Antenna) | • Single-module BLE + Wi-Fi integration<br>• Simplifies routing and integration<br>• Reduces interconnect complexity | • Higher cost than WM02C/WM02F<br>• Alternate architecture vs separate SoC + Wi-Fi companion | • TX: Wi-Fi up to ~260 mA<br>• RX: ~56–60 mA<br>• Sleep: TBD | $13.99 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-775sx-3jcdd)) | ~300 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-775sx-3jcdd)) |
+| [Fanstel WM02C](https://fanstel.squarespace.com/s/WM02C-Product-Specifications-3py2.pdf) | Module (Chip Antenna) | • Integrated chip antenna<br>• Stocked at major distributors<br>• Good near-term buyable option | • Smaller sourcing ecosystem than commodity Wi-Fi modules<br>• Antenna performance/layout keepouts still matter | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $9.09 – $9.65 | Active; 1,144 at [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WM02C/22107887) and 321 at [Mouser](https://www.mouser.com/ProductDetail/Fanstel/WM02C?qs=ST9lo4GX8V2bfCVo1J5PEw%3D%3D) in the 2026-08-12 sourcing check |
+| [Fanstel WT02E40E (Combo)](https://www.mouser.com/datasheet/2/915/WT02E40E_2bProduct_2bSpecifications-3576516.pdf) | Module (Integrated Antenna) | • Single-module BLE + Wi-Fi integration<br>• Simplifies routing and integration<br>• Reduces interconnect complexity | • Higher cost than WM02C/WM02F<br>• Alternate architecture vs separate SoC + Wi-Fi companion | • TX: Wi-Fi up to ~260 mA<br>• RX: ~56–60 mA<br>• Sleep not evaluated because the alternate architecture was rejected | $13.99 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-775sx-3jcdd)) | ~300 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-775sx-3jcdd)) |
 
 
 ### Notes & Considerations
 
 - Rev B assumes **Wi-Fi is optional and aggressively duty-cycled**:
-  - Wi-Fi is **power-gated during battery operation**
+  - Wi-Fi may be **power-gated during battery operation** in the Matter-over-Thread build or while Wi-Fi is intentionally unavailable
+  - A Matter-over-Wi-Fi build must instead retain association using a supported Wi-Fi power-save mode; the scheduled hard-off/upload model is not a Matter reachability policy
   - Wi-Fi is **fully enabled during USB-powered operation**
 - **nRF7002 peak TX current (~260 mA)** drives Rev B power design and rules out coin-cell for Wi-Fi use.
 - **Module selection constraint:** Wi-Fi modules must include an **integrated antenna** (PCB trace or chip antenna).
@@ -80,15 +105,12 @@ This document complements the HRS and will evolve as trade studies are completed
       - Potentially reduce unit cost vs distributor single-quantity pricing
       - Obtain clearer lifecycle visibility (PCN/EOL timing) to reduce long-term risk
 - **Optional population (DNP) strategy:**
-  - The PCB shall be designed such that the Wi-Fi module can be **left unpopulated** (DNP) and the device remains fully functional in a BLE/Thread/ZigBee-only mode.
+  - The PCB shall be designed such that the Wi-Fi module can be **left unpopulated** (DNP) and the device remains fully functional as a Matter-over-Thread device with BLE commissioning when loaded with the corresponding Thread firmware configuration.
   - Firmware shall detect the absence of the Wi-Fi module (or treat it as unavailable) and operate without Wi-Fi features enabled.
   - This reduces procurement risk and BOM cost for builds where Wi-Fi is not required.
 
-### Open Items (Wi-Fi Block)
+### Firmware Policy Items (Wi-Fi Block)
 
-- Confirm SDIO vs SPI interface choice and SoC pin impact
-- Validate PMIC selection against:
-  - ~300 mA peak load and fast transient response
 - Define firmware policy for:
   - Battery vs USB Wi-Fi behavior
   - TWT configuration and wake cadence
@@ -96,14 +118,16 @@ This document complements the HRS and will evolve as trade studies are completed
 ### Closed Items (Wi-Fi Block)
 
 - Integrated antenna requirement captured (modules requiring external antennas excluded from primary shortlist)
+- WM02C host connection frozen as standard four-wire SPI through a dedicated SPIM peripheral on the selected Rev B host. The host QSPI controller is reserved for external NOR flash.
+- TPS63802/TPS22919 power path validated at the architecture level for the approximately 300 mA system peak; schematic transient/layout validation remains.
 - Wi-Fi optional population (DNP) strategy captured:
-  - System must function fully in BLE/Thread/ZigBee-only mode when Wi-Fi is unpopulated
+  - System must function fully in a Matter-over-Thread/BLE commissioning build when Wi-Fi is unpopulated; runtime transport switching is not required
 - Wi-Fi peak current / power-state constraints captured (~260 mA TX; sleep/shutdown and TWT targets)
 - Primary Wi-Fi module candidate selected: **Fanstel WM02C**
   - Rationale: in-stock at major distributors; integrated chip antenna; sufficient quantity for project-scale runs
 
-**Preliminary Direction:** Fanstel WM02C (nRF7002 module with integrated chip antenna)  
-**Decision Status:** Frozen for Rev B (revisit if availability/cost changes)
+**Selected Baseline:** Fanstel WM02C (nRF7002 module with integrated chip antenna)
+**Decision Status:** WM02C frozen for Rev B, conditional on final host-interface and pin-count validation
 
 
 ---
@@ -127,8 +151,8 @@ This document complements the HRS and will evolve as trade studies are completed
 - **SHT40** is a credible cost/power alternative if we ever decide to move off SHTC3 (firmware change required).
 - **HDC2010** looks excellent on paper for power, but the **WLCSP package** is the main integration risk.
 
-**Preliminary Direction:** SHTC3  
-**Decision Status:** Pending schematic validation
+**Selected Baseline:** SHTC3-TR-2.5KS
+**Decision Status:** Frozen for both revisions
 
 ---
 
@@ -153,7 +177,7 @@ This document complements the HRS and will evolve as trade studies are completed
 - “eCO2” is an equivalent output derived from VOC sensing/algorithms and is not a direct CO2 ppm measurement. Any future requirement for true CO2 shall use a dedicated CO2 sensor (e.g., NDIR).
 - Pre-v1.0 evaluation boards shall populate the TPS62840 1.8 V buck and one break-before-make micro DIP/slide selector with an SPDT source-selection function so BME688 VDD can be switched between the main rail and 1.8 V without soldering. VDDIO remains on the main rail. The switch shall be changed only while unpowered. Production population will be selected after battery-input energy is measured with identical BSEC ULP profiles.
 
-**Preliminary Direction:** BME688 (Rev A + Rev B baseline); ENS160 optional for a future Rev B / USB-only variant
+**Selected Baseline:** BME688 (Rev A + Rev B baseline); ENS160 optional for a future Rev B / USB-only variant
 **Decision Status:** Sensor selection frozen; BME688 supply population pending prototype A/B measurement
 
 
@@ -178,7 +202,7 @@ This document complements the HRS and will evolve as trade studies are completed
   - Acceptable for prototypes and small runs.
 
 
-**Preliminary Direction:** VEML7700 (Rev A + Rev B baseline); multispectral optional for a future Rev B variant
+**Selected Baseline:** VEML7700 (Rev A + Rev B baseline); multispectral optional for a future Rev B variant
 **Decision Status:** Frozen for both baseline revisions
 
 
@@ -200,7 +224,7 @@ This document complements the HRS and will evolve as trade studies are completed
 - If VOC/IAQ uses a non-pressure part (e.g., ENS160), the preferred low-cost pressure add-on candidates are **BMP581** and **ENS220**.
 - Any required 1.8 V domain (including for other components) is assumed to be addressed by the system power architecture and is not treated as a disqualifying factor for ENS220.
 
-**Preliminary Direction:** Use pressure data from the baseline BME688; no separate pressure sensor
+**Selected Baseline:** Use pressure data from the baseline BME688; no separate pressure sensor
 **Decision Status:** Frozen for both baseline revisions
 
 
@@ -229,35 +253,84 @@ A dedicated “dB sensor” (direct calibrated dBA output) is not commonly avail
   - Without a designed acoustic port, the mic will be heavily attenuated and sensitive to internal cavity effects; it will not reliably “listen through” solid PCB/enclosure material.
   - **Top-port** microphones simplify enclosure integration when the opening is on the same side as the component.
 
-**Preliminary Direction:** Omit from Rev A and Rev B baseline; reconsider only for a future externally powered variant with defined acoustic requirements
+**Selected Baseline:** Omit from Rev A and Rev B baseline; reconsider only for a future externally powered variant with defined acoustic requirements
 **Decision Status:** Frozen as not fitted in the baseline designs
 
 
 
 ---
 
-## 4) Power Management Strategy
+## 4) External Nonvolatile Memory
+
+External flash is required in both revisions for secure OTA staging and is also
+useful for buffering selected sensor history, crash records, and diagnostic data.
+Nordic's nRF52840 Matter OTA flow requires an external secondary slot, and the
+nRF52840 DK uses a 64-Mbit MX25R6435F device that is already supported by Zephyr.
+
+### Capacity and Cost Comparison
+
+| Capacity class | Usable capacity | Representative current pricing | Assessment |
+|---|---:|---:|---|
+| 16 Mbit | 2 MiB | [$1.48 at quantity 1](https://www.digikey.com/en/products/detail/macronix/MX25R1635FZUIL0/8416960) for a representative active MX25R part | Lowest cost, but a conservative OTA reserve consumes nearly the entire device and leaves no useful history margin |
+| 32 Mbit | 4 MiB | [$2.01 at quantity 1](https://www.digikey.com/en/products/detail/macronix/MX25R3235FM1IL0/7915034) for a representative stocked MX25R part | Viable minimum, but leaves only about 2 MiB for data after the OTA reserve |
+| 64 Mbit | 8 MiB | $2.89 at quantity 1 for the selected low-power-default part | Best balance: Nordic/Zephyr reference-device compatibility and roughly 6 MiB remaining after a 2 MiB OTA reserve |
+
+The selected 64-Mbit device costs approximately $0.88 more than the representative
+32-Mbit option and $1.41 more than the representative 16-Mbit option. That small
+increment avoids a near-term capacity constraint and provides a standard,
+well-supported software target. A 128-Mbit device is not justified by the intended
+firmware or sensor-history volume.
+
+### Selected Implementation
+
+- **Part:** [Macronix MX25R6435FZNIL0](https://www.digikey.com/en/products/detail/macronix/MX25R6435FZNIL0/6558605)
+- **Capacity/interface:** 64 Mbit (8 MiB), SPI/dual/quad I/O up to 80 MHz
+- **Package:** 8-WSON, 6 × 5 mm, selected over WLCSP/DSBGA-style packages for prototype assembly and inspection
+- **Supply:** 1.65–3.6 V; connect to 3V0_MAIN in Rev A and 3V3_MAIN in Rev B
+- **Power mode:** L0 ordering option defaults to ultra-low-power mode; firmware shall also use deep power down between accesses
+- **MCU connection:** dedicated host QSPI controller using SCK, CSN, and IO0–IO3; verified on BL654 for Rev A and required of the selected Rev B host
+- **Rev B Wi-Fi:** connect WM02C through a separate standard SPI peripheral; do not share the external-flash QSPI controller
+- **Availability:** active, production-recommended family; 34,078 units at Digi-Key in the 2026-08-12 sourcing check
+
+Reserve at least 2 MiB for the MCUboot/Matter OTA secondary slot until the signed
+production build determines the exact partition. After allowing approximately
+0.25 MiB for settings, crash records, and storage metadata, approximately 5.75 MiB
+remains for sensor history. At one packed 32–48 byte record per minute, that is
+approximately 87–131 days before circular overwrite, excluding filesystem overhead.
+At a five-minute record cadence, the same allocation is approximately 14–21 months.
+
+Firmware shall buffer records, use a wear-aware circular layout, and recover from
+interrupted program/erase operations. The active image remains in the selected
+host's internal flash so loss or corruption of the external device cannot become the
+only boot path.
+
+**Selected Baseline:** Macronix MX25R6435FZNIL0, populated in both revisions
+**Decision Status:** Capacity, interface, package, and part frozen; exact firmware partition sizes pending production-image measurement
+
+---
+
+## 5) Power Management Strategy
 
 This section records the power architecture selected by the completed [Power Architecture and Power Study](../architecture/Power_Architecture_and_Power_Study.md). Because Rev A and Rev B have fundamentally different power sources and load profiles, power management is tracked separately.
 
 ---
 
-### 4.1 Selected Voltage Domains and Controls
+### 5.1 Selected Voltage Domains and Controls
 
-- **Rev A – 3V0_MAIN:** 3.0 V from a TPS63900 buck-boost; supplies the BL654, SHTC3, BME688, VEML7700, and logic.
-- **Rev B – 3V3_MAIN:** 3.3 V from a TPS63802 buck-boost; supplies the BL654, baseline sensors, and logic.
-- **Rev B – 3V3_WIFI_SW:** load-switched 3.3 V branch controlled by the BL654 through a TPS22919.
+- **Rev A – 3V0_MAIN:** 3.0 V from a TPS63900 buck-boost; supplies the BL654, SHTC3, VEML7700, external flash, logic, and one selectable BME688 source path.
+- **Rev B – 3V3_MAIN:** 3.3 V from a TPS63802 buck-boost; supplies the selected nRF5340-class host, baseline sensors, external flash, logic, and one selectable BME688 source path.
+- **Rev B – 3V3_WIFI_SW:** load-switched 3.3 V branch controlled by the selected Rev B host through a TPS22919.
 - **VDD_1V8_EVAL:** Populated TPS62840 1.8 V evaluation rail on pre-v1.0 boards. A break-before-make SPDT micro selector switches BME688 VDD between it and the main rail; BME688 VDDIO remains on the main logic rail.
 
 Baseline sensors remain powered and use their specified sleep modes. Only the Wi-Fi module is hard power-gated. Both revisions use a normally-off ADC divider for coarse battery measurement. Rev B also routes BQ24074 PGOOD and CHG status to the MCU.
 
-Pre-v1.0 schematics shall include normally shunted two-pin 2.54 mm male high-side current headers and separate two-pin 2.54 mm female local VDD/GND voltage headers at the battery/input, post-converter main rail, MCU/BLE branch, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B Wi-Fi rail. Firmware profile GPIOs shall be exposed so a PPK2 or oscilloscope can correlate heater, sensor, BLE, and Wi-Fi activity with current traces. At v1.0 and later, the development headers may be replaced by the compact production test-point set after validation closes.
+Pre-v1.0 schematics shall include normally shunted two-pin 2.54 mm male high-side current headers and separate two-pin 2.54 mm female local VDD/GND voltage headers at the battery/input, post-converter main rail, MCU/Thread/BLE branch, external-flash branch, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B Wi-Fi rail. Firmware profile GPIOs shall be exposed so a PPK2 or oscilloscope can correlate heater, sensor, Thread/BLE, flash, and Wi-Fi activity with current traces. At v1.0 and later, the development headers may be replaced by the compact production test-point set after validation closes.
 
 **Decision Status:** Baseline topology frozen; BME688 rail population and measured power model pending prototype validation
 
 ---
 
-### 4.2 Rev A – Coin Cell Power Path (BLE-only)
+### 5.2 Rev A – Coin Cell Power Path (Matter-over-Thread)
 
 #### Selected Implementation
 
@@ -265,18 +338,19 @@ Pre-v1.0 schematics shall include normally shunted two-pin 2.54 mm male high-sid
 - TI TPS63900 buck-boost set to 3.0 V
 - Initial programmable input-current limit: 50 mA
 - External 32.768 kHz crystal for the BL654
+- Macronix MX25R6435FZNIL0 QSPI NOR on 3V0_MAIN
 - 100–220 µF low-leakage bulk-capacitor footprint in addition to converter and local decoupling
 - Populated TPS62840 1.8 V evaluation rail and a break-before-make SPDT micro selector for BME688 VDD on pre-v1.0 hardware
 - Normally shunted two-pin 2.54 mm male current headers plus separate two-pin 2.54 mm female local voltage headers at the complete-device input and major load branches on pre-v1.0 hardware
 
-The conservative modeled battery life is approximately seven months with the BME688 running BSEC ULP. The supply must survive an approximately 37 mA worst-case overlap, although firmware shall avoid overlapping BME688 heater turn-on and high-power BLE TX.
+The conservative modeled battery life is approximately seven months with the BME688 running BSEC ULP. The supply must survive an approximately 41 mA worst-case overlap, although firmware shall avoid overlapping BME688 heater turn-on, high-power Thread/BLE radio activity, and routine flash writes.
 
-**Preliminary Direction (Rev A):** TPS63900 at 3.0 V from one CR2477
+**Selected Baseline (Rev A):** TPS63900 at 3.0 V from one CR2477
 **Decision Status (Rev A):** Frozen for schematic baseline; cell-pulse and end-of-life validation required
 
 ---
 
-### 4.3 Rev B – LiPo + USB-C Power Path (BLE + Wi-Fi)
+### 5.3 Rev B – LiPo + USB-C Power Path (Thread + Wi-Fi)
 
 #### Selected Implementation
 
@@ -289,13 +363,13 @@ The conservative modeled battery life is approximately seven months with the BME
 
 The BQ24074 input-current limit is initially 500 mA and charge current is approximately 400–500 mA for a protected 2000 mAh LiPo. The 3.3 V rail is designed for at least 500 mA continuous, 1 A transient capability, and less than 200 mV droop at the Wi-Fi module.
 
-**Preliminary Direction (Rev B):** BQ24074 + TPS63802 + TPS22919
+**Selected Baseline (Rev B):** BQ24074 + TPS63802 + TPS22919
 **Decision Status (Rev B):** Frozen for schematic baseline; thermal and transient validation required
 
 
 ---
 
-## 5) Battery Strategy
+## 6) Battery Strategy
 
 ### Candidate Comparison
 
@@ -306,33 +380,36 @@ The BQ24074 input-current limit is initially 500 mA and charge current is approx
 
 ### Notes & Considerations
 - Rev A life is dominated by the BME688 ULP profile.
-- Rev B modeled life is approximately 15 months with Wi-Fi gated, 10 months at one modeled upload per four hours, and five months at one upload per hour.
+- Rev B's provisional Thread/Wi-Fi-unavailable reference is approximately 15 months; scheduled non-Matter Wi-Fi events model about 10 months at one upload per four hours and five months at one upload per hour. Matter-over-Wi-Fi associated power must be remodeled after host selection.
 - Final holder, LiPo pack, connector, and mechanical retention remain BOM/enclosure selections.
 
-**Preliminary Direction:** CR2477 for Rev A; protected 2000 mAh 1S LiPo for Rev B
+**Selected Baseline:** CR2477 for Rev A; protected 2000 mAh 1S LiPo for Rev B
 **Decision Status:** Frozen electrically; exact mechanical parts pending
 
 ---
 
-## 6) Antenna Strategy
+## 7) Antenna Strategy
 
 ### Candidate Comparison
 
 | Approach | RF Scope | Key Pros | Key Cons | Certification Impact | Cost |
 |--------|----------|----------|----------|----------------------|------|
-| Certified modules | BLE / Wi-Fi | Simplified compliance | Higher BOM | Low risk | $$$ |
-| Discrete + PCB antenna | BLE / Wi-Fi | Lower BOM; flexibility | RF risk | Higher effort | $$ |
+| BL654 451-00001 integrated trace antenna | Rev A BLE / Thread | Pre-certified module path; no external RF matching network | Requires module-edge placement and antenna keepout | Low risk when vendor integration rules are followed | Included in module |
+| Rev B nRF5340-class host antenna | Rev B BLE / Thread / NFC | Can remain module-integrated if the host trade study selects an appropriate module | Exact antenna/certification path depends on the unresolved host | Open | Open |
+| WM02C integrated chip antenna | Wi-Fi | Module integration and no external antenna connector | Requires 2.4/5 GHz keepout and enclosure validation | Lower risk than discrete nRF7002 RF | Included in module |
+| NFC PCB loop or external antenna | NFC commissioning | Low incremental BOM and passive operation | Exact geometry and matching depend on PCB/enclosure | Product-level validation required | $ |
 
 ### Notes & Considerations
-- Early revisions favor reduced regulatory risk.
-- Final antenna tuning deferred beyond this document.
+- Rev A BLE/Thread and Rev B Wi-Fi antenna approaches are frozen through BL654 and WM02C respectively.
+- Follow Ezurio and Fanstel edge-placement, ground, copper-keepout, and enclosure-clearance requirements during layout.
+- Rev B BLE/Thread and NFC antenna provisions follow the pending host selection. Preserve NFC capability and choose the PCB loop or external antenna during schematic/layout work.
 
-**Preliminary Direction:** TBD  
-**Decision Status:** TBD
+**Selected Baseline:** Rev A BL654 integrated trace antenna; Rev B WM02C integrated chip antenna
+**Decision Status:** Rev A and Wi-Fi frozen; Rev B host BLE/Thread antenna and exact NFC implementation pending host selection
 
 ---
 
-## 7) Programming, Debug & Power-Test Strategy
+## 8) Programming, Debug & Power-Test Strategy
 
 ### Candidate Comparison
 
@@ -344,7 +421,7 @@ The BQ24074 input-current limit is initially 500 mA and charge current is approx
 | Shunted two-pin 2.54 mm male current headers | Pre-v1.0 power profiling | Standard jumper installed for normal use; removal opens the high-side feed for series measurement with female DuPont leads | Adds connector area and contact resistance | Low | Header/shunt rated for the domain |
 | Separate two-pin 2.54 mm female VDD/GND headers | Pre-v1.0 voltage probing | Accepts male DuPont leads, provides a short local return, and measures the DUT side of the current header | Socket contacts are less convenient for direct probe hooks | Low | No male pins, so a jumper shunt cannot be installed |
 | Compact test points | v1.0+ production debug | Preserves voltage, signal, event, and manufacturing access with less area | Does not inherently preserve per-branch series-current insertion | Low | Retained after validation |
-| Profile-event GPIO test points | Time correlation | Aligns heater, BLE, sensor, and Wi-Fi states with current traces | Consumes temporary GPIO/test area | Low | At least two markers |
+| Profile-event GPIO test points | Time correlation | Aligns heater, Thread/BLE, flash, sensor, and Wi-Fi states with current traces | Consumes temporary GPIO/test area | Low | At least two markers |
 
 ### Power-Measurement Partitioning
 
@@ -354,7 +431,7 @@ The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulesco
 
 - Required complete-device access: battery input on both revisions and USB input on Rev B.
 - Required post-converter access: 3V0_MAIN on Rev A and 3V3_MAIN on Rev B.
-- Required individual branches: MCU/BLE, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B 3V3_WIFI_SW.
+- Required individual branches: MCU/Thread/BLE, external QSPI flash, BME688 VDD, SHTC3 VDD, VEML7700 VDD, and Rev B 3V3_WIFI_SW.
 - Put a two-pin 2.54 mm male pin header in each high-side DC feed, labeled SOURCE and LOAD, with a standard removable jumper shunt fitted for normal operation. Removing the shunt shall permit series-current measurement with female-ended 2.54 mm DuPont leads, without soldering or cutting traces.
 - Put a separate two-pin 2.54 mm female socket header for VDD_DUT/GND near each domain. Sense VDD_DUT downstream of the current header, keep its ground close to the DUT, and connect voltage instruments with male-ended 2.54 mm DuPont leads.
 - Do not combine VDD_INPUT, VDD_OUTPUT, and GND on one three-pin header. Do not populate male pins at voltage-measurement positions. Male current headers and female voltage headers are mandatory physical differentiation so the current shunt cannot be placed across VDD and ground; silkscreen shall reinforce this distinction.
@@ -362,7 +439,7 @@ The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulesco
 - Put the BME688 current header downstream of its SPDT main-rail/1.8 V selector so the same instrument connection measures either supply.
 - Implement the BME selector as one break-before-make micro switch with an SPDT source-selection function, not two independently operated SPST DIP poles. Change it only with the board unpowered.
 - If practical, a DPDT version may use the second pole to control TPS62840 enable, disabling the evaluation buck in the main-rail position. Otherwise account for its approximately 60 nA quiescent current during comparison.
-- At v1.0 and later, retain compact test points for battery/input, main rail, BME688 VDD, ground, SWD, power-control/status signals, and profile GPIOs; Rev B also retains USB input and 3V3_WIFI_SW.
+- At v1.0 and later, retain compact test points for battery/input, main rail, external-flash VDD, BME688 VDD, ground, SWD, power-control/status signals, and profile GPIOs; Rev B also retains USB input and 3V3_WIFI_SW.
 - Per-branch series-current insertion is not implied after a shunted header is removed. Any branch that still requires production current profiling shall retain an explicit removable link or fixture-accessible disconnect.
 
 ### Notes & Considerations
@@ -372,25 +449,57 @@ The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulesco
 - Power access points must remain reachable on an unenclosed prototype and be compatible with the intended shunts, PPK2 leads, spring probes, or grabber leads.
 - Schematic notes shall identify allowed external-injection states so rails cannot be back-powered or shorted together.
 
-**Preliminary Direction:** SWD + bed-of-nails programming; pre-v1.0 shunted high-side current headers with separate voltage headers; v1.0+ compact test points; profile-event GPIO access
+**Selected Baseline:** SWD + bed-of-nails programming; pre-v1.0 shunted high-side current headers with separate voltage headers; v1.0+ compact test points; profile-event GPIO access
 **Decision Status:** Frozen at the architecture level; exact connector and test-pad geometry to be completed during schematic/layout
 
 ---
 
-## 8) Summary & Next Steps
+## 9) Selected Orderable Baseline and Availability Snapshot
 
-- Power-study-dependent baseline selections are now frozen:
-  - Ezurio BL654
+The following table records the schematic-library and footprint baselines plus the
+one outstanding Rev B host selection. Packaging suffix substitutions require
+confirmation that the electrical function and land pattern are identical. Inventory
+is a 2026-08-12 snapshot and is not a lifecycle guarantee.
+
+| Function | Selected orderable part | Package / antenna | Availability snapshot |
+|---|---|---|---|
+| Rev A MCU / BLE / Thread | Ezurio **451-00001** (BL654) | Module with integrated trace antenna | Active; Digi-Key 250, with substantially more stock visible at Mouser |
+| Rev B Matter-over-Wi-Fi host | **Open: nRF5340-class MCU/module** | Prefer pre-certified integrated-antenna module | Not yet orderable; this is the remaining Rev B architecture blocker |
+| Rev B Wi-Fi | Fanstel **WM02C** | Module with integrated chip antenna | Active; Digi-Key 1,144; Mouser 321 |
+| Temperature / humidity | Sensirion **SHTC3-TR-2.5KS** | 4-DFN, 2 × 2 mm | Active; Digi-Key 92,809 |
+| VOC / IAQ / pressure | Bosch Sensortec **BME688** | 8-LGA, 3 × 3 mm | Active; Digi-Key 9,183 |
+| Ambient light | Vishay **VEML7700-TT** | 4-SMD | Active; Digi-Key 13,130 |
+| External QSPI NOR | Macronix **MX25R6435FZNIL0** | 8-WSON, 6 × 5 mm, low-power default | Active; Digi-Key 34,078 |
+| Rev A main converter | TI **TPS63900DSKR** | 10-WSON | Active; Digi-Key 32,261 |
+| BME688 1.8 V evaluation converter | TI **TPS62840DLCR** | 8-VSON-HR | Active; Mouser 5,867; selected instead of the smaller DSBGA for easier prototype assembly |
+| Rev B main converter | TI **TPS63802DLAR** | 10-VSON-HR | Active; Digi-Key 9,507 |
+| Rev B Wi-Fi load switch | TI **TPS22919DCKR** | SC-70-6 | Active; Digi-Key 41,295 |
+| Rev B charger / power path | TI **BQ24074RGTR** | 16-VQFN, 3 × 3 mm | Active; Digi-Key 11,717 |
+| Rev A cell | Panasonic **CR2477** | Replaceable cell; holder pending | Active; Digi-Key 81,306 |
+
+The exact CR2477 holder, protected LiPo pack, USB-C receptacle, LFXO crystal,
+selector, measurement headers, shunts, passives, magnetics, and protection parts
+remain schematic/BOM selections and therefore cannot yet be checked by exact MPN.
+
+---
+
+## 10) Summary & Next Steps
+
+- Rev A and shared-block baseline selections are frozen:
+  - Ezurio BL654 for Rev A
   - Fanstel WM02C for Rev B Wi-Fi
   - SHTC3, BME688, and VEML7700
+  - MX25R6435FZNIL0 64-Mbit external QSPI NOR on both revisions
   - BME688 pressure output; no separate barometric sensor
   - no baseline microphone/sound block
   - TPS63900 + CR2477 for Rev A
   - BQ24074 + TPS63802 + TPS22919 + 2000 mAh LiPo for Rev B
 - The BME688 component is frozen, but its production VDD source remains an explicit pre-v1.0 measurement decision between the main rail and an efficient 1.8 V buck, selected by a populated break-before-make SPDT micro switch.
-- Pre-v1.0 schematic/layout shall include shunted two-pin 2.54 mm male whole-device and per-load current headers, separate two-pin 2.54 mm female voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
+- Rev A uses Matter-over-Thread with BLE commissioning. Rev B targets Matter-over-Wi-Fi with WM02C, but requires selection of an nRF5340-class host before its MCU/radio schematic is captured. The selected host shall use standard SPI for WM02C and reserve QSPI for external flash.
+- Pre-v1.0 schematic/layout shall include shunted two-pin 2.54 mm male whole-device and per-load current headers, including external flash, separate two-pin 2.54 mm female voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
 - Next:
-  - begin schematic capture and select exact passives, magnetics, batteries/holders, connectors, and protection parts;
-  - complete antenna and programming/test selections;
+  - begin Rev A schematic capture and select exact passives, magnetics, battery holder, connectors, and protection parts;
+  - complete a focused Rev B nRF5340 host/module trade study before Rev B MCU/radio schematic capture;
+  - complete NFC antenna, programming/test geometry, and user-I/O selections after the Rev B host is selected;
   - verify the modeled power figures on prototype hardware;
   - revisit optional Rev B multispectral or 1.8 V sensor population only if the product scope requires it.
