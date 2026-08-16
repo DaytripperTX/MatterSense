@@ -31,10 +31,10 @@ The results are planning estimates, not guaranteed battery-life specifications. 
 | Fuel gauge | Not fitted | Not fitted; reserve test/DNP provision only if later accuracy requirements justify it | Frozen |
 | Power profiling access | Board versions below v1.0 shall use shunted two-pin 2.54 mm male series-current headers plus separate two-pin 2.54 mm female VDD/GND voltage headers | Same, plus separate Wi-Fi and USB/battery-path access; v1.0 and later retain compact test points after validation | Required for schematic/layout |
 | Low-frequency clock | External 32.768 kHz crystal on BL654 | 32.768 kHz crystal and load components integrated in WT02C40C | Frozen |
-| External nonvolatile memory | [Macronix MX25R6435FZNIL0](https://www.digikey.com/en/products/detail/macronix/MX25R6435FZNIL0/6558605), 64-Mbit serial NOR over QSPI on 3V0_MAIN | Same part on 3V3_MAIN over a dedicated standard SPI peripheral; WT02C40C uses QSPI internally for nRF7002 | Frozen for OTA staging and sensor-history storage |
+| External nonvolatile memory | [Macronix MX25R6435FZNIL0](https://www.digikey.com/en/products/detail/macronix/MX25R6435FZNIL0/6558605), 64-Mbit serial NOR over QSPI on 3V0_MAIN | Same part on 3V3_MAIN over SPIM4; WT02C40C exposes the nRF5340 QSPI signal nets, but those shared nets and the sole dedicated QSPI CSN are connected internally to nRF7002 | Frozen for OTA staging and sensor-history storage |
 | Optional sound block | Not fitted | Not fitted in baseline; future externally powered option only | Frozen for baseline |
 
-The current Rev B hardware-selection document identifies the Fanstel WT02C40C as the frozen radio/host module. It integrates nRF5340, nRF7002, both chip antennas, clocks, radio coexistence wiring, and the nRF7002 power switch. The earlier claim that nRF52840 could not use nRF7002 was incorrect; Nordic supports nRF52840 Wi-Fi operation, but the selected combo module reduces integration and firmware-platform risk. The existing approximately 300 mA rail design remains appropriate, while the Rev B baseline-current and battery-life figures remain provisional pending complete-module measurements.
+The current Rev B hardware-selection document identifies the Fanstel WT02C40C as the frozen radio/host module. It integrates nRF5340, nRF7002, both chip antennas, clocks, radio coexistence wiring, and the nRF7002 power switch. Nordic supports nRF52840 Wi-Fi operation with nRF7002, while the selected nRF5340 combo module reduces integration and firmware-platform risk for the Rev B Matter-over-Wi-Fi baseline. The existing approximately 300 mA rail design remains appropriate, while the Rev B baseline-current and battery-life figures remain provisional pending complete-module measurements.
 
 ---
 
@@ -88,8 +88,10 @@ Both supply paths shall be functional on pre-v1.0 evaluation builds. The product
 ### 3.4 External Flash Without a Load Switch
 
 Both revisions populate a 64-Mbit Macronix MX25R6435FZNIL0. Rev A uses the BL654
-QSPI controller. WT02C40C internally allocates the nRF5340 QSPI interface to nRF7002,
-so Rev B uses the flash's standard SPI mode on a dedicated SPIM instance. The part
+QSPI controller. The nRF5340 has one QSPI controller, and WT02C40C connects its QSPI
+clock, data, and chip-select nets internally to nRF7002 while also exposing those
+shared nets at module pads. Because the module does not provide a second independent
+QSPI bus or chip-select, Rev B uses the flash's standard SPI mode on SPIM4. The part
 accepts either primary rail, defaults to its ultra-low-power mode, and can enter deep
 power down between logging or update operations. Its residual sleep current is lower
 than the leakage and area penalty of a separate load switch, so the flash remains
@@ -409,7 +411,7 @@ Rev B schematic/layout requirements:
 - use a wide 3.3 V path and uninterrupted ground plane;
 - implement the vendor P0.31 nRF7002 power sequence and ensure it defaults to the required safe state during reset;
 - design the pin-17 feed for at least the 270 mA complete-module planning peak even if firmware initially limits Wi-Fi to 2.4 GHz;
-- route the MX25R6435F on a separate standard SPI peripheral; WT02C40C uses QSPI internally for nRF7002.
+- route the MX25R6435F on SPIM4; do not attach it to the QSPI nets shared with nRF7002 unless explicit bus-selection hardware and firmware are added and validated.
 
 Firmware should avoid overlapping Wi-Fi startup/TX with the BME688 heater where practical, but correctness shall not depend on event serialization.
 
@@ -584,7 +586,7 @@ idle, BLE Local Mode, associated Wi-Fi, and event energy—not on part selection
 - [x] Rev B TPS63802 main converter selected.
 - [x] Rev B WT02C40C nRF5340+nRF7002 combo module and internal Wi-Fi switch selected.
 - [x] MX25R6435FZNIL0 64-Mbit external serial NOR selected for both revisions.
-- [x] Rev A flash fixed as QSPI; Rev B WT02C40C internal nRF7002 link uses QSPI and external flash is fixed as standard SPI.
+- [x] Rev A flash fixed as QSPI; Rev B external flash fixed as standard SPI on SPIM4 because the sole nRF5340 QSPI controller and dedicated QSPI CSN serve nRF7002.
 - [x] No mandatory production 1.8 V domain; populated BME688 1.8 V evaluation path required on pre-v1.0 prototypes.
 - [x] Baseline sensor power gating removed.
 - [ ] Add a break-before-make SPDT BME688 main-rail/1.8 V selector with VDDIO fixed to the main rail.
@@ -612,7 +614,7 @@ idle, BLE Local Mode, associated Wi-Fi, and event energy—not on part selection
 7. **The optional sound block is omitted from both baseline revisions.** A continuously active digital microphone would materially increase battery load and still requires acoustic/mechanical definition.
 8. **The 64-Mbit external flash is a low-cost, useful margin choice.** It supports a conservative OTA secondary slot plus months of compact one-minute sensor history, while adding approximately $2.89 at prototype quantity and a provisional 1 µA average logging allowance.
 9. **Rev A can proceed to schematic capture.** Its remaining risks are validation items: coin-cell pulse behavior, actual BME688 ULP energy, Matter ICD behavior, flash logging/OTA energy, and rail transient response.
-10. **Rev B can proceed to schematic capture with WT02C40C.** The combo module removes the host-selection blocker and external Wi-Fi load switch, but consumes QSPI internally; Rev B external flash therefore uses standard SPI, and the provisional current model must be updated from hardware measurements.
+10. **Rev B can proceed to schematic capture with WT02C40C.** The combo module removes the host-selection blocker and external Wi-Fi load switch. Its QSPI signal nets are exposed but shared with nRF7002, and the sole dedicated QSPI CSN is already connected internally; Rev B external flash therefore uses SPIM4, and the provisional current model must be updated from hardware measurements.
 
 ---
 
@@ -623,6 +625,9 @@ idle, BLE Local Mode, associated Wi-Fi, and event energy—not on part selection
 - [Bosch BME688 datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf)
 - [Vishay VEML7700 datasheet](https://www.vishay.com/docs/84286/veml7700.pdf)
 - [Fanstel WT02C40C product specifications](https://fanstel.squarespace.com/s/WT02C40C-Product-Specifications-h97f.pdf)
+- [Nordic nRF5340 peripheral instantiation](https://docs.nordicsemi.com/r/bundle/ps_nrf5340/page/chapters/memory/appmem.html)
+- [Nordic nRF5340 QSPI and SPIM4 pin assignments](https://docs.nordicsemi.com/r/bundle/ps_nrf5340/page/chapters/pin.html)
+- [Nordic nRF52840 peripheral instantiation](https://docs.nordicsemi.com/r/bundle/ps_nrf52840/page/memory.html)
 - [Macronix MX25R ultra-low-power serial NOR family](https://www.macronix.com/en-us/products/NOR-Flash/Pages/Ultra-Low-Power-Flash.aspx)
 - [Nordic Matter OTA documentation](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/matter/overview/dfu.html)
 - [Nordic Matter-over-Thread power study](https://docs.nordicsemi.com/r/bundle/nwp_049)

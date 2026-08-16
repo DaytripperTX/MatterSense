@@ -22,7 +22,7 @@ before every prototype or production buy.
 | [Raytac MDBT50Q-1M](https://www.mouser.com/datasheet/2/744/_5bnRF52840_5d_MDBT50Q_1MV2__26_MDBT50Q_P1MV2_Ver_-2525658.pdf?srsltid=AfmBOorB5Z35m8gI5794esgzA8Nj53-aUOLUO8bO6VV-565TyayQimsI) | Module | • Historically low-cost certified module<br>• Compact footprint | • Currently unavailable<br>• Potential lifecycle/EOL risk | Not evaluated because the candidate was rejected on availability | $6.00 – $9.00 | 0 <br>([Mouser](https://www.mouser.com/c/?q=MDBT50Q) & [Digi-Key](https://www.digikey.com/en/products/detail/raytac/MDBT50Q-1MV2/13677591)) |
 | [u-blox BMD-340-A-R](https://content.u-blox.com/sites/default/files/BMD-340_DataSheet_UBX-19033353.pdf) | Module | • Fully certified (FCC/IC/CE)<br>• Strong vendor documentation<br>• Lower cost than BL654 | • Less field history than BL654 | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 2.35 µA | $7.64 – $9.60 | 1000+ <br>([Mouser](https://www.mouser.com/ProductDetail/u-blox/BMD-340-A-R?qs=wd5RIQLrsJgGcI5R13BUYg%3D%3D&srsltid=AfmBOorkcgR2_ZodEhfTeudAxMhkFS4pwKuMG93ztHSLkbOvfiFKmboP) & [Digi-Key](https://www.digikey.com/en/products/detail/u-blox/BMD-340-A-R/8638939)) |
 | [Ezurio BL654 451-00001](https://www.ezurio.com/documentation/datasheet-bl654) | Module with integrated trace antenna | • Pre-certified (FCC/IC/CE)<br>• Proven production module<br>• Strong RF performance<br>• Simplifies RF and schedule risk | • Higher BOM vs discrete | • TX: 4.8 mA – 14.8 mA<br>• RX: 4.6 mA<br>• Sleep: 0.4 µA – 3.1 µA | $11.63 – $12.08 | Active and stocked by [Mouser](https://www.mouser.com/ProductDetail/Ezurio/451-00001?qs=MLItCLRbWszU6GB3nrHvkA%3D%3D&srsltid=AfmBOorA1ltk7Dfq18QRUn1tKwWPF2PeBid5a2opnczd6jA04DZWorvP) and [Digi-Key](https://www.digikey.com/en/products/detail/ezurio/451-00001/9172334) |
-| [Fanstel WT02C40C](https://fanstel.squarespace.com/s/WT02C40C-Product-Specifications-h97f.pdf) | nRF5340+nRF7002 combo module with two chip antennas | • Nordic's supported Matter-over-Wi-Fi host/companion class<br>• BLE, 802.15.4, dual-band Wi-Fi, and NFC<br>• Integrated RF, crystals, DC/DC passives, coexistence wiring, and Wi-Fi power switch<br>• Lower module cost than separate BL654+WM02C | • Newer, less broadly stocked part<br>• Large dual-antenna keepout<br>• Internal nRF7002 link occupies nRF5340 QSPI<br>• LGA pads required for full GPIO access | • Wi-Fi-on peak: approximately 270 mA for the complete module<br>• nRF7002 can be hard-off through the internal switch | $13.99 direct; distributor pricing varies | Active; 183 at [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WT02C40C/26639091) and available direct in the 2026-08-15 check |
+| [Fanstel WT02C40C](https://fanstel.squarespace.com/s/WT02C40C-Product-Specifications-h97f.pdf) | nRF5340+nRF7002 combo module with two chip antennas | • Nordic's supported Matter-over-Wi-Fi host/companion class<br>• BLE, 802.15.4, dual-band Wi-Fi, and NFC<br>• Integrated RF, crystals, DC/DC passives, coexistence wiring, and Wi-Fi power switch<br>• Lower module cost than separate BL654+WM02C | • Newer, less broadly stocked part<br>• Large dual-antenna keepout<br>• The nRF5340's sole QSPI controller and QSPI CSN net serve nRF7002; the shared QSPI signal nets remain exposed at module pads<br>• LGA pads required for full GPIO access | • Wi-Fi-on peak: approximately 270 mA for the complete module<br>• nRF7002 can be hard-off through the internal switch | $13.99 direct; distributor pricing varies | Active; 183 at [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WT02C40C/26639091) and available direct in the 2026-08-15 check |
 | [ESP32-WROOM-32 (Reference Only)](https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf) | Module | • Very low cost<br>• Integrated Wi-Fi + BLE<br>• Massive ecosystem | • High idle power<br>• Poor fit for coin-cell operation<br>• Firmware and power model divergence | • TX: 130 mA – 240 mA<br>• RX: 9 mA – 100 mA<br>• Sleep: 10 µA – 0.8 mA | $3.50 – $5.00 | 1000+ <br>([Mouser](https://www.mouser.com/ProductDetail/Espressif-Systems/ESP32-WROOM-32E-N4?qs=Li%252BoUPsLEnsPzTWsi%252BRMgQ%3D%3D&srsltid=AfmBOooi9ADzgFX94NQYgr2DWTCfaqRWz4_b8t2TaKm5tqPpJovUdi3F) & [Digi-Key](https://www.digikey.com/en/products/detail/espressif-systems/ESP32-WROOM-32-N4/8544298)) |
 
 
@@ -53,30 +53,34 @@ before every prototype or production buy.
 **Selected Baseline (Rev B):** Fanstel WT02C40C nRF5340+nRF7002 combo module
 **Decision Status:** Both revision baselines frozen for schematic capture
 
-### nRF52840 + nRF7002 Compatibility Correction and Rev B Decision
+### nRF52840 + nRF7002 Compatibility and Rev B Decision
 
 The nRF52840 is capable of operating an nRF7002. [Nordic describes nRF7002](https://www.nordicsemi.com/Products/nRF7002/Modules) as a
 companion for nRF52 and nRF53 hosts, the [nRF7002 EK](https://docs.nordicsemi.com/bundle/ncs-2.9.3/page/zephyr/boards/shields/nrf7002ek/doc/index.html) uses an SPI-family host interface,
 and Nordic's current nRF52840 Wi-Fi station memory table reports a working station
 build using approximately [565 KB ROM and 179 KB RAM](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/wifi/station_mode/mem_requirements_sta.html).
-The earlier statement that BL654/nRF52840 was incapable of using the 7000-series
-Wi-Fi companion was therefore incorrect.
 
 The remaining distinction is supported product scope. [Nordic's Matter
 sample/certification references](https://docs.nordicsemi.com/bundle/ncs-3.0.0/page/nrf/protocols/matter/end_product/ecosystems_certification.html) list nRF52840 for Matter-over-Thread and the nRF7002
 DK, which uses nRF5340 as host, for Matter-over-Wi-Fi. A complete nRF52840 product
 image would also need to fit Matter, Wi-Fi, BLE commissioning, BLE Local Mode,
-BSEC/sensors, logging, and OTA into the remaining memory. That makes the separate
-BL654+WM02C architecture technically possible but a higher firmware-integration risk,
-not an electrical impossibility.
+BSEC/sensors, logging, and OTA into the remaining memory. The separate BL654+WM02C
+architecture is technically possible but carries higher firmware-integration risk.
 
 Rev B instead selects the Fanstel WT02C40C. It combines nRF5340 and nRF7002 with
 two integrated chip antennas, follows the nRF7002 DK interconnect, exposes NFC/SWD/
 ADC/I²C and the required GPIOs, embeds the Wi-Fi power switch and crystals, and costs
 less than the approximately $20.72–$21.73 one-piece total for separate BL654 and
-WM02C modules before the external load switch and assembly cost. The internal Wi-Fi
-connection uses the nRF5340 QSPI interface, so Rev B external flash moves to a
-separate standard SPI controller.
+WM02C modules before the external load switch and assembly cost. The
+[nRF5340](https://docs.nordicsemi.com/r/bundle/ps_nrf5340/page/chapters/memory/appmem.html)
+and [nRF52840](https://docs.nordicsemi.com/r/bundle/ps_nrf52840/page/memory.html)
+each provide one hardware QSPI controller, along with several SPI/SPIM instances.
+In WT02C40C, the nRF5340 QSPI clock, data, and chip-select nets connect
+internally to nRF7002; Fanstel also exposes those shared nets at module pads. They do
+not form a second independent QSPI bus, and the sole dedicated QSPI CSN net is already
+connected to nRF7002. Rev B therefore connects external flash to an independent
+SPIM4 instance in standard SPI mode rather than adding bus-selection
+hardware and non-reference arbitration firmware.
 
 **Decision Status (Rev B host/Wi-Fi):** WT02C40C frozen for schematic baseline; pin mapping, RF keepout, power, and firmware remain schematic/validation work
 
@@ -93,7 +97,7 @@ separate standard SPI controller.
 | [MinewSemi MS14SF1-1N02AIR](https://en.minewsemi.com/file/MS14SF1-nRF7002_Datasheet_K_EN.pdf) | Module (PCB Antenna) | • Integrated PCB antenna<br>• Sold through Digi-Key (Marketplace)<br>• Good candidate if stock remains available | • Marketplace sourcing (not primary franchised line)<br>• Less established ecosystem vs Fanstel | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $10.00 | 1000+ ([Digi-Key](https://www.digikey.com/en/products/detail/minewsemi/MS14SF1-1N02AIR/26409766)) |
 | [Fanstel WM02F](https://static1.squarespace.com/static/561459a2e4b0b39f5cefa12e/t/672e447ee28d49742366de31/1731085441199/WM02C%2BProduct%2BSpecifications.pdf) | Module (PCB Trace Antenna) | • Integrated PCB trace antenna<br>• Attractive cost when sourced direct<br>• Module-first path for Rev B | • Not stocked at Mouser/Digi-Key (10+ week LT; MOQ 1000)<br>• Reliance on vendor-direct inventory | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $4.20 – $5.03 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-hlhel)) | ~600 ([Fanstel direct](https://www.fanstel.com/buy/bt840f-v1-nrf52840-bluetooth-5-thread-zigbee-module-wah32-amhmr-6meyb-hlhel))<br>0 ([Mouser](https://www.mouser.com/ProductDetail/Fanstel/WM02F?qs=ST9lo4GX8V39vk8QtDIbrQ%3D%3D) & [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WM02F/22107923)) |
 | [Fanstel WM02C](https://fanstel.squarespace.com/s/WM02C-Product-Specifications-3py2.pdf) | Module (Chip Antenna) | • Integrated chip antenna<br>• Stocked at major distributors<br>• Good near-term buyable option | • Smaller sourcing ecosystem than commodity Wi-Fi modules<br>• Antenna performance/layout keepouts still matter | • TX: up to ~260 mA<br>• RX: ~56–60 mA<br>• Idle (TWT): ~18–30 µA (chip capability) | $9.09 – $9.65 | Active; 1,144 at [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WM02C/22107887) and 321 at [Mouser](https://www.mouser.com/ProductDetail/Fanstel/WM02C?qs=ST9lo4GX8V2bfCVo1J5PEw%3D%3D) in the 2026-08-12 sourcing check |
-| [Fanstel WT02C40C (Selected Combo)](https://fanstel.squarespace.com/s/WT02C40C-Product-Specifications-h97f.pdf) | nRF5340+nRF7002 module, two chip antennas | • One module for BLE/Thread/Wi-Fi<br>• Integrated antennas, coexistence, clocks, DC/DC passives, and Wi-Fi switch<br>• Reference-like nRF7002 DK interconnect<br>• Lower combined module/BOM cost | • Large RF keepout<br>• Internal Wi-Fi link consumes nRF5340 QSPI<br>• Newer/shallower distribution stock | • Complete-module peak approximately 270 mA with Wi-Fi power save off<br>• nRF7002 hard-off supported internally | $13.99 direct; distributor pricing varies | Active; 183 at [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WT02C40C/26639091) and direct availability in the 2026-08-15 check |
+| [Fanstel WT02C40C (Selected Combo)](https://fanstel.squarespace.com/s/WT02C40C-Product-Specifications-h97f.pdf) | nRF5340+nRF7002 module, two chip antennas | • One module for BLE/Thread/Wi-Fi<br>• Integrated antennas, coexistence, clocks, DC/DC passives, and Wi-Fi switch<br>• Reference-like nRF7002 DK interconnect<br>• Lower combined module/BOM cost | • Large RF keepout<br>• Sole nRF5340 QSPI controller and QSPI CSN net serve nRF7002; the shared signal nets remain exposed at module pads<br>• Newer/shallower distribution stock | • Complete-module peak approximately 270 mA with Wi-Fi power save off<br>• nRF7002 hard-off supported internally | $13.99 direct; distributor pricing varies | Active; 183 at [Digi-Key](https://www.digikey.com/en/products/detail/fanstel-corp/WT02C40C/26639091) and direct availability in the 2026-08-15 check |
 | [Fanstel WT02E40E (Combo Alternate)](https://www.mouser.com/datasheet/2/915/WT02E40E_2bProduct_2bSpecifications-3576516.pdf) | nRF5340+nRF7002 module, two u.FL connectors | • Same integrated digital architecture as WT02C40C<br>• Flexible external-antenna placement | • Two antennas/cables add BOM and enclosure work<br>• Does not meet the preferred integrated-antenna baseline | • Same nRF5340+nRF7002 class | $19.31 at quantity 1 from Mouser; $13.03 direct | Active; stocked at Mouser and available direct in the 2026-08-15 check |
 
 
@@ -129,8 +133,8 @@ separate standard SPI controller.
 ### Closed Items (Wi-Fi Block)
 
 - Integrated antenna requirement captured (modules requiring external antennas excluded from primary shortlist)
-- WT02C40C internal nRF5340-to-nRF7002 interface accepted; it matches the nRF7002 DK QSPI/coexistence arrangement.
-- Rev B external NOR uses a separate SPIM peripheral in standard SPI mode; Rev A retains QSPI flash.
+- WT02C40C internal nRF5340-to-nRF7002 interface accepted; it matches the nRF7002 DK QSPI/coexistence arrangement and exposes the same shared QSPI nets at module pads.
+- Rev B external NOR uses the independent SPIM4 peripheral in standard SPI mode; Rev A retains QSPI flash.
 - TPS63802 power path validated at the architecture level for the approximately 300 mA system peak; the WT02C40C internal Wi-Fi switch replaces the external TPS22919. Schematic transient/layout validation remains.
 - Thread-only population strategy captured:
   - Fit footprint-compatible BT40F instead of WT02C40C and load the Thread firmware configuration; runtime transport switching is not required
@@ -300,7 +304,7 @@ firmware or sensor-history volume.
 - **Package:** 8-WSON, 6 × 5 mm, selected over WLCSP/DSBGA-style packages for prototype assembly and inspection
 - **Supply:** 1.65–3.6 V; connect to 3V0_MAIN in Rev A and 3V3_MAIN in Rev B
 - **Power mode:** L0 ordering option defaults to ultra-low-power mode; firmware shall also use deep power down between accesses
-- **MCU connection:** Rev A uses the BL654 QSPI controller with SCK, CSN, and IO0–IO3. Rev B uses the device's standard SPI mode on a dedicated nRF5340 SPIM instance because WT02C40C allocates nRF5340 QSPI to its internal nRF7002.
+- **MCU connection:** Rev A uses the BL654 QSPI controller with SCK, CSN, and IO0–IO3. Rev B uses the device's standard SPI mode on the independent nRF5340 SPIM4 instance. The schematic pin baseline is P0.08/SCK, P0.09/MOSI, P0.10/MISO, and P0.11/CSN, all exposed by WT02C40C. WT02C40C also exposes the nRF5340 QSPI signal nets, but they are the same nets connected internally to nRF7002 and do not provide a second independently selectable QSPI bus.
 - **Availability:** active, production-recommended family; 34,078 units at Digi-Key in the 2026-08-12 sourcing check
 
 Reserve at least 2 MiB for the MCUboot/Matter OTA secondary slot until the signed
@@ -316,7 +320,7 @@ host's internal flash so loss or corruption of the external device cannot become
 only boot path.
 
 **Selected Baseline:** Macronix MX25R6435FZNIL0, populated in both revisions
-**Decision Status:** Capacity, package, and part frozen; Rev A QSPI and Rev B SPI interfaces frozen; exact firmware partition sizes pending production-image measurement
+**Decision Status:** Capacity, package, and part frozen; Rev A QSPI and Rev B SPIM4 interfaces frozen; exact firmware partition sizes pending production-image measurement
 
 ---
 
@@ -478,7 +482,7 @@ pattern are identical. Inventory combines the 2026-08-12 baseline check with the
 | Temperature / humidity | Sensirion **SHTC3-TR-2.5KS** | 4-DFN, 2 × 2 mm | Active; Digi-Key 92,809 |
 | VOC / IAQ / pressure | Bosch Sensortec **BME688** | 8-LGA, 3 × 3 mm | Active; Digi-Key 9,183 |
 | Ambient light | Vishay **VEML7700-TT** | 4-SMD | Active; Digi-Key 13,130 |
-| External serial NOR | Macronix **MX25R6435FZNIL0** | 8-WSON, 6 × 5 mm, low-power default; QSPI in Rev A and SPI in Rev B | Active; Digi-Key 34,078 |
+| External serial NOR | Macronix **MX25R6435FZNIL0** | 8-WSON, 6 × 5 mm, low-power default; QSPI in Rev A and SPIM4 in Rev B | Active; Digi-Key 34,078 |
 | Rev A main converter | TI **TPS63900DSKR** | 10-WSON | Active; Digi-Key 32,261 |
 | BME688 1.8 V evaluation converter | TI **TPS62840DLCR** | 8-VSON-HR | Active; Mouser 5,867; selected instead of the smaller DSBGA for easier prototype assembly |
 | Rev B main converter | TI **TPS63802DLAR** | 10-VSON-HR | Active; Digi-Key 9,507 |
@@ -497,13 +501,13 @@ remain schematic/BOM selections and therefore cannot yet be checked by exact MPN
   - Ezurio BL654 for Rev A
   - Fanstel WT02C40C nRF5340+nRF7002 combo module for Rev B
   - SHTC3, BME688, and VEML7700
-  - MX25R6435FZNIL0 64-Mbit external serial NOR: QSPI on Rev A, SPI on Rev B
+  - MX25R6435FZNIL0 64-Mbit external serial NOR: QSPI on Rev A, SPIM4 on Rev B
   - BME688 pressure output; no separate barometric sensor
   - no baseline microphone/sound block
   - TPS63900 + CR2477 for Rev A
   - BQ24074 + TPS63802 + WT02C40C internal Wi-Fi switch + 2000 mAh LiPo for Rev B
 - The BME688 component is frozen, but its production VDD source remains an explicit pre-v1.0 measurement decision between the main rail and an efficient 1.8 V buck, selected by a populated break-before-make SPDT micro switch.
-- Both revisions support BLE commissioning and non-Matter BLE Local Mode. Rev A uses Matter-over-Thread. Rev B uses the WT02C40C for Matter-over-Wi-Fi or a separate Thread firmware build; its internal nRF7002 link consumes QSPI, so external flash uses a dedicated standard SPI peripheral.
+- Both revisions support BLE commissioning and non-Matter BLE Local Mode. Rev A uses Matter-over-Thread. Rev B uses the WT02C40C for Matter-over-Wi-Fi or a separate Thread firmware build; nRF7002 uses the nRF5340's sole QSPI controller and dedicated CSN net, so external flash uses the independent SPIM4 peripheral.
 - Pre-v1.0 schematic/layout shall include shunted two-pin 2.54 mm male whole-device and per-load current headers, including external flash, separate two-pin 2.54 mm female voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
 - Next:
   - begin schematic capture and select exact passives, magnetics, battery holder, connectors, and protection parts;

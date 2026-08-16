@@ -42,7 +42,7 @@ and system availability.
   - Battery-powered operation
   - USB-powered operation (Rev B)
 - Nonvolatile storage:
-  - 64-Mbit external serial NOR for OTA staging and selected sensor history; QSPI on Rev A and standard SPI on Rev B
+  - 64-Mbit external serial NOR for OTA staging and selected sensor history; QSPI on Rev A and SPIM4 on Rev B
 - Debug: SWD interface
 - Expansion: NFC pins routed for Rev B compatibility
 
@@ -113,7 +113,7 @@ and system availability.
 ### 4.6 Firmware Updates
 - FR-22: The system shall support secure firmware updates over the air.
 - FR-23: Firmware updates shall not compromise device security or integrity.
-- FR-27: OTA images shall be staged in the external QSPI NOR secondary slot and authenticated before activation.
+- FR-27: OTA images shall be staged in the external serial NOR secondary slot and authenticated before activation.
 - FR-28: The bootloader shall retain a known-good image or equivalent recovery path so an interrupted, invalid, or failed update does not brick the device.
 - FR-29: Rev A shall support OTA through its Matter-over-Thread operational network; Rev B may use Thread or Wi-Fi transport. A BLE SMP path may be retained for development and service.
 
@@ -158,7 +158,7 @@ and system availability.
 - NFC interface pins shall be routed and electrically supported.
 - Test points shall be provided for power and ground.
 - Rev A dedicated QSPI signals shall connect the MCU to external NOR flash.
-- Rev B shall connect external NOR flash through a dedicated standard SPI peripheral because WT02C40C uses the nRF5340 QSPI interface internally for nRF7002.
+- Rev B shall connect external NOR flash in standard SPI mode through SPIM4. WT02C40C exposes the nRF5340 QSPI signal nets, but those same nets and the sole dedicated QSPI CSN are connected internally to nRF7002 and do not provide a second independently selectable QSPI bus.
 
 ---
 

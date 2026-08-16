@@ -54,7 +54,7 @@ the device's non-Matter BLE Local Mode.
 ### Planned Revision B
 - Matter-over-Wi-Fi target using a Fanstel WT02C40C nRF5340+nRF7002 combo module with integrated BLE/Thread and Wi-Fi antennas
 - Lower module/BOM count than the separate BL654+WM02C path, with an internal nRF7002 power switch and reference-like Nordic interconnect
-- 64-Mbit external serial NOR flash operated over standard SPI because the combo module uses nRF5340 QSPI internally for nRF7002
+- 64-Mbit external serial NOR flash operated over SPIM4; the combo module exposes the nRF5340 QSPI signal nets, but they are the same bus and chip-select connection used internally by nRF7002
 - Matter-over-Thread remains a separate Rev B build using nRF7002 hard-off or the footprint-compatible BT40F nRF5340-only population
 - BLE Local Mode remains available independently of Thread or Wi-Fi infrastructure
 - NFC-assisted commissioning
@@ -96,7 +96,7 @@ commercial hardware programs.
 - **Rev A SoC module:** Ezurio BL654, orderable part 451-00001
 - **Rev B radio/host:** Fanstel WT02C40C combo module with nRF5340+nRF7002 and two integrated chip antennas
 - **Sensors:** SHTC3, BME688, and VEML7700 in both baseline revisions
-- **External memory:** Macronix MX25R6435FZNIL0, 64-Mbit serial NOR; QSPI in Rev A and standard SPI in Rev B
+- **External memory:** Macronix MX25R6435FZNIL0, 64-Mbit serial NOR; QSPI in Rev A and SPIM4 in Rev B
 - **Power:** Regulated CR2477 in Rev A; USB-C/protected 1S LiPo in Rev B
 - **Debug:** SWD
 - **Connectivity:** Matter-over-Thread plus BLE Local Mode in Rev A; Wi-Fi added in Rev B

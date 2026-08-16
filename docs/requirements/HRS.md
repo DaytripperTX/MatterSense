@@ -114,7 +114,7 @@ The MCU shall provide, at minimum:
 
 - I²C master interface for sensors
 - Rev A QSPI interface for external NOR flash
-- Rev B standard SPI interface for external NOR flash; the selected combo module uses the nRF5340 QSPI interface internally for nRF7002
+- Rev B SPIM4 interface for external NOR flash; the selected combo module connects the nRF5340's sole QSPI controller and dedicated QSPI CSN net to nRF7002 while exposing those shared signal nets at module pads
 - ADC inputs for battery monitoring and optional sensors
 - GPIOs for LEDs, buttons, and power control
 - SWD or equivalent debug/programming interface
@@ -125,7 +125,7 @@ The MCU shall provide, at minimum:
 - Both revisions shall populate one 64-Mbit (8 MiB) low-power serial NOR flash device.
 - The schematic baseline shall use Macronix **MX25R6435FZNIL0**, an active 1.65–3.6 V, low-power-default device in an 8-WSON (6 × 5 mm) package.
 - The flash shall be powered from the unswitched primary logic rail and placed in deep-power-down mode between accesses; a separate load switch is not required.
-- Rev A shall connect the flash through QSPI. Rev B shall connect the same flash in standard SPI mode through a dedicated SPIM instance because the WT02C40C uses the nRF5340 QSPI interface internally for nRF7002.
+- Rev A shall connect the flash through QSPI. Rev B shall connect the same flash in standard SPI mode through SPIM4. The WT02C40C exposes the nRF5340 QSPI signal nets, but those same nets and the sole dedicated QSPI CSN are connected internally to nRF7002 and do not provide a second independently selectable QSPI bus.
 - Reserve at least 2 MiB for MCUboot/Matter OTA staging until the signed production image size and partition layout are measured. The remaining capacity may support settings, crash records, and a wear-aware circular sensor-history buffer.
 - Flash writes shall be buffered and aligned to page/erase boundaries where practical. Firmware shall not erase a sector for every sensor sample.
 - The active firmware image shall remain in internal MCU flash; external flash is a staging and data-storage device, not a sole boot dependency.
@@ -324,18 +324,19 @@ passives, an internal nRF7002 power switch, NFC pins, SWD, ADC, I²C, and suffic
 exposed GPIO for the baseline design. Its nRF5340-to-nRF7002 connection matches the
 nRF7002 DK reference arrangement.
 
-This selection also records an important correction: nRF52840 is capable of using
-an nRF7002 over SPI/QSPI and is supported by Nordic's Wi-Fi driver and station-mode
-documentation. It was not electrically incapable. The separate BL654+WM02C path is
-not selected for Rev B because Nordic's current supported Matter-over-Wi-Fi reference
-configuration uses nRF5340 and because the combo module reduces module cost, RF
-integration work, external power-switch circuitry, and assembly count.
+The nRF52840 is capable of using an nRF7002 over SPI/QSPI and is supported by
+Nordic's Wi-Fi driver and station-mode documentation. The separate BL654+WM02C path
+is not selected for Rev B because Nordic's current supported Matter-over-Wi-Fi
+reference configuration uses nRF5340 and because the combo module reduces module
+cost, RF integration work, external power-switch circuitry, and assembly count.
 
-The WT02C40C internally consumes the nRF5340 QSPI connection for nRF7002. Rev B
-therefore connects the MX25R6435F through an independent SPIM peripheral in standard
-SPI mode. Schematic capture shall confirm the full pin assignment, the P0.31 Wi-Fi
-power sequence, separate access to module VDD and nRF7002 VBAT, and the antenna
-keepout against the enclosure.
+The nRF5340 has one QSPI controller. WT02C40C connects its QSPI clock, data, and
+chip-select nets internally to nRF7002 and also exposes those shared nets at module
+pads; it does not provide a second independent QSPI bus or chip-select. Rev B
+therefore connects the MX25R6435F through SPIM4 in standard SPI mode. Schematic
+capture shall confirm the full pin assignment, the P0.31 Wi-Fi power sequence,
+separate access to module VDD and nRF7002 VBAT, and the antenna keepout against the
+enclosure.
 
 ### 10.2 Schematic and Layout Selections
 

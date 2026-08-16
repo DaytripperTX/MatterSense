@@ -39,17 +39,7 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ### 3.1 High-Level Block Diagram
 
-```mermaid
-flowchart TD
-    BAT["CR2477"] --> PWR["3.0 V power"]
-    PWR --> MCU["Multiprotocol MCU"]
-    PWR --> SNS["Environmental sensors"]
-    PWR --> FLASH["64-Mbit QSPI NOR"]
-    MCU <--> SNS
-    MCU <--> FLASH
-    MCU <--> THREAD["Thread network"]
-    BLE["BLE commissioner or local client"] <--> MCU
-```
+<img width="874" height="771" alt="matterSense-REV-A drawio" src="https://github.com/user-attachments/assets/0505de6e-4263-498a-820d-b15fea2991b4" />
 
 
 ---
@@ -103,23 +93,7 @@ flowchart TD
 
 ### 4.1 High-Level Block Diagram
 
-```mermaid
-flowchart TD
-    USB["USB-C"] --> PM["Charger and power path"]
-    BAT["Protected 1S LiPo"] <--> PM
-    subgraph COMBO["WT02C40C combo module"]
-        MCU["nRF5340"] <--> WIFI["nRF7002 over QSPI"]
-    end
-    PM --> MCU
-    PM --> SNS["Environmental sensors"]
-    PM --> FLASH["64-Mbit serial NOR over SPI"]
-    MCU <--> SNS
-    MCU <--> FLASH
-    BLE["BLE commissioner or local client"] <--> MCU
-    PM --> WIFI
-    WIFI <--> LAN["Wi-Fi LAN"]
-    MCU <--> NFC["NFC and antenna"]
-```
+<img width="1263" height="761" alt="matterSense-REV-B drawio" src="https://github.com/user-attachments/assets/6a505ccd-1752-4ebf-985e-bf0b55661ebb" />
 
 
 ---
@@ -131,12 +105,13 @@ flowchart TD
 - Manages sensor polling, power domains, and state transitions
 - Handles BLE commissioning, BLE Local Mode, and the selected Thread or Wi-Fi Matter configuration
 - Controls Wi-Fi module power and activity
-- Uses a dedicated standard SPI peripheral for external NOR flash
+- Uses the independent SPIM4 peripheral for external NOR flash
 - The nRF5340 MCU and nRF7002 are integrated in the selected WT02C40C combo module
 
 **Wi-Fi Subsystem**
 - Provides IP connectivity for Matter over Wi-Fi
 - Uses the WT02C40C internal QSPI/coexistence connection matching the nRF7002 DK arrangement
+- Exposes the shared nRF5340 QSPI signal nets at module pads; these are the same nets connected internally to nRF7002, not a second QSPI bus
 - Shares the combo-module footprint, antennas, clocks, and internal power-control circuitry with the nRF5340 host
 - Enabled continuously when USB-powered
 - Uses a supported associated power-save mode when battery-powered in a Matter-over-Wi-Fi build
@@ -148,7 +123,7 @@ flowchart TD
 
 **External Memory**
 - Uses the same 64-Mbit serial NOR part as Rev A
-- Operates in standard SPI mode because Rev B QSPI is allocated to the internal nRF7002 connection
+- Operates in standard SPI mode on SPIM4 because the nRF5340 has one QSPI controller and its QSPI chip-select net is connected internally to nRF7002
 - Stages signed OTA images and buffers selected sensor history
 
 **Power System**
