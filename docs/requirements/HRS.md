@@ -13,12 +13,12 @@ This Hardware Requirements Specification (HRS) defines the required hardware cap
 This document applies to the following hardware revisions:
 
 - **MatterSense Rev A**
-  - BLE commissioning and Matter-over-Thread connectivity
+  - BLE commissioning, standalone BLE Local Mode, and Matter-over-Thread connectivity
   - Coin-cell powered
   - Ultra-low-power operation
 
 - **MatterSense Rev B**
-  - BLE commissioning with Thread and Wi-Fi capability
+  - BLE commissioning and standalone BLE Local Mode with Thread and Wi-Fi capability
   - Rechargeable LiPo battery
   - USB-C power and charging support
   - NFC-assisted onboarding
@@ -113,8 +113,8 @@ The primary MCU / SoC shall provide:
 The MCU shall provide, at minimum:
 
 - I²C master interface for sensors
-- Dedicated QSPI interface for external NOR flash
-- Standard SPI host interface for the Wi-Fi module (Rev B)
+- Rev A QSPI interface for external NOR flash
+- Rev B standard SPI interface for external NOR flash; the selected combo module uses the nRF5340 QSPI interface internally for nRF7002
 - ADC inputs for battery monitoring and optional sensors
 - GPIOs for LEDs, buttons, and power control
 - SWD or equivalent debug/programming interface
@@ -122,10 +122,10 @@ The MCU shall provide, at minimum:
 
 ### 4.3 External Nonvolatile Memory
 
-- Both revisions shall populate one 64-Mbit (8 MiB) low-power QSPI NOR flash device.
+- Both revisions shall populate one 64-Mbit (8 MiB) low-power serial NOR flash device.
 - The schematic baseline shall use Macronix **MX25R6435FZNIL0**, an active 1.65–3.6 V, low-power-default device in an 8-WSON (6 × 5 mm) package.
 - The flash shall be powered from the unswitched primary logic rail and placed in deep-power-down mode between accesses; a separate load switch is not required.
-- The QSPI bus shall be dedicated to external flash. Rev B shall use a separate SPIM instance for the WM02C Wi-Fi host interface.
+- Rev A shall connect the flash through QSPI. Rev B shall connect the same flash in standard SPI mode through a dedicated SPIM instance because the WT02C40C uses the nRF5340 QSPI interface internally for nRF7002.
 - Reserve at least 2 MiB for MCUboot/Matter OTA staging until the signed production image size and partition layout are measured. The remaining capacity may support settings, crash records, and a wear-aware circular sensor-history buffer.
 - Flash writes shall be buffered and aligned to page/erase boundaries where practical. Firmware shall not erase a sector for every sensor sample.
 - The active firmware image shall remain in internal MCU flash; external flash is a staging and data-storage device, not a sole boot dependency.
@@ -172,15 +172,19 @@ Provision may be made for the following optional sensors:
 - BLE radio shall support:
   - Advertising and connection roles
   - Low-power operation suitable for battery-powered devices
-- BLE shall provide commissioning and may provide development/service functions. Continuous post-commissioning advertising is not required unless a defined feature uses it.
+- BLE shall support both Matter commissioning and a product-specific BLE Local Mode.
+- BLE Local Mode shall provide direct access to current sensor readings and selected configuration/service functions without requiring a Thread Border Router, Wi-Fi access point, Matter controller, or Matter fabric.
+- BLE Local Mode is not a Matter operational transport and shall not be described as Matter-over-BLE.
+- BLE Local Mode sensor readings, configuration changes, stored-history access, and service actions shall require an authenticated, encrypted connection; only discovery/advertising metadata explicitly classified as public may be exposed before authentication.
+- The production advertising policy may be low-duty, user-initiated, or time-limited to meet the battery-life target, but BLE Local Mode shall remain available without reflashing firmware.
 
 ### 6.2 Wi-Fi Requirements (Rev B)
 
 - Wi-Fi shall support:
   - 2.4 GHz and 5 GHz operation
-  - Matter-over-Wi-Fi operation through the WM02C companion
+  - Matter-over-Wi-Fi operation through the nRF7002 integrated in the Fanstel WT02C40C
   - Secure onboarding and encrypted communication
-- Hardware shall allow Wi-Fi to be fully powered down in the Thread build or when Wi-Fi is intentionally unavailable
+- Hardware shall use the WT02C40C internal switch, controlled by nRF5340 P0.31, to remove power from the nRF7002 when Wi-Fi is intentionally unavailable
 - A Matter-over-Wi-Fi build shall use a supported associated power-save mode during battery operation; it shall not treat multi-hour hard-off intervals as normal Matter reachability
 
 ### 6.3 NFC Requirements (Rev B)
@@ -192,18 +196,18 @@ Provision may be made for the following optional sensors:
 ### 6.4 Thread and Zigbee
 
 - Rev A shall use Matter-over-Thread as its normal operational transport and shall operate as a low-power Thread Sleepy End Device or Matter Intermittently Connected Device.
-- Rev B shall retain Thread capability as a separate firmware/build option when Wi-Fi is unpopulated. Runtime switching between a commissioned Thread network and Wi-Fi is not required.
+- Rev B shall retain Thread capability as a separate firmware/build option. Runtime switching between a commissioned Thread network and Wi-Fi is not required.
+- Both revisions shall remain usable through BLE Local Mode when no Thread Border Router is available; Matter clusters and Matter fabric operation are not provided over that BLE path.
 - Rev A Thread operation shall use the BL654/nRF52840 IEEE 802.15.4 radio; no additional Thread radio is required.
-- The selected Rev B host shall retain an IEEE 802.15.4 radio for the Matter-over-Thread build/population option.
+- The WT02C40C nRF5340 shall provide the Rev B IEEE 802.15.4 radio for the Matter-over-Thread build option.
 - Zigbee remains a firmware-driven future possibility and is subject to stack and certification requirements.
 
 ### 6.5 Antenna Strategy
 
 - Rev A BLE/Thread shall use the integrated trace antenna in BL654 orderable part 451-00001.
-- Rev B BLE/Thread shall use the integrated antenna of the selected nRF5340-class host module, or a separately validated antenna if a discrete host is selected.
-- Rev B Wi-Fi shall use the integrated chip antenna in the WM02C.
+- Rev B BLE/Thread and Wi-Fi shall use the two integrated chip antennas in the WT02C40C.
 - Both module antennas shall follow their vendor edge-placement, copper-keepout, enclosure-clearance, and ground requirements.
-- Rev B shall provide the nRF52840 NFC antenna connection and matching provisions. The exact PCB loop or external-antenna implementation remains a schematic/layout selection.
+- Rev B shall provide the WT02C40C/nRF5340 NFC antenna connection and matching provisions. The exact PCB loop or external-antenna implementation remains a schematic/layout selection.
 
 ---
 
@@ -261,7 +265,7 @@ Provision may be made for the following optional sensors:
 - Rev B shall additionally permit measurement at USB input and the switched Wi-Fi rail
 - Major load branches shall be individually measurable at minimum for:
   - MCU / Thread / BLE module
-  - External QSPI flash
+  - External serial flash
   - BME688 VDD
   - SHTC3 VDD
   - VEML7700 VDD
@@ -309,35 +313,39 @@ Provision may be made for the following optional sensors:
 
 ---
 
-## 10. Remaining Selections
+## 10. Schematic Handoff and Remaining Selections
 
-### 10.1 Rev B Architecture Blocker
+### 10.1 Rev B Host and Wi-Fi Selection
 
-Rev A has the selected hardware needed to start schematic capture. Rev B does not:
-Nordic's current supported Matter-over-Wi-Fi platforms pair nRF7002 with an
-nRF5340-class host, while BL654/nRF52840 is supported for Matter-over-Thread but is
-not listed as a Matter-over-Wi-Fi host. Before capturing the Rev B MCU/radio portion,
-the project shall either:
+The Fanstel WT02C40C nRF5340+nRF7002 combo module is selected as the Rev B
+schematic baseline. It integrates the supported Nordic Matter-over-Wi-Fi host/companion
+pair, two chip antennas, radio coexistence wiring, required crystals and DC/DC
+passives, an internal nRF7002 power switch, NFC pins, SWD, ADC, I²C, and sufficient
+exposed GPIO for the baseline design. Its nRF5340-to-nRF7002 connection matches the
+nRF7002 DK reference arrangement.
 
-- select an nRF5340-class MCU/module with the required BLE, Thread, NFC, QSPI, SPI,
-  ADC, GPIO, antenna, memory, and certification characteristics; or
-- formally change the Rev B product requirement to retain Matter-over-Thread and use
-  Wi-Fi only for a non-Matter data path.
+This selection also records an important correction: nRF52840 is capable of using
+an nRF7002 over SPI/QSPI and is supported by Nordic's Wi-Fi driver and station-mode
+documentation. It was not electrically incapable. The separate BL654+WM02C path is
+not selected for Rev B because Nordic's current supported Matter-over-Wi-Fi reference
+configuration uses nRF5340 and because the combo module reduces module cost, RF
+integration work, external power-switch circuitry, and assembly count.
 
-The WM02C, external flash, sensors, and power-path selections can be retained, but
-their pin mapping and the Rev B current model shall be revalidated against the chosen
-host.
+The WT02C40C internally consumes the nRF5340 QSPI connection for nRF7002. Rev B
+therefore connects the MX25R6435F through an independent SPIM peripheral in standard
+SPI mode. Schematic capture shall confirm the full pin assignment, the P0.31 Wi-Fi
+power sequence, separate access to module VDD and nRF7002 VBAT, and the antenna
+keepout against the enclosure.
 
 ### 10.2 Schematic and Layout Selections
 
 The following non-architectural selections are intentionally completed during
-schematic capture or layout. They do not block Rev A schematic capture and will not
-block Rev B after the host decision is closed:
+schematic capture or layout. They do not block schematic capture for either revision:
 
 - Exact converter inductors, capacitors, feedback/current-limit components, and bias-effective capacitance
 - Exact CR2477 holder and protected 2000 mAh LiPo pack, connector, polarity, retention, and NTC implementation
 - Exact USB-C receptacle, CC resistors, ESD/TVS and input-protection parts for Rev B
-- Exact 32.768 kHz crystal and load capacitors
+- Exact Rev A 32.768 kHz crystal and load capacitors; Rev B clocks are integrated in WT02C40C
 - Exact BME688 break-before-make selector, current/voltage headers, shunts, and v1.0 test-pad geometry
 - Exact SWD/bed-of-nails pad geometry
 - Rev B NFC antenna and matching implementation

@@ -9,7 +9,7 @@ This document defines the **high-level system architecture** for the Environment
 
 The architecture is designed to:
 - Support **low-power battery operation**
-- Scale from **Matter-over-Thread with BLE commissioning (Rev A)** to **Thread + Wi-Fi + USB-powered (Rev B)**
+- Scale from **Matter-over-Thread plus BLE Local Mode (Rev A)** to **Thread + Wi-Fi + BLE Local Mode + USB power (Rev B)**
 - Support **Matter and common smart-home ecosystems**
 - Be suitable for **volume manufacturing and test**
 
@@ -25,8 +25,8 @@ The device is a compact, battery-powered environmental sensor node that periodic
 Two hardware revisions are planned:
 
 - **Rev A**  
-  Ultra-low-power Matter-over-Thread device, commissioned over BLE and optimized
-  for coin-cell operation.
+  Ultra-low-power Matter-over-Thread device with BLE commissioning and a secure,
+  standalone BLE Local Mode, optimized for coin-cell operation.
 
 - **Rev B**  
   Feature-expanded device with Wi-Fi connectivity, USB-C power, rechargeable battery support, and NFC-based onboarding.
@@ -35,7 +35,7 @@ Both revisions share a common architectural philosophy and firmware model.
 
 ---
 
-## 3. Rev A Architecture (Matter-over-Thread, BLE Commissioning, Coin Cell)
+## 3. Rev A Architecture (Matter-over-Thread, BLE Local Mode, Coin Cell)
 
 ### 3.1 High-Level Block Diagram
 
@@ -48,7 +48,7 @@ flowchart TD
     MCU <--> SNS
     MCU <--> FLASH
     MCU <--> THREAD["Thread network"]
-    BLE["BLE commissioner"] <--> MCU
+    BLE["BLE commissioner or local client"] <--> MCU
 ```
 
 
@@ -59,7 +59,7 @@ flowchart TD
 **Multiprotocol SoC / MCU**
 - Central controller for all system functions
 - Handles sensor polling, data aggregation, and power-state transitions
-- Manages BLE commissioning and Matter-over-Thread communication
+- Manages BLE commissioning, the product-specific BLE Local Mode, and Matter-over-Thread communication
 - Enters deep sleep between scheduled events
 
 **Sensors**
@@ -80,9 +80,10 @@ flowchart TD
 - No charging circuitry
 
 **Wireless Operation**
-- BLE is used for Matter commissioning and optional development/service access
+- BLE is used for Matter commissioning and for a secure Local Mode that exposes sensor data and selected configuration/service functions
+- BLE Local Mode is a product-specific GATT interface, not Matter-over-BLE
 - Thread is the normal Matter operational transport
-- A Thread Border Router and Matter controller/fabric are required
+- A Thread Border Router and Matter controller/fabric are required for Matter-over-Thread, but neither is required for BLE Local Mode
 
 ---
 
@@ -106,12 +107,15 @@ flowchart TD
 flowchart TD
     USB["USB-C"] --> PM["Charger and power path"]
     BAT["Protected 1S LiPo"] <--> PM
-    PM --> MCU["Multiprotocol MCU"]
+    subgraph COMBO["WT02C40C combo module"]
+        MCU["nRF5340"] <--> WIFI["nRF7002 over QSPI"]
+    end
+    PM --> MCU
     PM --> SNS["Environmental sensors"]
-    PM --> FLASH["64-Mbit QSPI NOR"]
+    PM --> FLASH["64-Mbit serial NOR over SPI"]
     MCU <--> SNS
     MCU <--> FLASH
-    MCU <--> WIFI["Wi-Fi companion over SPI"]
+    BLE["BLE commissioner or local client"] <--> MCU
     PM --> WIFI
     WIFI <--> LAN["Wi-Fi LAN"]
     MCU <--> NFC["NFC and antenna"]
@@ -125,15 +129,17 @@ flowchart TD
 **Multiprotocol SoC / MCU**
 - Remains the system master controller
 - Manages sensor polling, power domains, and state transitions
-- Handles BLE commissioning and the selected Thread or Wi-Fi Matter configuration
+- Handles BLE commissioning, BLE Local Mode, and the selected Thread or Wi-Fi Matter configuration
 - Controls Wi-Fi module power and activity
-- Uses its dedicated QSPI controller for external NOR flash
+- Uses a dedicated standard SPI peripheral for external NOR flash
+- The nRF5340 MCU and nRF7002 are integrated in the selected WT02C40C combo module
 
 **Wi-Fi Subsystem**
 - Provides IP connectivity for Matter over Wi-Fi
-- Uses a standard SPI host connection so the MCU QSPI controller remains available for flash
+- Uses the WT02C40C internal QSPI/coexistence connection matching the nRF7002 DK arrangement
+- Shares the combo-module footprint, antennas, clocks, and internal power-control circuitry with the nRF5340 host
 - Enabled continuously when USB-powered
-- Duty-cycled aggressively when battery-powered
+- Uses a supported associated power-save mode when battery-powered in a Matter-over-Wi-Fi build
 
 **NFC Subsystem**
 - Enables tap-to-pair and out-of-band credential exchange
@@ -141,7 +147,8 @@ flowchart TD
 - Passive when not actively scanned
 
 **External Memory**
-- Uses the same 64-Mbit QSPI NOR baseline as Rev A
+- Uses the same 64-Mbit serial NOR part as Rev A
+- Operates in standard SPI mode because Rev B QSPI is allocated to the internal nRF7002 connection
 - Stages signed OTA images and buffers selected sensor history
 
 **Power System**
@@ -160,7 +167,7 @@ flowchart TD
   - No aggressive duty cycling required
 
 - **Battery-Powered Mode**
-  - Matter-over-Thread build keeps Wi-Fi unpopulated or hard-off
+  - Matter-over-Thread build uses the combo module with nRF7002 hard-off or the footprint-compatible nRF5340-only population
   - Matter-over-Wi-Fi build remains associated using a supported power-save mode
   - Wi-Fi is the only hard-gateable load; baseline sensors and flash use their own low-power modes
 
@@ -188,7 +195,8 @@ interfaces with compact production test points as defined by the HRS.
 
 ## 6. Architecture Evolution Notes
 
-- Rev B is a strict superset of Rev A
+- Rev B is a feature superset of Rev A
 - Firmware architecture is designed to scale without rewrite
 - Sensor interfaces and power domains are reusable across revisions
+- BLE Local Mode remains available independently of Thread Border Router, Wi-Fi, or Matter-controller availability
 - Future revisions may add additional sensors without altering the core architecture

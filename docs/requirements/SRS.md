@@ -17,9 +17,10 @@ hardware and firmware system. It translates product requirements into clear, tes
 ## 2. System Overview
 
 MatterSense is a battery-powered embedded system built around a Nordic multiprotocol
-SoC. Rev A operates as a Matter-over-Thread device commissioned through Bluetooth
-Low Energy; Rev B adds an optional Wi-Fi companion for Matter-over-Wi-Fi operation.
-Both revisions include environmental sensors and external nonvolatile storage.
+SoC. Rev A supports Matter-over-Thread, BLE commissioning, and a product-specific
+BLE Local Mode that does not require a Thread Border Router or Matter controller.
+Rev B uses an nRF5340+nRF7002 combo module for Matter-over-Wi-Fi operation. Both
+revisions include environmental sensors and external nonvolatile storage.
 
 The system supports multiple power modes that directly influence wireless behavior
 and system availability.
@@ -30,7 +31,7 @@ and system availability.
 
 ### 3.1 Hardware
 - Rev A SoC: Nordic nRF52840 in the Ezurio BL654 module
-- Rev B host: nRF5340-class MCU/module selection required to meet the current Nordic Matter-over-Wi-Fi platform requirement with nRF7002
+- Rev B host/radio: Fanstel WT02C40C combo module integrating nRF5340+nRF7002 and both radio antennas
 - Sensors:
   - Temperature & humidity
   - eCO₂ / VOC
@@ -41,7 +42,7 @@ and system availability.
   - Battery-powered operation
   - USB-powered operation (Rev B)
 - Nonvolatile storage:
-  - 64-Mbit external QSPI NOR for OTA staging and selected sensor history
+  - 64-Mbit external serial NOR for OTA staging and selected sensor history; QSPI on Rev A and standard SPI on Rev B
 - Debug: SWD interface
 - Expansion: NFC pins routed for Rev B compatibility
 
@@ -50,9 +51,11 @@ and system availability.
 ### 3.2 Wireless Connectivity
 - Rev A:
   - Bluetooth Low Energy commissioning
+  - Secure, non-Matter BLE Local Mode for sensor access and selected configuration
   - Matter-over-Thread operational transport
 - Rev B:
   - Bluetooth Low Energy commissioning
+  - Secure, non-Matter BLE Local Mode independent of Thread or Wi-Fi availability
   - Matter-over-Thread and Matter-over-Wi-Fi capability
   - One operational IP transport selected per product/firmware configuration; runtime Thread/Wi-Fi transport switching is not required
   - Power-mode–dependent radio operation
@@ -84,14 +87,16 @@ and system availability.
 ### 4.3 Wireless Operation
 - FR-11: The system shall support BLE-based commissioning.
 - FR-12: The system shall maintain reliable wireless connectivity during commissioning.
-- FR-13: Rev B shall support Matter-over-Wi-Fi through the WM02C companion.
-- FR-24: Both revisions shall support Matter-over-Thread as a Sleepy End Device or Matter Intermittently Connected Device appropriate to the final application behavior; it is Rev A's normal transport and a separate Rev B firmware/build option when Wi-Fi is unpopulated.
+- FR-13: Rev B shall support Matter-over-Wi-Fi through the nRF7002 integrated in WT02C40C.
+- FR-24: Both revisions shall support Matter-over-Thread as a Sleepy End Device or Matter Intermittently Connected Device appropriate to the final application behavior; it is Rev A's normal transport and a separate Rev B firmware/build option using WT02C40C with Wi-Fi disabled or the footprint-compatible BT40F Thread-only population.
+- FR-30: Both revisions shall provide a BLE Local Mode that exposes current sensor readings and selected local configuration or service operations through a product-specific GATT interface without requiring a Thread Border Router, Wi-Fi access point, Matter controller, or Matter fabric.
+- FR-31: BLE Local Mode shall remain distinct from Matter commissioning and shall not be represented as Matter-over-BLE. Its advertising policy may be low-duty, user-initiated, or time-limited to meet the battery-life requirement, but the mode shall be available without reflashing firmware.
 
 ---
 
 ### 4.4 Power-Mode–Aware Operation (Rev B)
 - FR-14: The system shall detect whether it is battery-powered or externally powered.
-- FR-15: When battery-powered, the system shall aggressively duty-cycle wireless radios.
+- FR-15: When battery-powered, the system shall use transport-appropriate low-power behavior. Radios not required by the selected build or operating mode may be hard-off; an active Matter-over-Wi-Fi configuration shall remain associated as required by FR-16.
 - FR-16: When battery-powered in a Matter-over-Wi-Fi configuration, the system shall use a supported associated power-save mode and meet the selected Matter reachability requirements.
 - FR-17: When externally powered, the system shall maintain continuous network availability.
 - FR-18: The system shall transition cleanly between power modes without reboot or data loss.
@@ -134,6 +139,7 @@ and system availability.
 - NFR-6: Wireless communication shall be encrypted.
 - NFR-7: Unauthorized firmware installation shall be prevented.
 - NFR-11: Sensor-history storage shall not contain credentials, private keys, or other security-sensitive commissioning material.
+- NFR-12: BLE Local Mode shall require authenticated and encrypted access for sensor readings, configuration, stored history, and service actions; only discovery/advertising metadata explicitly classified as public may be exposed before authentication.
 
 ---
 
@@ -151,8 +157,8 @@ and system availability.
 ### 6.2 External Interfaces
 - NFC interface pins shall be routed and electrically supported.
 - Test points shall be provided for power and ground.
-- Dedicated QSPI signals shall connect the MCU to external NOR flash.
-- Rev B shall connect the Wi-Fi companion through a separate standard SPI peripheral so the MCU QSPI controller remains dedicated to flash.
+- Rev A dedicated QSPI signals shall connect the MCU to external NOR flash.
+- Rev B shall connect external NOR flash through a dedicated standard SPI peripheral because WT02C40C uses the nRF5340 QSPI interface internally for nRF7002.
 
 ---
 
@@ -170,6 +176,7 @@ and system availability.
 | Sensor acquisition | Functional testing |
 | Power consumption | Current profiling |
 | Wireless behavior | Connectivity testing |
+| BLE Local Mode | No-infrastructure GATT access, security, advertising-policy, and power testing |
 | Power-mode switching | Mode transition testing |
 | Secure update and recovery | Signed-image OTA, rejection, interruption, and rollback tests |
 | Sensor-history storage | Capacity, wear, integrity, wraparound, and power-interruption tests |

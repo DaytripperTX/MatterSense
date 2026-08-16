@@ -22,8 +22,10 @@ hardware and firmware development practices, with a strong focus on:
 - Clear documentation and requirements traceability
 
 The system is architected to evolve across multiple hardware revisions, beginning
-with a Matter-over-Thread sensor node commissioned over Bluetooth Low Energy and
-expanding toward direct Wi-Fi IP transport without requiring a Thread Border Router.
+with a Matter-over-Thread sensor node that also supports Bluetooth Low Energy (BLE)
+commissioning and standalone local operation, then expanding toward direct Wi-Fi IP
+transport. A Thread Border Router is required for Matter-over-Thread, but not for
+the device's non-Matter BLE Local Mode.
 
 ---
 
@@ -41,7 +43,8 @@ expanding toward direct Wi-Fi IP transport without requiring a Thread Border Rou
 
 ### Revision A (Current Focus)
 - Ezurio BL654 module based on the Nordic nRF52840
-- Matter-over-Thread operation with BLE commissioning
+- Matter-over-Thread operation, BLE commissioning, and secure BLE Local Mode
+- Direct sensor access and selected local configuration over BLE when no Thread Border Router is available
 - Temperature/humidity, VOC/IAQ/eCO₂, barometric pressure, and lux sensing
 - Ultra-low-power operation
 - Regulated CR2477 coin-cell power
@@ -49,12 +52,14 @@ expanding toward direct Wi-Fi IP transport without requiring a Thread Border Rou
 - SWD-based development and debugging
 
 ### Planned Revision B
-- Matter-over-Wi-Fi target using a Fanstel WM02C/nRF7002 companion
-- nRF5340-class host/module selection required before Rev B schematic capture; the Rev A BL654/nRF52840 is not a currently supported Nordic Matter-over-Wi-Fi host
-- Matter-over-Thread remains a separate Rev B build/population option when Wi-Fi is omitted
+- Matter-over-Wi-Fi target using a Fanstel WT02C40C nRF5340+nRF7002 combo module with integrated BLE/Thread and Wi-Fi antennas
+- Lower module/BOM count than the separate BL654+WM02C path, with an internal nRF7002 power switch and reference-like Nordic interconnect
+- 64-Mbit external serial NOR flash operated over standard SPI because the combo module uses nRF5340 QSPI internally for nRF7002
+- Matter-over-Thread remains a separate Rev B build using nRF7002 hard-off or the footprint-compatible BT40F nRF5340-only population
+- BLE Local Mode remains available independently of Thread or Wi-Fi infrastructure
 - NFC-assisted commissioning
 - USB-C plus protected 2000 mAh LiPo power
-- Operation without a Thread Border Router; a Matter controller/fabric is still required
+- Operation without a Thread Border Router through BLE Local Mode or Matter-over-Wi-Fi; a Matter controller/fabric is required only for Matter operation
 - The same baseline environmental sensor suite as Rev A, with room for future variants
 
 ---
@@ -81,7 +86,7 @@ commercial hardware programs.
 - ✔ Baseline component and power-architecture selection completed
 - ✔ Product, system, hardware, and traceability requirements aligned
 - ⏳ Rev A schematic capture
-- ⏳ Rev B Matter-over-Wi-Fi host/module selection
+- ⏳ Rev B WT02C40C schematic integration and measured power validation
 - ⏳ Firmware and hardware bring-up
 
 ---
@@ -89,13 +94,13 @@ commercial hardware programs.
 ## Hardware Platform
 
 - **Rev A SoC module:** Ezurio BL654, orderable part 451-00001
-- **Rev B host:** nRF5340-class MCU/module to be selected for the Matter-over-Wi-Fi requirement
+- **Rev B radio/host:** Fanstel WT02C40C combo module with nRF5340+nRF7002 and two integrated chip antennas
 - **Sensors:** SHTC3, BME688, and VEML7700 in both baseline revisions
-- **External memory:** Macronix MX25R6435FZNIL0, 64-Mbit QSPI NOR
+- **External memory:** Macronix MX25R6435FZNIL0, 64-Mbit serial NOR; QSPI in Rev A and standard SPI in Rev B
 - **Power:** Regulated CR2477 in Rev A; USB-C/protected 1S LiPo in Rev B
 - **Debug:** SWD
-- **Connectivity:** Matter-over-Thread with BLE commissioning in Rev A; Wi-Fi added in Rev B
-- **Commissioning:** BLE in both revisions, with NFC assistance planned for Rev B
+- **Connectivity:** Matter-over-Thread plus BLE Local Mode in Rev A; Wi-Fi added in Rev B
+- **Commissioning:** BLE in both revisions, with NFC assistance planned for Rev B; BLE Local Mode is a separate non-Matter operational interface
 
 ---
 

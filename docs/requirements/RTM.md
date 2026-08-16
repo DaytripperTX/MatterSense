@@ -53,6 +53,7 @@ The RTM maps:
 | PRD-20 | Privacy-preserving sound sensing | FR-6, PRD Notes | Firmware + Product Design | Design review |
 | PRD-21 | Matter-over-Thread operation (Rev A baseline; Rev B build option) | FR-24 | Wireless HW + Thread/Matter Stack | Commissioning and interoperability test |
 | PRD-22 | Local buffering of selected sensor history | FR-25, FR-26, NFR-10, NFR-11 | External Flash + Firmware | Capacity, wear, integrity, wraparound, and interruption test |
+| PRD-23 | Standalone BLE sensor access and selected local configuration | FR-30, FR-31, NFR-12 | BLE GATT + Firmware | No-infrastructure functional, security, and power test |
 
 ---
 

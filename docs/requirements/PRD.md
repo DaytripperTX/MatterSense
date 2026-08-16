@@ -44,6 +44,7 @@ expansion and power-scaling without fundamental redesign.
 - Optionally monitor ambient sound levels in a future externally powered variant (non-audio)
 - Enable smart home automations based on environmental conditions
 - Demonstrate Matter device commissioning and interoperability
+- Permit direct local sensor access and selected configuration over BLE when no Thread Border Router or Matter controller is available
 - Buffer selected sensor history locally when configured
 
 ---
@@ -66,19 +67,21 @@ expansion and power-scaling without fundamental redesign.
 ### 5.2 Revision A (Initial Release)
 - Battery-powered operation
 - BLE-based commissioning
+- Secure BLE Local Mode for standalone sensor access and selected local configuration
 - Matter-over-Thread operation
 - Core environmental sensing (T/H, eCO₂/VOC, lux)
 - Barometric pressure capability
 - Secure OTA staging and local sensor-data buffering in external flash
 - Ultra-low-power, sleep-centric design
-- Thread Border Router and Matter controller/fabric required
+- Thread Border Router and Matter controller/fabric required for Matter-over-Thread, but not for BLE Local Mode
 
 ---
 
 ### 5.3 Revision B (Planned)
 - Dual power modes: battery-powered or USB-powered
 - Matter-over-Wi-Fi operation without requiring a Thread Border Router
-- Matter-over-Thread build/population option when Wi-Fi is unpopulated
+- Matter-over-Thread build option with Wi-Fi disabled or the footprint-compatible Thread-only host-module population
+- Secure BLE Local Mode independent of Thread and Wi-Fi availability
 - NFC-assisted commissioning
 - Power-mode–aware radio behavior:
   - Supported associated Wi-Fi power-save behavior when battery-powered
@@ -103,8 +106,9 @@ expansion and power-scaling without fundamental redesign.
 
 - eCO₂ and VOC values are trend-based and not laboratory-grade
 - Sound level sensing is relative and intended for environmental awareness only
-- Rev A devices rely on a Thread Border Router and a Matter controller/fabric
-- Rev B devices may use Wi-Fi transport without a Thread Border Router but still require a Matter controller/fabric
+- Rev A devices require a Thread Border Router and Matter controller/fabric for Matter-over-Thread, but remain usable through BLE Local Mode without either
+- Rev B devices may use Matter-over-Wi-Fi without a Thread Border Router; BLE Local Mode remains available without a Matter controller/fabric
+- BLE Local Mode is a product-specific GATT interface, not a Matter operational transport
 - Power availability directly influences radio availability and responsiveness
 
 ---
@@ -113,6 +117,7 @@ expansion and power-scaling without fundamental redesign.
 
 - Successful commissioning with at least one Matter ecosystem
 - Stable reporting of environmental sensor data over extended runtime
+- Reliable local readout and selected configuration through BLE without Thread or Wi-Fi infrastructure
 - Successful signed firmware update with recovery from an interrupted transfer
 - Reliable circular buffering and retrieval of selected sensor history
 - Multi-month battery life under typical indoor conditions
@@ -136,6 +141,7 @@ expansion and power-scaling without fundamental redesign.
 |----|----|
 | High power draw from air-quality sensors | Aggressive duty cycling and sampling control |
 | Wi-Fi power consumption in Rev B | Power-mode–dependent radio behavior |
+| BLE Local Mode reducing battery life | Low-duty or user-initiated advertising policy, authenticated connections, and measured current budget |
 | Battery life degradation | Feature gating when on battery |
 | Flash wear or interrupted writes | Buffered writes, circular storage, integrity metadata, and recovery testing |
 | User privacy concerns | No audio recording, no cloud dependency |

@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document closes the Rev A pre-schematic power architecture and the Rev B power-path architecture. The Rev B MCU load remains provisional until an nRF5340-class Matter-over-Wi-Fi host/module is selected. It:
+This document closes the Rev A pre-schematic power architecture and the Rev B power-path architecture. The Rev B radio baseline is now the Fanstel WT02C40C nRF5340+nRF7002 combo module; its battery-life contribution remains provisional until measured. It:
 
 - maps every baseline load to a power rail;
 - defines representative operating profiles;
@@ -23,18 +23,18 @@ The results are planning estimates, not guaranteed battery-life specifications. 
 | Primary rail | 3.0 V regulated | 3.3 V regulated | Frozen |
 | Main converter | [TI TPS63900](https://www.ti.com/lit/ds/symlink/tps63900.pdf) buck-boost | [TI TPS63802](https://www.ti.com/lit/ds/symlink/tps63802.pdf) 2 A buck-boost | Frozen |
 | USB/LiPo power path | Not applicable | [TI BQ24074](https://www.ti.com/lit/ds/symlink/bq24074.pdf), 500 mA input limit and approximately 400–500 mA charge current | Frozen for schematic baseline |
-| Wi-Fi rail | Not applicable | 3.3 V switched branch from 3V3_MAIN | Frozen |
-| Wi-Fi switch | Not applicable | [TI TPS22919](https://www.ti.com/lit/gpn/TPS22919), controlled by the selected Rev B host | Frozen electrically; control pin pending host selection |
+| Wi-Fi rail | Not applicable | Separately measurable 3V3_WIFI_IN feed from 3V3_MAIN to WT02C40C pin 17 | Frozen |
+| Wi-Fi switch | Not applicable | Integrated in WT02C40C and controlled by nRF5340 P0.31 | Frozen; firmware sequence and leakage require validation |
 | BME688 1.8 V evaluation | Pre-v1.0 prototypes shall populate a [TPS62840](https://www.ti.com/lit/ds/symlink/tps62840.pdf) 1.8 V buck and a break-before-make SPDT micro selector between 3V0_MAIN and 1.8 V; VDDIO remains on 3V0_MAIN | Same provision between 3V3_MAIN and 1.8 V; VDDIO remains on 3V3_MAIN | Production rail and removal of evaluation hardware pending measured comparison |
 | Sensor gating | No separate load switch; use device sleep modes | Baseline sensors remain powered and use sleep modes | Frozen |
 | Battery measurement | MCU ADC through a normally-off switched divider | MCU ADC through a normally-off switched divider; charger PGOOD and CHG also routed to MCU | Frozen |
 | Fuel gauge | Not fitted | Not fitted; reserve test/DNP provision only if later accuracy requirements justify it | Frozen |
 | Power profiling access | Board versions below v1.0 shall use shunted two-pin 2.54 mm male series-current headers plus separate two-pin 2.54 mm female VDD/GND voltage headers | Same, plus separate Wi-Fi and USB/battery-path access; v1.0 and later retain compact test points after validation | Required for schematic/layout |
-| Low-frequency clock | External 32.768 kHz crystal on BL654 | Host/module-specific LFXO implementation | Rev A frozen; Rev B pending host selection |
-| External nonvolatile memory | [Macronix MX25R6435FZNIL0](https://www.digikey.com/en/products/detail/macronix/MX25R6435FZNIL0/6558605), 64-Mbit QSPI NOR on 3V0_MAIN | Same part on 3V3_MAIN; QSPI dedicated to flash and WM02C connected through standard SPI | Frozen for OTA staging and sensor-history storage |
+| Low-frequency clock | External 32.768 kHz crystal on BL654 | 32.768 kHz crystal and load components integrated in WT02C40C | Frozen |
+| External nonvolatile memory | [Macronix MX25R6435FZNIL0](https://www.digikey.com/en/products/detail/macronix/MX25R6435FZNIL0/6558605), 64-Mbit serial NOR over QSPI on 3V0_MAIN | Same part on 3V3_MAIN over a dedicated standard SPI peripheral; WT02C40C uses QSPI internally for nRF7002 | Frozen for OTA staging and sensor-history storage |
 | Optional sound block | Not fitted | Not fitted in baseline; future externally powered option only | Frozen for baseline |
 
-The current Rev B hardware-selection document identifies the Fanstel WM02C as the frozen Wi-Fi module. The Wi-Fi rail and peak design are based on the nRF7002 electrical envelope and remain valid through the host re-selection. The Rev B baseline-current and battery-life figures remain provisional because the original BL654/nRF52840 host is not a currently supported Nordic Matter-over-Wi-Fi target.
+The current Rev B hardware-selection document identifies the Fanstel WT02C40C as the frozen radio/host module. It integrates nRF5340, nRF7002, both chip antennas, clocks, radio coexistence wiring, and the nRF7002 power switch. The earlier claim that nRF52840 could not use nRF7002 was incorrect; Nordic supports nRF52840 Wi-Fi operation, but the selected combo module reduces integration and firmware-platform risk. The existing approximately 300 mA rail design remains appropriate, while the Rev B baseline-current and battery-life figures remain provisional pending complete-module measurements.
 
 ---
 
@@ -60,7 +60,7 @@ The TPS63900 provides a stable 3.0 V rail across the useful cell range, has 75 n
 
 The 3.0 V setpoint is preferred over 3.3 V because it is compatible with every baseline load, reduces energy per active event, and reduces boost ratio and input current near coin-cell end of life.
 
-### 3.2 Rev B: One 3.3 V Converter With a Switched Wi-Fi Branch
+### 3.2 Rev B: One 3.3 V Converter With an Internally Switched Wi-Fi Feed
 
 The LiPo voltage crosses above and below 3.3 V during discharge, so a buck-only or boost-only solution cannot hold the rail across the full battery range. The TPS63802 provides:
 
@@ -69,7 +69,7 @@ The LiPo voltage crosses above and below 3.3 V during discharge, so a buck-only 
 - 11 µA typical operating quiescent current;
 - substantial margin above the approximately 300 mA calculated system peak.
 
-A separate Wi-Fi converter is not required. A TPS22919 load switch isolates the Wi-Fi module when off, limits inrush through controlled turn-on, and introduces only about 23 mV typical drop at 260 mA from its 90 mΩ typical on-resistance.
+A separate Wi-Fi converter or external load switch is not required. WT02C40C exposes a separate 3.3 V nRF7002 input at pin 17 and embeds the switch controlled by nRF5340 P0.31. This preserves hard-off control and a separately measurable Wi-Fi feed while removing TPS22919 and its supporting routing/BOM. Prototype testing shall characterize inrush, off leakage, discharge behavior, and the required power-up/down sequence.
 
 ### 3.3 BME688 1.8 V Decision Reopened for Measurement
 
@@ -87,11 +87,13 @@ Both supply paths shall be functional on pre-v1.0 evaluation builds. The product
 
 ### 3.4 External Flash Without a Load Switch
 
-Both revisions populate a 64-Mbit Macronix MX25R6435FZNIL0 on a dedicated host QSPI
-controller. The part accepts either primary rail, defaults to its ultra-low-power
-mode, and can enter deep power down between logging or update operations. Its residual
-sleep current is lower than the leakage and area penalty of a separate load switch, so
-the flash remains connected to the unswitched main rail.
+Both revisions populate a 64-Mbit Macronix MX25R6435FZNIL0. Rev A uses the BL654
+QSPI controller. WT02C40C internally allocates the nRF5340 QSPI interface to nRF7002,
+so Rev B uses the flash's standard SPI mode on a dedicated SPIM instance. The part
+accepts either primary rail, defaults to its ultra-low-power mode, and can enter deep
+power down between logging or update operations. Its residual sleep current is lower
+than the leakage and area penalty of a separate load switch, so the flash remains
+connected to the unswitched main rail.
 
 Reserve at least 2 MiB for a signed MCUboot/Matter OTA secondary slot until the final
 image and partition layout are measured. Approximately 5.75 MiB can remain for a
@@ -100,8 +102,8 @@ and storage metadata. Firmware shall buffer small records, avoid erasing a secto
 every sample, and recover from interrupted writes. The active firmware remains in
 internal MCU flash.
 
-Rev B uses a separate standard SPI peripheral for the WM02C, preventing the Wi-Fi
-companion from competing with the OTA/data flash for the selected host's QSPI controller.
+Rev B shall verify MCUboot and the sensor-history driver against `jedec,spi-nor` on
+the selected SPIM instance. OTA and buffered logging do not require quad-I/O throughput.
 
 ### 3.5 Sensors Remain Powered
 
@@ -124,7 +126,7 @@ CR2477 → TPS63900 3.0 V buck-boost → BL654, MX25R6435F QSPI flash, SHTC3, an
 
 ### 4.2 Rev B
 
-USB-C 5 V and the 1S LiPo connect to the BQ24074 power-path charger. Its OUT node feeds the TPS63802 3.3 V buck-boost. The selected nRF5340-class host, MX25R6435F QSPI flash, SHTC3, and VEML7700 use 3V3_MAIN; a TPS22919 creates 3V3_WIFI_SW for the WM02C. On pre-v1.0 evaluation hardware, BME688 VDD is selectable through a populated break-before-make SPDT switch from 3V3_MAIN or a populated TPS62840 1.8 V evaluation rail, while BME688 VDDIO remains on 3V3_MAIN.
+USB-C 5 V and the 1S LiPo connect to the BQ24074 power-path charger. Its OUT node feeds the TPS63802 3.3 V buck-boost. WT02C40C nRF5340 VDD, the SPI-connected MX25R6435F, SHTC3, and VEML7700 use 3V3_MAIN. A separately measurable branch, 3V3_WIFI_IN, feeds WT02C40C pin 17; the module's internal switch gates nRF7002 under P0.31 control. On pre-v1.0 evaluation hardware, BME688 VDD is selectable through a populated break-before-make SPDT switch from 3V3_MAIN or a populated TPS62840 1.8 V evaluation rail, while BME688 VDDIO remains on 3V3_MAIN.
 
 With USB present, the power path powers the system and charges the battery. Without USB, the battery supplies OUT through the internal battery FET. The battery can supplement the input during a load transient, and the system can start from USB with a missing or deeply discharged battery.
 
@@ -134,12 +136,12 @@ With USB present, the power path powers the system and charges the battery. With
 
 | Function | Baseline component | Rev A rail | Rev B rail | Low-power state |
 |---|---|---:|---:|---|
-| MCU / Thread / BLE | Ezurio BL654 (Rev A); nRF5340-class host pending (Rev B) | 3V0_MAIN | 3V3_MAIN | Matter ICD/Thread SED idle; exact Rev B state current pending host selection |
+| MCU / Thread / BLE | Ezurio BL654 (Rev A); WT02C40C nRF5340 (Rev B) | 3V0_MAIN | 3V3_MAIN | Matter ICD/Thread SED or BLE Local Mode; exact Rev B state current pending measurement |
 | OTA / data flash | Macronix MX25R6435FZNIL0 | 3V0_MAIN | 3V3_MAIN | Deep power down between buffered writes/updates |
 | Temperature / humidity | Sensirion SHTC3 | 3V0_MAIN | 3V3_MAIN | Explicit sleep command |
 | VOC / IAQ / pressure | Bosch BME688 | 3V0_MAIN or VDD_1V8_EVAL | 3V3_MAIN or VDD_1V8_EVAL | BSEC ULP / sensor sleep between heater events |
 | Ambient light | Vishay VEML7700 | 3V0_MAIN | 3V3_MAIN | Software shutdown between readings |
-| Wi-Fi | Fanstel WM02C | — | 3V3_WIFI_SW | Hard off through TPS22919 |
+| Wi-Fi | WT02C40C internal nRF7002 | — | 3V3_WIFI_IN at module pin 17 | Hard off through the module's P0.31-controlled internal switch |
 | Optional 1.8 V sensor | ENS160 or multispectral sensor | Not fitted; populated evaluation rail is reserved for BME688 testing on pre-v1.0 hardware | Future variant may reuse VDD_1V8_EVAL after load review | Converter may be omitted after BME688 rail selection is frozen |
 | Battery sensing | Resistor divider + ADC filter | Raw coin cell, switched | Raw LiPo, switched | Divider normally disconnected |
 | Status LED | BOM/layout selection | 3V0_MAIN | 3V3_MAIN | Off except short user-visible events |
@@ -170,10 +172,9 @@ With USB present, the power path powers the system and charges the battery. With
 | TPS62840 | Operating quiescent current | 0.060 µA typical | Populated on pre-v1.0 BME688 evaluation hardware; included only in measured 1.8 V cases, not the direct-main-rail planning baseline |
 | TPS63802 | Operating quiescent current | 11 µA typical | Included in Rev B |
 | BQ24074 | Battery sleep current, USB absent | 4.3 µA typical, 6.5 µA max at stated condition | Conservative 6.5 µA used |
-| TPS22919 | Off-state current | 2 nA typical | Wi-Fi module isolated |
-| WM02C / nRF7002 | TX | 191 mA at 2.4 GHz; 260 mA at 5 GHz | 260 mA used for rail design |
-| WM02C / nRF7002 | RX listen | approximately 56–60 mA | Peak/active state |
-| WM02C / nRF7002 | Connected power save | approximately 4 mA planning value | Used only for USB-mode range |
+| WT02C40C | Complete-module peak with Wi-Fi connected and power save off | approximately 270 mA measured by Fanstel | 270 mA used for rail design; validate on the product board |
+| nRF7002 class | RX listen | approximately 56–60 mA | Peak/active reference state |
+| nRF7002 class | Connected power save | approximately 4 mA planning value | Used only for USB-mode range pending WT02C40C measurement |
 | CR2477 | Nominal rating | 3 V, 1000 mAh, 0.2 mA standard continuous drain | [Panasonic CR2477](https://energy.panasonic.com/na/business/products/lithium/coin-cr-standard/models/CR2477) |
 
 The baseline budgets retain the 90 µA BME688 ULP value as a planning proxy, not as a characterized 3.0 V or 3.3 V value. Bosch specifies that average at VDD ≤ 1.8 V and states that the device is optimized for 1.8 V. The actual main-rail current and the end-to-end benefit of the 1.8 V buck are therefore dominant uncertainties that must be measured with the actual BSEC configuration.
@@ -189,8 +190,9 @@ The baseline budgets retain the 90 µA BME688 ULP value as a planning proxy, not
 | SHTC3 cadence | One normal-mode T/RH reading per 60 s |
 | VEML7700 cadence | One 100 ms lux conversion per 60 s; shutdown otherwise |
 | BME688 cadence | BSEC ULP, IAQ update every 300 s |
-| Matter operational transport | Matter-over-Thread using a low-power ICD/SED configuration; BLE used for commissioning |
-| Thread/BLE radio contribution | 10 µA average planning allowance pending measurement with the selected Matter ICD parameters |
+| Matter operational transport | Matter-over-Thread using a low-power ICD/SED configuration for the Rev A planning baseline |
+| BLE functions | Commissioning plus product-specific BLE Local Mode; Local Mode advertising may be low-duty, user-initiated, or time-limited |
+| Thread/BLE radio contribution | 10 µA average planning allowance for the modeled Thread configuration; replace or add the measured BLE Local Mode contribution for the selected operating policy |
 | MCU/sensor-service overhead | 2 µA average planning allowance |
 | External-flash history cadence | One buffered 32–48 byte record per minute; 1 µA average planning allowance |
 | LED use | Excluded from normal operation; brief commissioning/status indications only |
@@ -198,12 +200,14 @@ The baseline budgets retain the 90 µA BME688 ULP value as a planning proxy, not
 | Miscellaneous leakage | 1 µA Rev A; 2 µA Rev B |
 | Design contingency | 15% added to the modeled baseline |
 
-The 10 µA wireless allowance is an engineering placeholder, not a claim that
-Matter operates over BLE. Rev A uses Thread after BLE commissioning. Nordic's
-nRF52840 Matter measurements show that ICD current depends strongly on slow/fast
-poll intervals, idle-mode duration, subscriptions, and network quality. Replace the
-allowance with complete-device Power Profiler measurements using the final Matter
-ICD configuration and commercial ecosystem.
+The 10 µA wireless allowance is an engineering placeholder, not a claim that Matter
+operates over BLE. Rev A uses Thread for Matter and a separate product-specific GATT
+service for BLE Local Mode. Nordic's nRF52840 Matter measurements show that ICD
+current depends strongly on slow/fast poll intervals, idle-mode duration,
+subscriptions, and network quality. BLE advertising interval, connection interval,
+and client use likewise affect Local Mode energy. Replace the allowance with
+complete-device Power Profiler measurements for both the final Matter ICD
+configuration and each supported BLE Local Mode policy.
 
 ### 7.2 Battery Capacity and Efficiency
 
@@ -255,7 +259,7 @@ One average month is treated as 730 hours. Battery self-discharge and calendar a
 | Contributor | Average current at 3.0 V rail |
 |---|---:|
 | BL654 System ON idle with external LFXO | 2.60 µA |
-| Matter-over-Thread / BLE commissioning allowance | 10.00 µA |
+| Matter-over-Thread radio allowance; BLE commissioning is event-based | 10.00 µA |
 | MCU and I²C service allowance | 2.00 µA |
 | MX25R6435F buffered history logging | 1.00 µA |
 | SHTC3 at one reading per minute | 0.38 µA |
@@ -327,9 +331,9 @@ A bulk capacitor can cover fast radio/load-step response, but it cannot supply t
 
 The following figures preserve the original BL654-based planning model so the
 converter, battery, and Wi-Fi cadence can be evaluated. They are not a frozen Rev B
-battery-life prediction. Recalculate the MCU/radio contribution, idle states, peak
-current, LFXO load, and firmware cadence after selecting the required nRF5340-class
-Matter-over-Wi-Fi host/module.
+battery-life prediction. Replace the MCU/radio contribution, idle states, and Wi-Fi
+association energy with WT02C40C measurements before making a product battery-life
+claim.
 
 ### 10.1 Battery-Mode Thread Build or Wi-Fi-Unavailable Baseline
 
@@ -343,7 +347,8 @@ Matter-over-Wi-Fi host/module.
 
 With 1600 mAh usable capacity, this provisional Thread-build or intentionally
 Wi-Fi-unavailable reference is approximately **11,100 hours or 15.2 months** before
-the Rev B host correction. It is not a Matter-over-Wi-Fi battery-life estimate.
+substitution of measured WT02C40C idle current. It is not a Matter-over-Wi-Fi
+battery-life estimate.
 
 ### 10.2 Scheduled Wi-Fi Energy Sensitivity
 
@@ -381,12 +386,11 @@ The BQ24074 dynamic power path reduces charge current as system demand rises and
 
 | Simultaneous load | Peak planning value |
 |---|---:|
-| nRF7002 5 GHz TX | 260 mA |
-| Provisional host radio/MCU allowance | At least 14.1 mA; replace after host selection |
+| WT02C40C complete-module Wi-Fi-on peak | 270 mA |
 | BME688 heater turn-on | 18 mA |
 | External-flash program/erase | Up to approximately 4 mA |
-| MCU, sensors, and margin | 10–20 mA |
-| **Worst planning total** | **approximately 306–316 mA** |
+| Other sensors, control activity, and margin | 10–20 mA |
+| **Worst planning total** | **approximately 302–312 mA** |
 
 The 3V3_MAIN converter and power path shall be designed for at least:
 
@@ -394,18 +398,18 @@ The 3V3_MAIN converter and power path shall be designed for at least:
 - 1 A transient capability;
 - less than 200 mV rail droop at the Wi-Fi module during the characterized load step.
 
-The TPS63802 and TPS22919 provide comfortable silicon current margin. Layout and capacitance remain critical.
+The TPS63802 provides comfortable silicon current margin. WT02C40C pin-17 routing,
+the internal switch, layout, and capacitance remain critical.
 
 Rev B schematic/layout requirements:
 
-- start with 100–220 µF low-ESR bulk capacitance on 3V3_WIFI_SW;
+- start with 100–220 µF low-ESR bulk capacitance on 3V3_WIFI_IN near WT02C40C pin 17;
 - provide the converter-required input/output capacitors plus module-local 22 µF, 10 µF, and 0.1 µF placements as applicable;
 - keep the high-di/dt Wi-Fi current loop short and separate from sensor ground returns;
 - use a wide 3.3 V path and uninterrupted ground plane;
-- connect TPS22919 QOD so the Wi-Fi rail discharges when disabled;
-- ensure the MCU control pin defaults low during reset;
-- design for 260 mA even if firmware initially limits Wi-Fi to 2.4 GHz.
-- connect WM02C through standard SPI and reserve the selected host's QSPI controller for external flash.
+- implement the vendor P0.31 nRF7002 power sequence and ensure it defaults to the required safe state during reset;
+- design the pin-17 feed for at least the 270 mA complete-module planning peak even if firmware initially limits Wi-Fi to 2.4 GHz;
+- route the MX25R6435F on a separate standard SPI peripheral; WT02C40C uses QSPI internally for nRF7002.
 
 Firmware should avoid overlapping Wi-Fi startup/TX with the BME688 heater where practical, but correctness shall not depend on event serialization.
 
@@ -478,7 +482,7 @@ Board maturity and feature architecture use separate identifiers: Rev A and Rev 
 #### v1.0-and-later production access
 
 - After the corresponding power measurements and BME688 rail selection are closed, v1.0 and later hardware may replace the removable current and voltage headers with compact labeled test points.
-- Retain at minimum battery/input voltage, main rail, BME688 VDD, ground, SWD, power-control/status, and profile-event test points. Rev B shall also retain USB input and 3V3_WIFI_SW test points.
+- Retain at minimum battery/input voltage, main rail, BME688 VDD, ground, SWD, power-control/status, and profile-event test points. Rev B shall also retain USB input and 3V3_WIFI_IN test points.
 - Production test points preserve voltage, continuity, control-signal, and event-correlation debugging. Per-branch series-current insertion is no longer guaranteed after the shunted current headers are removed; any domain that still requires production current profiling shall retain an explicit removable link or fixture-accessible disconnect.
 - Do not mark the hardware v1.0 until the pre-v1.0 current measurements needed to close the power architecture have been completed.
 
@@ -489,14 +493,14 @@ Minimum pre-v1.0 measurement domains:
 | BAT_IN | Required | Required | Complete battery-powered device, including regulators |
 | USB_IN | — | Required | Complete USB-powered device and charger behavior |
 | MAIN_RAIL | Required | Required | Post-converter system load and converter-efficiency comparison |
-| MCU_RADIO | Required | Required | Rev A BL654 or selected Rev B host, LFXO implementation, and associated local support load |
+| MCU_RADIO | Required | Required | Rev A BL654 or Rev B WT02C40C nRF5340 VDD, LFXO implementation, and associated local support load |
 | EXT_FLASH | Required | Required | Deep-power-down leakage, buffered logging energy, erase/program peaks, and OTA staging |
 | BME688_VDD | Required | Required | ULP/heater cycle and 3.0/3.3 V versus 1.8 V comparison |
 | SHTC3_VDD | Required | Required | Temperature/humidity event and sleep current |
 | VEML7700_VDD | Required | Required | Lux conversion and shutdown current |
-| WIFI_SW | — | Required | Wi-Fi inrush, association, TX, and hard-off leakage |
+| WIFI_IN | — | Required | WT02C40C pin-17 nRF7002 inrush, association, TX, and hard-off leakage |
 
-If board area becomes constrained, BAT_IN, MAIN_RAIL, MCU_RADIO, BME688_VDD, EXT_FLASH, and Rev B WIFI_SW are the highest-priority individual domains. SHTC3 and VEML7700 may share a secondary sensor-branch header only if each can still be isolated by a removable population option.
+If board area becomes constrained, BAT_IN, MAIN_RAIL, MCU_RADIO, BME688_VDD, EXT_FLASH, and Rev B WIFI_IN are the highest-priority individual domains. SHTC3 and VEML7700 may share a secondary sensor-branch header only if each can still be isolated by a removable population option.
 
 #### Rail and signal breakout
 
@@ -506,11 +510,11 @@ On pre-v1.0 hardware, provide the dedicated voltage headers described above for:
 - 3V0_MAIN or 3V3_MAIN and ground;
 - external-flash VDD and ground;
 - VDD_1V8_EVAL and ground;
-- 3V3_WIFI_SW and ground on Rev B.
+- 3V3_WIFI_IN and ground on Rev B.
 
 Also provide labeled test-point access for:
 
-- power-control signals, including the 1.8 V converter enable and Wi-Fi switch enable;
+- power-control signals, including the 1.8 V converter enable and WT02C40C P0.31 Wi-Fi-switch control;
 - battery-divider enable and ADC node;
 - BQ24074 PGOOD and CHG on Rev B;
 - at least two spare/profile GPIOs from the selected MCU/host.
@@ -535,7 +539,7 @@ Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity
 
 1. Measure electronics-only storage current at 25 °C; pass target ≤3 µA.
 2. Measure System ON idle with RTC, full firmware image, and all sensors sleeping; pass target ≤7 µA.
-3. Measure commissioning advertising plus steady-state Matter-over-Thread ICD/SED current using the final poll, subscription, report, and ecosystem configuration.
+3. Measure commissioning advertising, each supported BLE Local Mode advertising/connection policy, and steady-state Matter-over-Thread ICD/SED current using the final poll, subscription, report, and ecosystem configuration.
 4. Measure SHTC3 and VEML7700 event charge at their final cadence.
 5. Measure one complete BME688 ULP cycle and long-term average with identical BSEC version, configuration, cadence, and environmental exposure at 3.0 V VDD and 1.8 V VDD.
 6. For each BME688 supply option, record BME688 branch charge, complete-device battery-input charge, heater peak, main-rail droop, IAQ accuracy status, and stabilization behavior.
@@ -549,13 +553,13 @@ Firmware shall drive dedicated PROFILE_EVENT GPIOs around BME688 heater activity
 
 1. Verify battery-only, USB-only with no battery, USB with battery, and source-transition behavior.
 2. Verify charger thermal behavior at 400–500 mA charge current.
-3. Measure Wi-Fi rail inrush and confirm clean startup through TPS22919.
+3. Measure WT02C40C pin-17 Wi-Fi-feed inrush and confirm clean startup through the module's internal switch and P0.31 sequence.
 4. Measure complete Wi-Fi event energy from rail enable through association, upload, acknowledgement, and rail discharge.
 5. Test weak-signal and retry cases at 2.4 GHz and 5 GHz.
-6. Capture 3V3_WIFI_SW minimum voltage during 260 mA-class TX bursts.
+6. Capture 3V3_WIFI_IN minimum voltage during 270 mA-class complete-module peaks.
 7. Repeat the BME688 3.3 V versus 1.8 V comparison used for Rev A and update the no-Wi-Fi baseline budget from the measured result.
-8. Verify that an unpopulated Wi-Fi module does not affect BLE/sensor operation.
-9. Repeat external-flash logging, OTA energy, and interruption/recovery measurements on 3V3_MAIN.
+8. Verify the footprint-compatible BT40F Thread-only population and its BLE Local Mode/sensor operation.
+9. Repeat external-flash SPI logging, OTA energy, and interruption/recovery measurements on 3V3_MAIN.
 10. Confirm battery-life policy using measured event energy and update the cadence table.
 
 ### 13.4 Instruments and Capture
@@ -568,9 +572,9 @@ A single handheld DMM average is not sufficient. Retain raw traces and exported 
 
 ## 14. Schematic Handoff Checklist
 
-The power study is complete enough to begin Rev A schematic capture and to retain the
-Rev B power-path design. Rev B MCU/radio schematic capture remains blocked on the
-nRF5340-class host/module selection.
+The power study and radio selections are complete enough to begin schematic capture
+for both revisions. Rev B battery-life claims remain blocked on measured WT02C40C
+idle, BLE Local Mode, associated Wi-Fi, and event energy—not on part selection.
 
 - [x] Rev A primary rail fixed at 3.0 V.
 - [x] Rev A TPS63900 buck-boost selected.
@@ -578,10 +582,9 @@ nRF5340-class host/module selection.
 - [x] Rev B primary rail fixed at 3.3 V.
 - [x] Rev B BQ24074 power-path charger selected.
 - [x] Rev B TPS63802 main converter selected.
-- [x] Rev B TPS22919 Wi-Fi load switch selected.
-- [ ] Select the Rev B nRF5340-class Matter-over-Wi-Fi host/module and recalculate its baseline and peak contribution.
-- [x] MX25R6435FZNIL0 64-Mbit external QSPI NOR selected for both revisions.
-- [x] QSPI reserved for external flash; WM02C host interface fixed as standard SPI.
+- [x] Rev B WT02C40C nRF5340+nRF7002 combo module and internal Wi-Fi switch selected.
+- [x] MX25R6435FZNIL0 64-Mbit external serial NOR selected for both revisions.
+- [x] Rev A flash fixed as QSPI; Rev B WT02C40C internal nRF7002 link uses QSPI and external flash is fixed as standard SPI.
 - [x] No mandatory production 1.8 V domain; populated BME688 1.8 V evaluation path required on pre-v1.0 prototypes.
 - [x] Baseline sensor power gating removed.
 - [ ] Add a break-before-make SPDT BME688 main-rail/1.8 V selector with VDDIO fixed to the main rail.
@@ -603,13 +606,13 @@ nRF5340-class host/module selection.
 1. **Rev A is feasible from one CR2477.** The conservative estimate is approximately seven months with all baseline sensors, including BME688 ULP IAQ.
 2. **The BME688 dominates Rev A energy.** BLE optimization is useful, but changing IAQ cadence or disabling IAQ has a much larger effect.
 3. **A regulated 3.0 V Rev A rail is the best system trade.** The low-Iq TPS63900 removes rail variability and preserves usable cell range with little overhead.
-4. **Rev B requires a true buck-boost and a hard Wi-Fi gate.** TPS63802 plus TPS22919 meets the current and leakage targets.
-5. **The present Rev B battery table does not establish Matter-over-Wi-Fi life.** It ranges from approximately 15.2 months for the Thread/Wi-Fi-unavailable reference to 1.8 months for 15-minute scheduled Wi-Fi events. A compliant associated Matter-over-Wi-Fi build requires a new model after host selection.
+4. **Rev B requires a true buck-boost and a hard Wi-Fi gate.** TPS63802 plus the WT02C40C internal nRF7002 switch provides the selected architecture.
+5. **The present Rev B battery table does not establish Matter-over-Wi-Fi life.** It ranges from approximately 15.2 months for the Thread/Wi-Fi-unavailable reference to 1.8 months for 15-minute scheduled Wi-Fi events. A compliant associated Matter-over-Wi-Fi build requires a new model from WT02C40C measurements.
 6. **Sensor load switches remain unjustified, but the BME688 1.8 V question is open for measurement.** Pre-v1.0 boards shall provide solderless selection between main-rail and efficient 1.8 V operation; v1.0 production hardware will follow measured battery-input energy.
 7. **The optional sound block is omitted from both baseline revisions.** A continuously active digital microphone would materially increase battery load and still requires acoustic/mechanical definition.
 8. **The 64-Mbit external flash is a low-cost, useful margin choice.** It supports a conservative OTA secondary slot plus months of compact one-minute sensor history, while adding approximately $2.89 at prototype quantity and a provisional 1 µA average logging allowance.
 9. **Rev A can proceed to schematic capture.** Its remaining risks are validation items: coin-cell pulse behavior, actual BME688 ULP energy, Matter ICD behavior, flash logging/OTA energy, and rail transient response.
-10. **Rev B cannot yet freeze its MCU/radio schematic.** Its power path, Wi-Fi module, sensors, and flash can be retained, but an nRF5340-class Matter-over-Wi-Fi host/module must be selected and the provisional current model updated.
+10. **Rev B can proceed to schematic capture with WT02C40C.** The combo module removes the host-selection blocker and external Wi-Fi load switch, but consumes QSPI internally; Rev B external flash therefore uses standard SPI, and the provisional current model must be updated from hardware measurements.
 
 ---
 
@@ -619,16 +622,17 @@ nRF5340-class host/module selection.
 - [Sensirion SHTC3 datasheet](https://sensirion.com/resource/datasheet/shtc3)
 - [Bosch BME688 datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf)
 - [Vishay VEML7700 datasheet](https://www.vishay.com/docs/84286/veml7700.pdf)
-- [Fanstel WM02C product specifications](https://fanstel.squarespace.com/s/WM02C-Product-Specifications-3py2.pdf)
+- [Fanstel WT02C40C product specifications](https://fanstel.squarespace.com/s/WT02C40C-Product-Specifications-h97f.pdf)
 - [Macronix MX25R ultra-low-power serial NOR family](https://www.macronix.com/en-us/products/NOR-Flash/Pages/Ultra-Low-Power-Flash.aspx)
 - [Nordic Matter OTA documentation](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/matter/overview/dfu.html)
 - [Nordic Matter-over-Thread power study](https://docs.nordicsemi.com/r/bundle/nwp_049)
 - [Nordic Matter sample platform support](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/light_switch/README.html)
+- [Nordic nRF7002 module/host overview](https://www.nordicsemi.com/Products/nRF7002/Modules)
+- [Nordic nRF7002 EK host-interface documentation](https://docs.nordicsemi.com/bundle/ncs-2.9.3/page/zephyr/boards/shields/nrf7002ek/doc/index.html)
 - [Nordic nRF52840 Wi-Fi station memory requirements](https://docs.nordicsemi.com/bundle/ncs-3.2.4/page/nrf/protocols/wifi/station_mode/mem_requirements_sta.html)
 - [TI TPS63900 datasheet](https://www.ti.com/lit/ds/symlink/tps63900.pdf)
 - [TI TPS62840 datasheet](https://www.ti.com/lit/ds/symlink/tps62840.pdf)
 - [TI TPS63802 datasheet](https://www.ti.com/lit/ds/symlink/tps63802.pdf)
 - [TI BQ24074 datasheet](https://www.ti.com/lit/ds/symlink/bq24074.pdf)
-- [TI TPS22919 datasheet](https://www.ti.com/lit/gpn/TPS22919)
 - [Nordic Power Profiler Kit II](https://www.nordicsemi.com/Products/Development-hardware/Power-Profiler-Kit-2)
 - [Panasonic CR2477 product data](https://energy.panasonic.com/na/business/products/lithium/coin-cr-standard/models/CR2477)
