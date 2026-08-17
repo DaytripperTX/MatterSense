@@ -31,11 +31,11 @@ The RTM maps:
 
 | PRD ID | PRD Requirement | SRS ID(s) | Implementation Domain | Verification Method |
 |------|------------------|-----------|------------------------|---------------------|
-| PRD-1 | Temperature & humidity monitoring | FR-1, FR-2 | Sensor HW + Firmware | Functional test |
+| PRD-1 | Temperature & humidity monitoring | FR-1, FR-2, FR-32 | Sensor HW + Firmware | Functional and source-authority test |
 | PRD-2 | eCO₂ / VOC monitoring | FR-3 | Sensor HW + Firmware | Functional test |
 | PRD-3 | Ambient light (lux) monitoring | FR-4 | Sensor HW + Firmware | Functional test |
 | PRD-4 | Barometric pressure capability | FR-5 | Baseline BME688 + Firmware | Functional test |
-| PRD-5 | Optional ambient sound level (dB) monitoring | FR-6 | Optional Sensor HW + Firmware | Functional test |
+| PRD-5 | Future externally powered ambient sound level option | FR-6 | Optional Sensor HW + Firmware | Configuration and functional test |
 | PRD-6 | Configurable sensor sampling | FR-7 | Firmware | Configuration test |
 | PRD-7 | Matter-compatible data reporting | FR-8, FR-9 | Firmware + Protocol Stack | Interoperability test |
 | PRD-8 | Conditional exposure of optional sensors | FR-10 | Firmware | Feature detection test |
@@ -43,14 +43,14 @@ The RTM maps:
 | PRD-10 | Matter-over-Wi-Fi connectivity (Rev B) | FR-13 | Wireless HW + FW | Connectivity and interoperability test |
 | PRD-11 | Battery-powered operation | FR-19, FR-20 | Power HW + FW | Power profiling |
 | PRD-12 | Multi-month battery life | NFR-1, NFR-2 | Power HW + FW | Long-duration profiling |
-| PRD-13 | USB-powered operation (Rev B) | FR-14, FR-17 | Power HW + FW | Power-mode test |
-| PRD-14 | Power-mode–aware radio behavior | FR-15, FR-16, FR-18 | Firmware | Mode transition test |
+| PRD-13 | USB power, charging, and USB device data (Rev B) | FR-14, FR-17, FR-33, NFR-3 | Power HW + USB HW/FW | Power-mode, enumeration, recovery, and wired-update test |
+| PRD-14 | Power-mode–aware radio behavior | FR-15, FR-16, FR-18, NFR-3 | Firmware | Mode transition test |
 | PRD-15 | Low-power sleep-centric design | FR-19 | Firmware | Current measurement |
-| PRD-16 | Robust recovery from power events | FR-21 | Firmware | Fault injection test |
-| PRD-17 | Secure firmware updates | FR-22, FR-23, FR-27, FR-28, FR-29, NFR-10 | External Flash + Firmware + Bootloader | Signed OTA, interruption, and recovery test |
-| PRD-18 | Secure wireless communication | NFR-6 | Wireless FW | Security validation |
+| PRD-16 | Robust recovery from power events | FR-21, NFR-4, NFR-5 | Hardware + Firmware | Reset, brownout, and fault-injection test |
+| PRD-17 | Secure firmware updates | FR-22, FR-23, FR-27, FR-28, FR-29, NFR-7, NFR-10 | External Flash + Firmware + Bootloader | Signed OTA, rejection, interruption, and recovery test |
+| PRD-18 | Secure wireless communication and credential protection | NFR-6, NFR-13 | Wireless FW + Protected SoC Storage + Provisioning | Link-security, provisioning, readout-protection, and debug-lock validation |
 | PRD-19 | Modular, revision-aware firmware | NFR-8, NFR-9 | Firmware architecture | Code review |
-| PRD-20 | Privacy-preserving sound sensing | FR-6, PRD Notes | Firmware + Product Design | Design review |
+| PRD-20 | Privacy-preserving sound sensing | FR-6 | Firmware + Product Design | No-audio-storage design review |
 | PRD-21 | Matter-over-Thread operation (Rev A baseline; Rev B build option) | FR-24 | Wireless HW + Thread/Matter Stack | Commissioning and interoperability test |
 | PRD-22 | Local buffering of selected sensor history | FR-25, FR-26, NFR-10, NFR-11 | External Flash + Firmware | Capacity, wear, integrity, wraparound, and interruption test |
 | PRD-23 | Standalone BLE sensor access and selected local configuration | FR-30, FR-31, NFR-12 | BLE GATT + Firmware | No-infrastructure functional, security, and power test |

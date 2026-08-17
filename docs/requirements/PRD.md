@@ -79,6 +79,7 @@ expansion and power-scaling without fundamental redesign.
 
 ### 5.3 Revision B (Planned)
 - Dual power modes: battery-powered or USB-powered
+- USB 2.0 device data for service logs, recovery, and wired firmware update support
 - Matter-over-Wi-Fi operation without requiring a Thread Border Router
 - Matter-over-Thread build option with Wi-Fi disabled or the footprint-compatible Thread-only host-module population
 - Secure BLE Local Mode independent of Thread and Wi-Fi availability
@@ -88,6 +89,38 @@ expansion and power-scaling without fundamental redesign.
   - Always-reachable operation when externally powered
 - Same baseline sensor population as Rev A, with support for future higher-power variants
 - Improved onboarding and user experience
+
+### 5.4 Product Requirement Identifiers
+
+The following identifiers are the normative product-level requirements used by the
+Requirements Traceability Matrix. The feature summaries above provide context but
+do not replace these requirements.
+
+| ID | Product requirement |
+|---|---|
+| PRD-1 | The product shall monitor indoor temperature and relative humidity. |
+| PRD-2 | The product shall monitor VOC and equivalent CO2 trends. |
+| PRD-3 | The product shall monitor ambient light level in lux. |
+| PRD-4 | The product shall provide barometric-pressure capability from the baseline environmental sensor. |
+| PRD-5 | A future externally powered variant may monitor non-recording ambient sound level; neither baseline revision requires a microphone. |
+| PRD-6 | Sensor sampling and reporting intervals shall be configurable within the supported power and protocol limits. |
+| PRD-7 | Baseline environmental data shall be reportable through Matter-compatible device behavior and clusters. |
+| PRD-8 | Optional capabilities shall be exposed only when supported by the assembled hardware and firmware configuration. |
+| PRD-9 | Both revisions shall support BLE-based Matter commissioning. |
+| PRD-10 | Rev B shall support Matter-over-Wi-Fi without requiring a Thread Border Router. |
+| PRD-11 | Both revisions shall support battery-powered operation. |
+| PRD-12 | Battery-powered operation shall provide multi-month runtime under the defined typical-use profile. |
+| PRD-13 | Rev B shall accept USB-C power, charge its battery, and provide USB 2.0 device data for service, recovery, and wired update workflows. |
+| PRD-14 | Radio behavior and responsiveness shall adapt to the available power source and selected product configuration. |
+| PRD-15 | The product shall use a sleep-centric, low-average-power operating model. |
+| PRD-16 | The product shall recover safely from reset, brownout, and interrupted power events. |
+| PRD-17 | The product shall support authenticated firmware updates with a non-bricking recovery path. |
+| PRD-18 | Wireless links and provisioned device credentials shall be protected against unauthorized access. |
+| PRD-19 | Firmware shall remain modular and revision-aware so shared sensing and application behavior can be reused across hardware revisions. |
+| PRD-20 | Sound-level functionality, if fitted in a future variant, shall not record or store audio. |
+| PRD-21 | Rev A shall support Matter-over-Thread; Rev B shall retain a Matter-over-Thread build option. |
+| PRD-22 | The product shall support bounded, wear-aware local buffering of selected sensor history. |
+| PRD-23 | Both revisions shall provide secure BLE Local Mode for sensor access and selected local configuration without Thread, Wi-Fi, or Matter infrastructure. |
 
 ---
 
@@ -122,7 +155,7 @@ expansion and power-scaling without fundamental redesign.
 - Reliable circular buffering and retrieval of selected sensor history
 - Multi-month battery life under typical indoor conditions
 - Seamless transition between power modes in Rev B
-- No architectural redesign required between revisions
+- Shared sensing functions, application behavior, and firmware abstractions reused across revisions without redesign of those common functions
 
 ---
 

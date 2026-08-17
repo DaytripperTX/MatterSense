@@ -20,7 +20,7 @@ This document applies to the following hardware revisions:
 - **MatterSense Rev B**
   - BLE commissioning and standalone BLE Local Mode with Thread and Wi-Fi capability
   - Rechargeable LiPo battery
-  - USB-C power and charging support
+  - USB-C power, charging, and USB 2.0 device data support
   - NFC-assisted onboarding
 
 ### 1.2 Out of Scope
@@ -89,6 +89,7 @@ This HRS does **not** define:
 **Rev A**
 - Deep sleep current target: single-digit microamps or lower
 - Active Thread/BLE radio operation optimized for coin-cell operation
+- The TPS63900 input-current limit shall initially be configured for 100 mA. The final setting shall be verified against the minimum usable cell voltage, converter efficiency, CR2477 pulse capability, holder/contact resistance, and the approximately 41 mA worst-case output overlap.
 
 **Rev B**
 - Hardware shall tolerate high peak current during Wi-Fi transmission
@@ -130,6 +131,13 @@ The MCU shall provide, at minimum:
 - Flash writes shall be buffered and aligned to page/erase boundaries where practical. Firmware shall not erase a sector for every sensor sample.
 - The active firmware image shall remain in internal MCU flash; external flash is a staging and data-storage device, not a sole boot dependency.
 
+### 4.4 Credential and Identity Storage
+
+- Device attestation credentials, private keys, commissioning material, and unique device identity shall use protected internal SoC storage and a controlled factory-provisioning process.
+- Rev A shall use nRF52840 internal flash protections, access-control features, secure boot, and production debug-port protection appropriate to the selected Nordic software stack.
+- Rev B shall use nRF5340 protected storage, TrustZone/Key Management Unit facilities where supported by the selected stack, secure boot, and production debug-port protection.
+- An external secure element is not required in either baseline schematic. Adding one later requires a documented threat-model or customer/certification requirement.
+
 ---
 
 ## 5. Sensor & Measurement Requirements
@@ -163,6 +171,16 @@ Provision may be made for the following optional sensors:
 - Firmware shall preserve BME688/BSEC history and stabilization behavior across normal low-power operation
 - Prototype firmware and hardware shall support identical BME688 ULP profiles at main-rail VDD and 1.8 V VDD for energy comparison
 
+### 5.5 Measurement Authority, Placement, and Environmental Access
+
+- The SHTC3 shall be the authoritative product source for reported temperature and relative humidity.
+- BME688 temperature and humidity data shall be used for gas-sensor compensation and may be exposed only as explicitly identified diagnostic data.
+- The SHTC3 shall be placed near a ventilated board/enclosure boundary and thermally separated from the BME688 heater, converters, charger, radios, LED, and other heat-producing circuitry.
+- PCB copper, ground returns, and high-current paths around the SHTC3 shall be arranged to minimize conducted self-heating while preserving required electrical integrity.
+- The BME688 gas port shall have unobstructed ambient-air access and shall be protected from assembly residues, conformal coating, adhesives, and enclosure materials that can contaminate or bias gas measurements.
+- The VEML7700 shall align with a defined optical window, avoid shadows and internal LED light, and be characterized with the final window material and geometry.
+- Sensor accuracy and response time shall be verified on the assembled PCB and again in the production-intent enclosure; component datasheet accuracy alone shall not be treated as system-level performance.
+
 ---
 
 ## 6. RF & Connectivity Requirements
@@ -189,7 +207,7 @@ Provision may be made for the following optional sensors:
 
 ### 6.3 NFC Requirements (Rev B)
 
-- NFC shall support out-of-band (OOB) pairing
+- NFC shall support NFC-assisted Matter onboarding using the behavior available in the selected Matter software version
 - NFC antenna connection must be exposed at the PCB level
 - Firmware assumes NFC is primarily active during onboarding
 
@@ -209,6 +227,14 @@ Provision may be made for the following optional sensors:
 - Both module antennas shall follow their vendor edge-placement, copper-keepout, enclosure-clearance, and ground requirements.
 - Rev B shall provide the WT02C40C/nRF5340 NFC antenna connection and matching provisions. The exact PCB loop or external-antenna implementation remains a schematic/layout selection.
 
+### 6.6 USB Device Interface (Rev B)
+
+- The USB-C receptacle shall provide USB 2.0 D+ and D− to the WT02C40C/nRF5340 USB device peripheral in addition to 5 V power and charging.
+- D+ and D− shall use controlled USB 2.0 differential routing, a short return path, and low-capacitance ESD protection located at the receptacle.
+- VBUS sensing and any required series/termination components shall follow Nordic and Fanstel reference guidance.
+- The USB interface shall support service logs, recovery, and wired firmware-update workflows. Initial firmware is not required to expose a general-purpose consumer USB function.
+- USB data operation shall not bypass secure-boot, firmware-authentication, credential-protection, or production debug-lock requirements.
+
 ---
 
 ## 7. User I/O Requirements
@@ -221,11 +247,12 @@ Provision may be made for the following optional sensors:
 
 ### 7.2 User Input
 
-- Optional pushbutton input shall be supported
+- One populated multifunction pushbutton input shall be provided on both baseline revisions
 - Button may be used for:
-  - User reset
-  - Pairing initiation
-  - Factory reset via long-press
+  - Commissioning or BLE Local Mode activation
+  - User reset or recovery entry
+  - Factory reset via a deliberate long-press sequence
+- Exact short-, long-, and boot-time press behavior shall be defined in firmware so accidental factory reset is avoided
 
 ### 7.3 Reset Behavior
 
@@ -308,7 +335,8 @@ Provision may be made for the following optional sensors:
 
 ### 9.3 Size Constraints
 
-- Target device footprint approximately ≤ 2 × 2 inches
+- Target production/v1.0-and-later device footprint approximately ≤ 2 × 2 inches
+- Pre-v1.0 evaluation boards may exceed the production target to accommodate the required current/voltage headers, selector, and accessible debug hardware
 - No strict thickness requirement defined at the HRS stage
 
 ---
@@ -338,6 +366,12 @@ capture shall confirm the full pin assignment, the P0.31 Wi-Fi power sequence,
 separate access to module VDD and nRF7002 VBAT, and the antenna keepout against the
 enclosure.
 
+Before the symbol and footprint are released, schematic capture shall download and
+archive the current WT02C40C product specification, official ECAD footprint, STEP
+model, and evaluation/reference schematic from Fanstel's current
+[download page](https://www.fanstel.com/download-document). The archived source
+revision and date shall be recorded in the library component documentation.
+
 ### 10.2 Schematic and Layout Selections
 
 The following non-architectural selections are intentionally completed during
@@ -345,12 +379,12 @@ schematic capture or layout. They do not block schematic capture for either revi
 
 - Exact converter inductors, capacitors, feedback/current-limit components, and bias-effective capacitance
 - Exact CR2477 holder and protected 2000 mAh LiPo pack, connector, polarity, retention, and NTC implementation
-- Exact USB-C receptacle, CC resistors, ESD/TVS and input-protection parts for Rev B
+- Exact USB-C receptacle, CC resistors, low-capacitance D+/D− ESD protection, VBUS/input-protection parts, and any reference-required USB series components for Rev B
 - Exact Rev A 32.768 kHz crystal and load capacitors; Rev B clocks are integrated in WT02C40C
 - Exact BME688 break-before-make selector, current/voltage headers, shunts, and v1.0 test-pad geometry
 - Exact SWD/bed-of-nails pad geometry
 - Rev B NFC antenna and matching implementation
-- Exact status LED and optional user-button circuitry
+- Exact status LED and populated multifunction user-button circuitry
 - Exact models for future non-baseline sensors
 - Final enclosure design
 

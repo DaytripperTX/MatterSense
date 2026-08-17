@@ -143,7 +143,7 @@ With USB present, the power path powers the system and charges the battery. With
 | Temperature / humidity | Sensirion SHTC3 | 3V0_MAIN | 3V3_MAIN | Explicit sleep command |
 | VOC / IAQ / pressure | Bosch BME688 | 3V0_MAIN or VDD_1V8_EVAL | 3V3_MAIN or VDD_1V8_EVAL | BSEC ULP / sensor sleep between heater events |
 | Ambient light | Vishay VEML7700 | 3V0_MAIN | 3V3_MAIN | Software shutdown between readings |
-| Wi-Fi | WT02C40C internal nRF7002 | — | 3V3_WIFI_IN at module pin 17 | Hard off through the module's P0.31-controlled internal switch |
+| Wi-Fi | WT02C40C internal nRF7002 | — | 3V3_WIFI_IN at module pin 17 | Hard-off only when Wi-Fi is intentionally unavailable; supported associated power-save in a Matter-over-Wi-Fi build |
 | Optional 1.8 V sensor | ENS160 or multispectral sensor | Not fitted; populated evaluation rail is reserved for BME688 testing on pre-v1.0 hardware | Future variant may reuse VDD_1V8_EVAL after load review | Converter may be omitted after BME688 rail selection is frozen |
 | Battery sensing | Resistor divider + ADC filter | Raw coin cell, switched | Raw LiPo, switched | Divider normally disconnected |
 | Status LED | BOM/layout selection | 3V0_MAIN | 3V3_MAIN | Off except short user-visible events |
@@ -230,7 +230,7 @@ The battery-mode Wi-Fi estimate uses:
 - 100 mA average at the 3.3 V Wi-Fi rail;
 - 10 s from power-on through association, upload, acknowledgement, and shutdown;
 - cadence varied in the results table;
-- a separate 260 mA instantaneous peak requirement for rail design.
+- a separate 270 mA complete-module instantaneous peak requirement for rail design.
 
 This event model is deliberately simple. Association time and current vary materially with access point, signal strength, retries, security exchange, DHCP behavior, firmware, and 2.4/5 GHz use. Hardware validation must record coulombs per complete upload event, not only peak current.
 
@@ -313,9 +313,12 @@ The worst unscheduled overlap is approximately:
 
 Firmware shall avoid scheduling a high-power radio event or routine flash erase/program during BME688 heater turn-on. The normal target peak is therefore less than approximately 25–29 mA. OTA reception necessarily overlaps radio and flash activity but shall suspend normal BME688 heater scheduling. The power path shall nevertheless survive the approximately 41 mA unscheduled overlap without reset.
 
+At 2.0 V input and 85% efficiency, the 41 mA/3.0 V output case requires about
+72 mA input. The baseline therefore uses 100 mA, subject to cell and droop testing.
+
 Rev A schematic requirements:
 
-- configure TPS63900 input-current limit initially for 50 mA;
+- configure TPS63900 input-current limit initially for 100 mA, then validate the final setting across minimum cell voltage, converter efficiency, CR2477 pulse capability, holder/contact resistance, and the approximately 41 mA worst-case output overlap;
 - fit at least 22 µF effective ceramic output capacitance per converter guidance;
 - provide an additional 100–220 µF low-leakage bulk-capacitor footprint near the main rail;
 - place local 0.1 µF and device-recommended bulk capacitors at each IC;
@@ -451,7 +454,7 @@ The BL654 datasheet reports approximately:
 - 3.1 µA System ON idle using the internal LFRC;
 - 2.6 µA using an external 32.768 kHz LFXO.
 
-The approximately 0.5 µA saving is small relative to the BME688, but the LFXO also improves radio timing and removes periodic RC calibration overhead. Both revisions shall populate the external LFXO unless later pin or layout constraints outweigh the benefit.
+The approximately 0.5 µA saving is small relative to the BME688, but the LFXO also improves radio timing and removes periodic RC calibration overhead. Rev A shall populate the external LFXO and its load components. Rev B uses the 32.768 kHz crystal integrated in WT02C40C and requires no external LFXO population.
 
 ---
 
@@ -608,7 +611,7 @@ idle, BLE Local Mode, associated Wi-Fi, and event energy—not on part selection
 1. **Rev A is feasible from one CR2477.** The conservative estimate is approximately seven months with all baseline sensors, including BME688 ULP IAQ.
 2. **The BME688 dominates Rev A energy.** BLE optimization is useful, but changing IAQ cadence or disabling IAQ has a much larger effect.
 3. **A regulated 3.0 V Rev A rail is the best system trade.** The low-Iq TPS63900 removes rail variability and preserves usable cell range with little overhead.
-4. **Rev B requires a true buck-boost and a hard Wi-Fi gate.** TPS63802 plus the WT02C40C internal nRF7002 switch provides the selected architecture.
+4. **Rev B requires a true buck-boost and controllable Wi-Fi power.** TPS63802 and the WT02C40C internal switch provide it; Matter-over-Wi-Fi remains associated using supported power-save.
 5. **The present Rev B battery table does not establish Matter-over-Wi-Fi life.** It ranges from approximately 15.2 months for the Thread/Wi-Fi-unavailable reference to 1.8 months for 15-minute scheduled Wi-Fi events. A compliant associated Matter-over-Wi-Fi build requires a new model from WT02C40C measurements.
 6. **Sensor load switches remain unjustified, but the BME688 1.8 V question is open for measurement.** Pre-v1.0 boards shall provide solderless selection between main-rail and efficient 1.8 V operation; v1.0 production hardware will follow measured battery-input energy.
 7. **The optional sound block is omitted from both baseline revisions.** A continuously active digital microphone would materially increase battery load and still requires acoustic/mechanical definition.
