@@ -45,13 +45,17 @@ before every prototype or production buy.
 
 ### Feature Parity (Confirmed for nRF52840-Based Modules)
 
-- NFC pin exposure suitable for OOB pairing
+- NFC pin exposure suitable for NFC-assisted Matter onboarding
 - Internal flash/RAM sufficient for the active Matter image and runtime; external serial NOR is required for robust OTA staging and data storage
 - Required peripheral exposure confirmed (GPIO, ADC, I²C, SPI, QSPI, IEEE 802.15.4, and NFC)
 
 **Selected Baseline (Rev A):** Ezurio BL654 451-00001
 **Selected Baseline (Rev B):** Fanstel WT02C40C nRF5340+nRF7002 combo module
 **Decision Status:** Both revision baselines frozen for schematic capture
+
+Both baselines use protected internal SoC storage, secure boot, controlled factory
+provisioning, and production debug-port protection for device identity and private
+keys. An external secure element is not included in the baseline BOM.
 
 ### nRF52840 + nRF7002 Compatibility and Rev B Decision
 
@@ -179,7 +183,7 @@ hardware and non-reference arbitration firmware.
 | Candidate | Sensor Class | Key Pros | Key Cons | Power Impact | Cost (Ballpark) | Availability |
 |---------|--------------|----------|----------|--------------|-----------------|--------------|
 | [ENS160](https://www.sciosense.com/wp-content/uploads/2023/12/ENS160-Datasheet.pdf) | VOC / IAQ | • On-sensor IAQ outputs (TVOC + eCO2 eq)<br>• Simple host integration | • Warm-up/conditioning overhead after idle/power-off<br>• High risk for coin-cell use at ≥1/hr updates | • Std: ~29 mA avg (Std)<br>• Warm-up: ~3 min typical after idle/power-off | $5.63 – $5.63 | 1000+ ([Mouser](https://www.mouser.com/c/sensors/environmental-sensors/?series=ENS160) & [Digi-Key](https://www.digikey.com/en/products/detail/sciosense/ENS160-BGLT/16129831)) |
-| [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | Multi-sensor | • IAQ + T/H + Pressure in one<br>• Low average-current profiles available | • IAQ/eCO2 typically assumes BSEC integration<br>• Heater power tradeoffs | • ULP IAQ: ~0.09 mA avg<br>• LP IAQ: ~0.9 mA avg<br>• Std gas scan: ~3.9 mA avg | $8.65 – $8.65 | [Digi-Key](https://www.digikey.com/en/products/detail/bosch-sensortec/BME688/13681261): 10,000+<br>[Mouser](https://www.mouser.com/ProductDetail/Bosch-Sensortec/BME688?qs=IS%252B4QmGtzzqQoVDscqwx3A%3D%3D): <1000 (6,000 exp 3/3/2026) |
+| [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme688-ds000.pdf) | Multi-sensor | • IAQ + T/H + Pressure in one<br>• Low average-current profiles available | • IAQ/eCO2 typically assumes BSEC integration<br>• Heater power tradeoffs | • ULP IAQ: ~0.09 mA avg<br>• LP IAQ: ~0.9 mA avg<br>• Std gas scan: ~3.9 mA avg | $8.65 – $8.65 | [Digi-Key](https://www.digikey.com/en/products/detail/bosch-sensortec/BME688/13681261)<br>[Mouser](https://www.mouser.com/ProductDetail/Bosch-Sensortec/BME688?qs=IS%252B4QmGtzzqQoVDscqwx3A%3D%3D)<br>See the selected-baseline table for the dated stock snapshot |
 
 ### Notes & Considerations
 - Both options are heater-based; duty-cycling and sampling cadence strongly influence battery life.
@@ -258,7 +262,7 @@ A dedicated “dB sensor” (direct calibrated dBA output) is not commonly avail
 |---------|-------------|----------|----------|--------------|-----------------|--------------|
 | [Infineon IM69D130V01XTSA1](https://www.infineon.com/assets/row/public/documents/24/49/infineon-im69d130-datasheet-en.pdf) | Digital MEMS mic (PDM), bottom-port | • Active part (not LTB/EOL)<br>• Strong ecosystem/stock | • Not a “dB sensor” (DSP + calibration needed)<br>• High active current for coin-cell unless duty-cycled | • Icc: ~1.3 mA typ | $1.91 – $2.02 | [Mouser](https://www.mouser.com/ProductDetail/Infineon-Technologies/IM69D130V01XTSA1?qs=W0yvOO0ixfHjr98Yrg6FIA%3D%3D): 6,800+<br>[Digi-Key](https://www.digikey.com/en/products/detail/infineon-technologies/IM69D130V01XTSA1/8030732): 5,000+ |
 | [Syntiant SPH0641LU4H-1](https://www.mouser.com/datasheet/2/218/-746191.pdf) | Digital MEMS mic (PDM), bottom-port | • Low-power capable modes<br>• Strong stock depth | • Not a “dB sensor” (DSP + calibration needed)<br>• High active current for coin-cell unless duty-cycled | • Icc: ~1.0 mA typ | $3.22 – $3.22 | [Mouser](https://www.mouser.com/ProductDetail/Syntiant/SPH0641LU4H-1-8?qs=zEmsApcVOkWTK1aVriKK3w%3D%3D): 5,700+<br>[Digi-Key](https://www.digikey.com/en/products/detail/syntiant/SPH0641LU4H-1/5332438): 18,000+ |
-| [ST MP34DT06JTR](https://www.st.com/resource/en/datasheet/mp34dt06j.pdf) | Digital MEMS mic (PDM), port varies by package | • Common PDM mic option<br>• Good stock (today) | • Distributor status indicates lifecycle risk (LTB / discontinuation flags) | • Icc: ~650 µA typ | $2.17 – $2.44 | [Mouser](https://www.mouser.com/ProductDetail/STMicroelectronics/MP34DT06JTR?qs=%252BEew9%252B0nqrDi3H2kv8Y1Xg%3D%3D): 5,800+ (EOL flagged)<br>[Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/MP34DT06JTR/9605993): 7,000+ (LTB) |
+| [ST MP34DT06JTR](https://www.st.com/resource/en/datasheet/mp34dt06j.pdf) | Digital MEMS mic (PDM), port varies by package | • Common PDM mic option | • Distributor status indicates lifecycle risk (LTB / discontinuation flags) | • Icc: ~650 µA typ | $2.17 – $2.44 | [Mouser](https://www.mouser.com/ProductDetail/STMicroelectronics/MP34DT06JTR?qs=%252BEew9%252B0nqrDi3H2kv8Y1Xg%3D%3D)<br>[Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/MP34DT06JTR/9605993)<br>Lifecycle and stock status must be rechecked before reconsidering this non-baseline block |
 
 #### Notes & Considerations
 
@@ -271,6 +275,15 @@ A dedicated “dB sensor” (direct calibrated dBA output) is not commonly avail
 
 **Selected Baseline:** Omit from Rev A and Rev B baseline; reconsider only for a future externally powered variant with defined acoustic requirements
 **Decision Status:** Frozen as not fitted in the baseline designs
+
+### 3.6 Measurement Source and Placement Baseline
+
+- SHTC3 is the authoritative product source for temperature and relative humidity.
+- BME688 temperature and humidity inputs are reserved for BSEC/gas compensation and explicitly identified diagnostics.
+- Place SHTC3 near ventilated ambient access and away from the BME688 heater, power converters, charger, radios, LED, and high-current copper.
+- Give the BME688 gas port unobstructed ambient access and protect it from flux, cleaning residue, coating, adhesive, and enclosure outgassing.
+- Align VEML7700 with the final optical window and shield it from the product's own LED and internal shadows.
+- Validate sensor accuracy and response time on the assembled PCB and in the production-intent enclosure before freezing placement.
 
 
 
@@ -351,7 +364,7 @@ Pre-v1.0 schematics shall include normally shunted two-pin 2.54 mm male high-sid
 
 - One CR2477-class 3 V, 1000 mAh Li-MnO₂ coin cell
 - TI TPS63900 buck-boost set to 3.0 V
-- Initial programmable input-current limit: 50 mA
+- Initial programmable input-current limit: 100 mA; verify the final setting against minimum cell voltage, efficiency, coin-cell pulse capability, holder resistance, and the approximately 41 mA worst-case output overlap
 - External 32.768 kHz crystal for the BL654
 - Macronix MX25R6435FZNIL0 QSPI NOR on 3V0_MAIN
 - 100–220 µF low-leakage bulk-capacitor footprint in addition to converter and local decoupling
@@ -376,6 +389,13 @@ The conservative modeled battery life is approximately seven months with the BME
 | TI TPS62840 | BME688 1.8 V evaluation rail | Populated on pre-v1.0 evaluation boards; 60 nA typical IQ, 1.8 V to 6.5 V input, 750 mA output capability, and efficient light-load operation |
 
 The BQ24074 input-current limit is initially 500 mA and charge current is approximately 400–500 mA for a protected 2000 mAh LiPo. The 3.3 V rail is designed for at least 500 mA continuous, 1 A transient capability, and less than 200 mV droop at the Wi-Fi module.
+
+The Rev B USB-C receptacle shall also route USB 2.0 D+ and D− to the
+WT02C40C/nRF5340 USB device peripheral. The schematic shall include low-capacitance
+ESD protection at the connector, VBUS sensing, and any series components required by
+the current Nordic/Fanstel reference design. USB data is intended for service logs,
+recovery, and wired firmware-update workflows; no USB Power Delivery controller is
+required for the baseline.
 
 **Selected Baseline (Rev B):** BQ24074 + TPS63802 + WT02C40C internal nRF7002 power switch
 **Decision Status (Rev B):** Frozen for schematic baseline; thermal and transient validation required
@@ -439,6 +459,10 @@ The BQ24074 input-current limit is initially 500 mA and charge current is approx
 ### Power-Measurement Partitioning
 
 Rev A and Rev B describe feature architectures; v0.x and v1.x describe PCB maturity. Board versions below v1.0 shall retain the full measurement-header set. Once the required validation is complete, v1.0 and later boards may use the compact production test-point set.
+
+The approximately 2 × 2 inch size target applies to production/v1.0-and-later
+hardware. Pre-v1.0 evaluation boards may be larger where necessary to keep the
+required headers, selector, and debug connections accessible and unambiguous.
 
 The pre-v1.0 hardware shall support a Nordic PPK2, source-measure unit, Joulescope, or equivalent instrument in source or ampere-meter mode.
 
@@ -511,7 +535,8 @@ remain schematic/BOM selections and therefore cannot yet be checked by exact MPN
 - Pre-v1.0 schematic/layout shall include shunted two-pin 2.54 mm male whole-device and per-load current headers, including external flash, separate two-pin 2.54 mm female voltage headers, and profile-event GPIOs; v1.0 and later shall retain the compact production test-point set.
 - Next:
   - begin schematic capture and select exact passives, magnetics, battery holder, connectors, and protection parts;
-  - create and review the WT02C40C symbol/footprint, complete its full pin allocation, and preserve the BT40F Thread-only population option;
-  - complete NFC antenna, programming/test geometry, and user-I/O selections during schematic/layout;
+  - download and archive the current WT02C40C specification, official ECAD footprint, STEP model, and evaluation/reference schematic from Fanstel's [download page](https://www.fanstel.com/download-document), then record their revisions in the library component;
+  - create and review the WT02C40C symbol/footprint, complete its full pin allocation, route USB 2.0 data, and preserve the BT40F Thread-only population option;
+  - complete NFC antenna, programming/test geometry, status LED, and populated multifunction-button selections during schematic/layout;
   - verify the modeled power figures on prototype hardware;
   - revisit optional Rev B multispectral or 1.8 V sensor population only if the product scope requires it.

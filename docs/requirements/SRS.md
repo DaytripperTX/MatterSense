@@ -1,4 +1,4 @@
-# Software Requirements Specification (SRS)
+# System Requirements Specification (SRS)
 ## MatterSense System
 
 > This document defines the functional and non-functional requirements for the
@@ -70,8 +70,9 @@ and system availability.
 - FR-3: The system shall periodically sample eCO₂ and VOC data.
 - FR-4: The system shall periodically sample ambient light level data.
 - FR-5: The system shall be capable of periodically sampling barometric pressure data from the baseline BME688; product reporting may be configurable.
-- FR-6: The system shall optionally sample ambient sound level (dB) data.
+- FR-6: A future externally powered hardware variant may sample non-recording ambient sound level (dB) data; this function shall be disabled and unexposed when a microphone is not populated.
 - FR-7: Sensor sampling intervals shall be configurable at build time or firmware configuration time.
+- FR-32: Product temperature and relative-humidity values shall use the SHTC3 as the authoritative measurement source. BME688 temperature and humidity data shall be used for gas-sensor compensation and may be exposed only as explicitly identified diagnostic data.
 
 ---
 
@@ -116,6 +117,7 @@ and system availability.
 - FR-27: OTA images shall be staged in the external serial NOR secondary slot and authenticated before activation.
 - FR-28: The bootloader shall retain a known-good image or equivalent recovery path so an interrupted, invalid, or failed update does not brick the device.
 - FR-29: Rev A shall support OTA through its Matter-over-Thread operational network; Rev B may use Thread or Wi-Fi transport. A BLE SMP path may be retained for development and service.
+- FR-33: Rev B shall provide a USB 2.0 device interface for service logs, recovery, and wired firmware-update workflows in addition to USB-C power and charging.
 
 ---
 
@@ -140,6 +142,7 @@ and system availability.
 - NFR-7: Unauthorized firmware installation shall be prevented.
 - NFR-11: Sensor-history storage shall not contain credentials, private keys, or other security-sensitive commissioning material.
 - NFR-12: BLE Local Mode shall require authenticated and encrypted access for sensor readings, configuration, stored history, and service actions; only discovery/advertising metadata explicitly classified as public may be exposed before authentication.
+- NFR-13: Device identity, attestation material, private keys, and commissioning credentials shall use protected internal SoC storage and controlled factory provisioning. The baseline hardware shall not require an external secure element.
 
 ---
 
@@ -155,10 +158,12 @@ and system availability.
 - SWD shall be accessible for development and test.
 
 ### 6.2 External Interfaces
-- NFC interface pins shall be routed and electrically supported.
+- NFC interface pins shall be routed and electrically supported for NFC-assisted Matter onboarding.
 - Test points shall be provided for power and ground.
 - Rev A dedicated QSPI signals shall connect the MCU to external NOR flash.
 - Rev B shall connect external NOR flash in standard SPI mode through SPIM4. WT02C40C exposes the nRF5340 QSPI signal nets, but those same nets and the sole dedicated QSPI CSN are connected internally to nRF7002 and do not provide a second independently selectable QSPI bus.
+- Rev B USB-C D+ and D− shall connect to the WT02C40C/nRF5340 USB device interface with USB 2.0 routing, ESD protection, and VBUS sensing appropriate to the selected receptacle and power path.
+- Both revisions shall provide one populated multifunction user button for commissioning activation, BLE Local Mode activation, and factory-reset input; exact press behavior shall be defined by firmware.
 
 ---
 
@@ -180,6 +185,8 @@ and system availability.
 | Power-mode switching | Mode transition testing |
 | Secure update and recovery | Signed-image OTA, rejection, interruption, and rollback tests |
 | Sensor-history storage | Capacity, wear, integrity, wraparound, and power-interruption tests |
+| USB device interface | Enumeration, service/recovery access, ESD design review, and wired-update test |
+| Credential protection | Provisioning, readout-protection, debug-lock, and unauthorized-access test |
 
 ---
 

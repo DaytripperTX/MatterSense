@@ -58,7 +58,7 @@ the device's non-Matter BLE Local Mode.
 - Matter-over-Thread remains a separate Rev B build using nRF7002 hard-off or the footprint-compatible BT40F nRF5340-only population
 - BLE Local Mode remains available independently of Thread or Wi-Fi infrastructure
 - NFC-assisted commissioning
-- USB-C plus protected 2000 mAh LiPo power
+- USB-C power/charging plus USB 2.0 device data for service, recovery, and wired firmware updates
 - Operation without a Thread Border Router through BLE Local Mode or Matter-over-Wi-Fi; a Matter controller/fabric is required only for Matter operation
 - The same baseline environmental sensor suite as Rev A, with room for future variants
 
@@ -84,7 +84,7 @@ commercial hardware programs.
 
 - ✔ System architecture defined
 - ✔ Baseline component and power-architecture selection completed
-- ✔ Product, system, hardware, and traceability requirements aligned
+- ✔ Product, system, hardware, and traceability requirements aligned for schematic capture
 - ⏳ Rev A schematic capture
 - ⏳ Rev B WT02C40C schematic integration and measured power validation
 - ⏳ Firmware and hardware bring-up
@@ -98,6 +98,7 @@ commercial hardware programs.
 - **Sensors:** SHTC3, BME688, and VEML7700 in both baseline revisions
 - **External memory:** Macronix MX25R6435FZNIL0, 64-Mbit serial NOR; QSPI in Rev A and SPIM4 in Rev B
 - **Power:** Regulated CR2477 in Rev A; USB-C/protected 1S LiPo in Rev B
+- **Wired service:** Rev B USB 2.0 device interface for logs, recovery, and wired firmware updates
 - **Debug:** SWD
 - **Connectivity:** Matter-over-Thread plus BLE Local Mode in Rev A; Wi-Fi added in Rev B
 - **Commissioning:** BLE in both revisions, with NFC assistance planned for Rev B; BLE Local Mode is a separate non-Matter operational interface
